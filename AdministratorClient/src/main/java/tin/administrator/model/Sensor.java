@@ -6,9 +6,9 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class Sensor {
-    private long id;
+    private Integer id;
     private String name;
     private String ip;
-    private Long port;
+    private Integer port;
 
 }
