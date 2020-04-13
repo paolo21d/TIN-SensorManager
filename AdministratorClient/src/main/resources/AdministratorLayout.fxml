@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane fx:id="MainBox" maxHeight="500" maxWidth="700" minHeight="400" minWidth="600" prefHeight="400.0" prefWidth="600.0" styleClass="mainPane" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tin.administrator.controller.Controller">
+   <top>
+      <MenuBar BorderPane.alignment="CENTER">
+        <menus>
+          <Menu mnemonicParsing="false" text="File">
+            <items>
+              <MenuItem mnemonicParsing="false" text="Close" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Edit">
+            <items>
+              <MenuItem mnemonicParsing="false" text="Delete" />
+            </items>
+          </Menu>
+            <Menu mnemonicParsing="false" text="Sensors">
+              <items>
+                <MenuItem fx:id="menuSensorsAddNewSensor" mnemonicParsing="false" onAction="#addNewSensorClick" text="Add new sensor" />
+              </items>
+            </Menu>
+          <Menu mnemonicParsing="false" text="Help">
+            <items>
+              <MenuItem mnemonicParsing="false" text="About" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
+   </top>
+   <left>
+      <VBox prefHeight="375.0" prefWidth="205.0" BorderPane.alignment="CENTER">
+         <children>
+            <Label text="Sensors" />
+            <ListView fx:id="sensorsList" prefHeight="304.0" prefWidth="205.0" />
+            <Button fx:id="addNewSensor" mnemonicParsing="false" onAction="#addNewSensorClick" prefHeight="25.0" prefWidth="206.0" styleClass="newSensor" text="Add new sensor" />
+         </children></VBox>
+   </left>
+   <center>
+      <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER" />
+   </center>
+   <bottom>
+      <AnchorPane prefHeight="21.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+         <children>
+            <Label layoutX="23.0" layoutY="2.0" text="Administrator Panel" />
+            <Label layoutX="516.0" layoutY="2.0" text="Version 0.1" />
+         </children></AnchorPane>
+   </bottom>
+</BorderPane>
