@@ -2,18 +2,13 @@ package tin.administrator.controller;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import tin.administrator.model.AdministratorModel;
 import tin.administrator.model.Sensor;
 import tin.administrator.model.SensorTable;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class Controller {
 
@@ -28,20 +23,17 @@ public class Controller {
     public Button buttonDisconnect;
     public Button buttonRevoke;
     public Button buttonNewSensor;
+    public TextField textFieldEditedName;
+    public Button buttonEditName;
 
+    private boolean isNameEditing = false;
     //model
-    private List<Sensor> sensors = new ArrayList<>();
+//    private List<Sensor> sensors = new ArrayList<>();
+//    private Sensor nowDisplayedSensor = null;
+
 
     public Controller() {
-        Sensor sensor1 = new Sensor(1, "Sensor1", "192.168.1.1", 9000);
-        Sensor sensor2 = new Sensor(2, "Sensor2", "192.168.1.2", 9000);
-        Sensor sensor3 = new Sensor(3, "Sensor3", "192.168.1.3", 9000);
-        Sensor sensor4 = new Sensor(4, "Sensor4", "192.168.111.111", 9000);
 
-        sensors.add(sensor1);
-        sensors.add(sensor2);
-        sensors.add(sensor3);
-        sensors.add(sensor4);
     }
 
     @FXML
@@ -51,18 +43,20 @@ public class Controller {
         tableSensorIp.setCellValueFactory(new PropertyValueFactory<SensorTable, String>("SensorIp"));
         tableSensorPort.setCellValueFactory(new PropertyValueFactory<SensorTable, Integer>("SensorPort"));
 
-        for(Sensor sensor:sensors) {
+        for (Sensor sensor : AdministratorModel.getInstance().getSensors()) {
             sensorsTable.getItems().add(new SensorTable(sensor));
         }
     }
 
     public void tableClicked(MouseEvent mouseEvent) {
-        if(mouseEvent.getClickCount() == 2) {
+        isNameEditing = false;
+        if (mouseEvent.getClickCount() == 2) {
             Integer selectedSensorId = sensorsTable.getSelectionModel().getSelectedItem().getSensorId();
             String selectedSensorName = sensorsTable.getSelectionModel().getSelectedItem().getSensorName();
             String selectedSensorIp = sensorsTable.getSelectionModel().getSelectedItem().getSensorIp();
+            AdministratorModel.getInstance().changeCurrentSensor(selectedSensorId);
 
-            labelName.setText(selectedSensorName);
+            labelName.setText(AdministratorModel.getInstance().getCurrentDisplayedSensor().getName());
             System.out.println("Selected Sensor ID: " + selectedSensorId);
         }
     }
@@ -76,5 +70,20 @@ public class Controller {
     }
 
     public void revokeClicked(ActionEvent actionEvent) {
+    }
+
+    public void editNameClicked(ActionEvent actionEvent) {
+        if (isNameEditing) {
+            textFieldEditedName.setVisible(false);
+            buttonEditName.setText("Edit");
+            String newName = textFieldEditedName.getText();
+            if(newName != null && !newName.isEmpty()) {
+                AdministratorModel.getInstance().updateSensorName(newName);
+            }
+        } else { //start editing name
+            textFieldEditedName.setVisible(true);
+            buttonEditName.setText("Save");
+        }
+        isNameEditing = !isNameEditing;
     }
 }
