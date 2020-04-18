@@ -22,8 +22,7 @@ namespace sc
 
                 //below's a temporary solution to test connection
                 vector<unsigned char> data = getBytes(socketDescriptor, msgLen - sizeof(long));
-
-                cout << "Received msg from client:      time: " << timestamp << ",      double: " << BytesParser::parse<double>(data) << endl;
+                cout << "Received msg from client:      time: " << timestamp  << ",      double: " << BytesParser::parse<double>(data) << endl;
             }
             catch (ConnectionException e)
             {
@@ -59,12 +58,14 @@ namespace sc
         while (remainingBytes > 0)
         {
             int gotBytes = recv(socket, data.data(), remainingBytes, 0);
-
             if (gotBytes <= 0)
-                throw ConnectionException(ConnectionException::RECV, "Problem with receiving data");
+                break;
 
             remainingBytes -= gotBytes;
         }
+
+        if (remainingBytes > 0)
+            throw ConnectionException(ConnectionException::RECV, "Problem with receiving data");
 
         return BytesParser::parse<T>(data);
     }
@@ -77,12 +78,14 @@ namespace sc
         while (remainingBytes > 0)
         {
             int gotBytes = recv(socket, data.data(), remainingBytes, 0);
-
             if (gotBytes <= 0)
-                throw ConnectionException(ConnectionException::RECV, "Problem with receiving data");
+                break;
 
             remainingBytes -= gotBytes;
         }
+
+        if (remainingBytes > 0)
+            throw ConnectionException(ConnectionException::RECV, "Problem with receiving data");
 
         return data;
     }

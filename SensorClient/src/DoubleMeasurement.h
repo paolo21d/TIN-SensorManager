@@ -21,6 +21,7 @@ public:
 
 private:
     double measurement;
+    long timestamp;
 };
 
 
