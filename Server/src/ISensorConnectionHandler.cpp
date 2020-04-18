@@ -25,6 +25,8 @@ int ISensorConnectionHandler::getAcceptingSocket(std::string ipAddress, int port
     //nasluchujemy gniazdo: liczba klientow, ktora moze sie z nami polaczyc (przejda przez funkcje connect()), ale nie sa jeszcze zaakceptowani przez accept()
     if( listen( acceptingSocket, 1 ) == -1 )
         printf( "Error listening on socket.\n" );
+
+    return acceptingSocket;
 }
 
 int ISensorConnectionHandler::closeSocket(int socketDescriptor)

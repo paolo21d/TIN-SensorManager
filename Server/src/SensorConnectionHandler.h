@@ -1,6 +1,7 @@
 #ifndef SensorConnectionHandler_h
 #define SensorConnectionHandler_h
 
+#include <exception>
 #include "ISensorConnectionHandler.h"
 
 class SensorConnectionHandler : public ISensorConnectionHandler

@@ -1,6 +1,7 @@
 #ifndef SERVER_CONNECTIONSMANAGER_H
 #define SERVER_CONNECTIONSMANAGER_H
 
+#include <iostream>
 #include "IConnectionsManager.h"
 #include "SensorConnectionHandler.h"
 
