@@ -5,19 +5,23 @@
 #include "IConnectionsManager.h"
 #include "SensorConnectionHandler.h"
 
-class ConnectionsManager : public IConnectionsManager
+namespace sc
 {
-public:
-    ConnectionsManager(std::string ipAddress, int port);
+    class ConnectionsManager : public IConnectionsManager
+    {
+    public:
+        ConnectionsManager(std::string ipAddress, int port);
 
-    void startAcceptingSensors() override ;
-    void onClientAccepted(int socketDescriptor) override ;
+        void startAcceptingSensors() override;
 
-private:
-    const std::string ipAddress;
-    const int port;
+        void onClientAccepted(int socketDescriptor) override;
 
-    ISensorConnectionHandler *sensorsHandler;
-};
+    private:
+        const std::string ipAddress;
+        const int port;
+
+        ISensorConnectionHandler *sensorsHandler;
+    };
+}
 
 #endif //SERVER_CONNECTIONSMANAGER_H
