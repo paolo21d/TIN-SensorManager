@@ -36,7 +36,7 @@ template <class T>
 std::vector<unsigned char> BytesParser::appendBytes(std::vector<unsigned char> &bytes, T value)
 {
     std::vector<unsigned char> temp = toBytes(value);
-    bytes.insert(bytes.begin(), make_move_iterator(temp.begin()), make_move_iterator(temp.end()));
+    bytes.insert(bytes.end(), make_move_iterator(temp.begin()), make_move_iterator(temp.end()));
     return bytes;
 }
 

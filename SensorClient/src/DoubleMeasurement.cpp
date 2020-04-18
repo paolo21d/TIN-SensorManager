@@ -4,16 +4,20 @@
 
 #include "DoubleMeasurement.h"
 
+DoubleMeasurement::DoubleMeasurement(long timestamp, double measurement)
+    : timestamp(timestamp), measurement(measurement)
+{
 
+}
 
 long DoubleMeasurement::getTimestamp() {
-    return 0;
+    return timestamp;
 }
 
 std::vector<unsigned char> DoubleMeasurement::getBytes() {
-    return BytesParser::toBytes(5.0);
+    return BytesParser::toBytes(measurement);
 }
 
 int DoubleMeasurement::setValue(std::vector<unsigned char> bytes) {
-    return 0;
+    measurement = BytesParser::parse<double>(bytes);
 }

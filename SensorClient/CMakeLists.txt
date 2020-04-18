@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(sensor)
 set(CMAKE_CXX_STANDARD 20)
-add_executable(sensor src/main.cpp src/NetworkManager.cpp)
+add_executable(sensor src/main.cpp src/NetworkManager.cpp src/DoubleMeasurement.cpp)
 if(WIN32)
     target_link_libraries(sensor wsock32 ws2_32)
 endif()

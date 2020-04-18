@@ -15,6 +15,7 @@
 
 #include "BytesParser.h"
 #include "INetworkManager.h"
+#include "DoubleMeasurement.h"
 
 namespace nm
 {

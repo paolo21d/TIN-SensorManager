@@ -39,17 +39,14 @@ namespace nm
             break;
         }
 
+        for (int i = 0; i < 100; ++i)
+            sendMeasurement(new DoubleMeasurement(i*3, i * i));
+
 #ifdef WIN32
         closesocket(mainSocket);
 #else
         close(mainSocket);
 #endif
-
-//        while (true)
-//        {
-//            cout << "send" << endl;
-////            sendMeasurement()
-//        }
     }
 
     int NetworkManager::sendMeasurement(IMeasurement *measurement)
@@ -62,12 +59,15 @@ namespace nm
         {
             vector<unsigned char> data = measurement->getBytes();
             vector<unsigned char> header;
+
             BytesParser::appendBytes<int>(header, sizeof(long) + data.size());
             BytesParser::appendBytes<long>(header, measurement->getTimestamp());
-            if (send(mainSocket, header.data(), header.size(), 0) < 0 ||
-                send(mainSocket, data.data(), data.size(), 0) < 0)
+
+            if (send(mainSocket, header.data(), header.size(), 0) <= 0 ||
+                send(mainSocket, data.data(), data.size(), 0) <= 0)
                 connected = false;
         }
+
         return connected ? 0 : -1;
     }
 
