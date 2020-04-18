@@ -10,10 +10,14 @@ void SensorConnectionHandler::acceptSensors(std::string ipAddress, int port, ICo
 {
     int acceptingSocket = getAcceptingSocket(ipAddress, port);
 
-    do
+    if (acceptingSocket < 0)
+        throw std::exception();
+
+    int clientSocket = -1;
+
+    while (clientSocket == -1)
     {
-        int clientSocket = accept(acceptingSocket, NULL, NULL);
+        clientSocket = accept(acceptingSocket, NULL, NULL);
         connectionsListener->onClientAccepted(clientSocket);
     }
-    while(acceptingSocket == -1);
 }
