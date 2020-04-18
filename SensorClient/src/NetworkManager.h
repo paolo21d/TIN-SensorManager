@@ -3,6 +3,16 @@
 
 #include <vector>
 #include <string>
+#include <iostream>
+
+#ifdef WIN32
+#include "winsock.h"
+#else
+#include <netinet/in.h>
+#include <zconf.h>
+#include <arpa/inet.h>
+#endif
+
 #include "INetworkManager.h"
 
 class NetworkManager : public INetworkManager
