@@ -1,7 +1,6 @@
-#include <netinet/in.h>
-#include <zconf.h>
-#include <arpa/inet.h>
 #include "NetworkManager.h"
+
+using namespace std;
 
 NetworkManager::NetworkManager(std::string ipAddress, int port)
     : ipAddress(ipAddress), port(port), mainSocket(-1)
@@ -25,6 +24,7 @@ void NetworkManager::start()
         {
             sleep(1);
         }
+        cout << "Connected to server" << endl;
     }
 }
 

@@ -1,6 +1,10 @@
 #include <iostream>
 #include "ConnectionsManager.h"
 
+#ifdef WIN32
+#include "winsock.h"
+#endif
+
 using namespace  std;
 
 int initNetwork()
@@ -17,7 +21,7 @@ int main(int argc, char *argv[])
 
     cout << "START" << endl;
 
-    IConnectionsManager *connectionsManager = new ConnectionsManager("127.0.0.1", 33333);
+    IConnectionsManager *connectionsManager = new ConnectionsManager("127.0.0.1", 33334);
     connectionsManager->startAcceptingSensors();
 
     cout << "END" << endl;

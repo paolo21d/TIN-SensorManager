@@ -1,4 +1,9 @@
 #include <iostream>
+
+#ifdef WIN32
+#include "winsock.h"
+#endif
+
 using namespace std;
 
 #include "NetworkManager.h"
@@ -15,7 +20,7 @@ int initNetwork()
 
 void networkThread()
 {
-    INetworkManager *networkManager = new NetworkManager("127.0.0.1", 33333);
+    INetworkManager *networkManager = new NetworkManager("127.0.0.1", 33334);
     networkManager->start();
 }
 

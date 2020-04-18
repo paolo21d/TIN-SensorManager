@@ -1,6 +1,14 @@
 #ifndef ISensorConnectionHandler_h
 #define ISensorConnectionHandler_h
 
+#ifdef WIN32
+#include "winsock.h"
+#else
+#include <netinet/in.h>
+#include <zconf.h>
+#include <arpa/inet.h>
+#endif
+
 #include <string>
 #include "IConnectionsManager.h"
 
