@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.15)
+project(server)
+set(CMAKE_CXX_STANDARD 20)
+add_executable(server src/main.cpp src/SensorConnectionHandler.cpp src/ConnectionsManager.cpp src/ConnectionsManager.h src/ISensorConnectionHandler.cpp)
+if(WIN32)
+    target_link_libraries(server wsock32 ws2_32)
+endif()
