@@ -1,9 +1,8 @@
 #include <iostream>
 #include "ConnectionsManager.h"
+#include "ConnectionException.h"
 
-#ifdef WIN32
-#include "winsock.h"
-#endif
+
 
 using namespace  std;
 
@@ -12,6 +11,8 @@ int initNetwork()
 #ifdef WIN32
     WSADATA wsaData;
     return WSAStartup( MAKEWORD( 2, 2 ), & wsaData );
+#else
+    return 0;
 #endif
 }
 
@@ -21,7 +22,7 @@ int main(int argc, char *argv[])
 
     cout << "START" << endl;
 
-    IConnectionsManager *connectionsManager = new ConnectionsManager("127.0.0.1", 33334);
+    sc::IConnectionsManager *connectionsManager = new sc::ConnectionsManager("127.0.0.1", 33334);
     connectionsManager->startAcceptingSensors();
 
     cout << "END" << endl;

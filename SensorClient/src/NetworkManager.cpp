@@ -2,38 +2,46 @@
 
 using namespace std;
 
-NetworkManager::NetworkManager(std::string ipAddress, int port)
-    : ipAddress(ipAddress), port(port), mainSocket(-1)
+namespace nm
 {
-
-}
-
-void NetworkManager::start()
-{
-    sockaddr_in service;
-    memset( & service, 0, sizeof( service ) );
-    service.sin_family = AF_INET;
-    service.sin_addr.s_addr = inet_addr( ipAddress.c_str() );
-    service.sin_port = htons( port );
-
-    mainSocket = socket( AF_INET, SOCK_STREAM, IPPROTO_TCP );
-
-    while (true)
+    NetworkManager::NetworkManager(std::string ipAddress, int port)
+            : ipAddress(ipAddress), port(port), mainSocket(-1)
     {
-        while (connect(mainSocket, (sockaddr * ) & service, sizeof(service)) == -1)
-        {
-            sleep(1);
-        }
-        cout << "Connected to server" << endl;
+
     }
-}
 
-int NetworkManager::sendMeasurement(IMeasurement measurement)
-{
+    void NetworkManager::start()
+    {
+        sockaddr_in service;
+        memset( & service, 0, sizeof( service ) );
+        service.sin_family = AF_INET;
+        service.sin_addr.s_addr = inet_addr( ipAddress.c_str() );
+        service.sin_port = htons( port );
 
-}
+        mainSocket = socket( AF_INET, SOCK_STREAM, IPPROTO_TCP );
 
-void NetworkManager::addListener(INetworkStateListener *listener)
-{
-    listeners.push_back(listener);
+        while (true)
+        {
+            while (connect(mainSocket, (sockaddr * ) & service, sizeof(service)) == -1)
+            {
+#ifdef WIN32
+                Sleep(1000);
+#else
+                sleep(1);
+#endif
+
+            }
+            cout << "Connected to server" << endl;
+        }
+    }
+
+    int NetworkManager::sendMeasurement(IMeasurement *measurement)
+    {
+        return 0;
+    }
+
+    void NetworkManager::addListener(INetworkStateListener *listener)
+    {
+        listeners.push_back(listener);
+    }
 }

@@ -15,22 +15,25 @@
 
 #include "INetworkManager.h"
 
-class NetworkManager : public INetworkManager
+namespace nm
 {
-public:
-    NetworkManager(std::string ipAddress, int port);
+    class NetworkManager : public INetworkManager
+    {
+    public:
+        NetworkManager(std::string ipAddress, int port);
 
-    void start() override ;
-    int sendMeasurement(IMeasurement measurement) override ;
-    void addListener(INetworkStateListener *listener) override ;
+        void start() override ;
+        int sendMeasurement(IMeasurement *measurement) override ;
+        void addListener(INetworkStateListener *listener) override ;
 
-private:
-    const std::string ipAddress;
-    const int port;
+    private:
+        const std::string ipAddress;
+        const int port;
 
-    int mainSocket;
+        int mainSocket;
 
-    std::vector<INetworkStateListener*> listeners;
-};
+        std::vector<INetworkStateListener*> listeners;
+    };
+}
 
 #endif //SENSOR_NETWORKMANAGER_H

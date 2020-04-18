@@ -3,23 +3,24 @@
 
 #include <exception>
 
-class NetworkException : public std::Exception
+class NetworkException : public std::exception
 {
 public:
-    NetworkException(std::string errorMsg);
-    NetworkException(ErrorType errorType, std::string errorMsg = "");
-
-    std::string what() override ;
-
     enum ErrorType
     {
+        NON_SPECIFIED,
         BIND,
         LISTEN,
         ACCEPT
     };
 
+    NetworkException(std::string errorMsg);
+    NetworkException(ErrorType errorType, std::string errorMsg = "");
+
+    std::string what();
 private:
-    ErrorType errorType
+    ErrorType errorType = NON_SPECIFIED;
+    std::string errorMsg = "";
 };
 
 #endif //SERVER_CONNECTIONEXCEPTION_H
