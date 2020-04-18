@@ -63,8 +63,8 @@ namespace nm
             BytesParser::appendBytes<int>(header, sizeof(long) + data.size());
             BytesParser::appendBytes<long>(header, measurement->getTimestamp());
 
-            if (send(mainSocket, header.data(), header.size(), 0) <= 0 ||
-                send(mainSocket, data.data(), data.size(), 0) <= 0)
+            if (send(mainSocket, reinterpret_cast<const char *>(header.data()), header.size(), 0) <= 0 ||
+                send(mainSocket, reinterpret_cast<const char *>(data.data()), data.size(), 0) <= 0)
                 connected = false;
         }
 

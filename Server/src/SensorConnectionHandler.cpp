@@ -57,7 +57,7 @@ namespace sc
 
         while (remainingBytes > 0)
         {
-            int gotBytes = recv(socket, data.data(), remainingBytes, 0);
+            int gotBytes = recv(socket, reinterpret_cast<char *>(data.data()), remainingBytes, 0);
             if (gotBytes <= 0)
                 break;
 
@@ -77,7 +77,7 @@ namespace sc
 
         while (remainingBytes > 0)
         {
-            int gotBytes = recv(socket, data.data(), remainingBytes, 0);
+            int gotBytes = recv(socket, reinterpret_cast<char *>(data.data()), remainingBytes, 0);
             if (gotBytes <= 0)
                 break;
 
