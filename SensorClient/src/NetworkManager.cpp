@@ -5,14 +5,13 @@ using namespace std;
 namespace nm
 {
     NetworkManager::NetworkManager(std::string ipAddress, int port)
-            : ipAddress(ipAddress), port(port), mainSocket(-1)
+            : ipAddress(ipAddress), port(port), mainSocket(-1), connected(false)
     {
 
     }
 
     void NetworkManager::start()
     {
-        sockaddr_in service;
         memset( & service, 0, sizeof( service ) );
         service.sin_family = AF_INET;
         service.sin_addr.s_addr = inet_addr( ipAddress.c_str() );
@@ -32,12 +31,44 @@ namespace nm
 
             }
             cout << "Connected to server" << endl;
+            connected = true;
+            for (auto listener : listeners)
+                listener->onConnected();
+
+            //TODO: code below's for testing purposes
+            break;
         }
+
+#ifdef WIN32
+        closesocket(mainSocket);
+#else
+        close(mainSocket);
+#endif
+
+//        while (true)
+//        {
+//            cout << "send" << endl;
+////            sendMeasurement()
+//        }
     }
 
     int NetworkManager::sendMeasurement(IMeasurement *measurement)
     {
-        return 0;
+        if (!connected)
+        {
+            connected = connect(mainSocket, (sockaddr * ) & service, sizeof(service)) != -1;
+        }
+        if (connected)
+        {
+            vector<unsigned char> data = measurement->getBytes();
+            vector<unsigned char> header;
+            BytesParser::appendBytes<int>(header, sizeof(long) + data.size());
+            BytesParser::appendBytes<long>(header, measurement->getTimestamp());
+            if (send(mainSocket, header.data(), header.size(), 0) < 0 ||
+                send(mainSocket, data.data(), data.size(), 0) < 0)
+                connected = false;
+        }
+        return connected ? 0 : -1;
     }
 
     void NetworkManager::addListener(INetworkStateListener *listener)

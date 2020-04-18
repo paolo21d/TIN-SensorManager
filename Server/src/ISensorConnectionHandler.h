@@ -9,8 +9,11 @@
 #include <arpa/inet.h>
 #endif
 
+#include <iostream>
 #include <string>
 #include "IConnectionsManager.h"
+#include "BytesParser.h"
+#include "ConnectionException.h"
 
 namespace sc
 {
@@ -21,7 +24,7 @@ namespace sc
         virtual void acceptSensors(std::string ipAddress, int port, IConnectionsManager *connectionsListener) = 0;
 
     protected:
-        int getAcceptingSocket(std::string ipAddress, int port);
+        int getAcceptingSocket(std::string ipAddress, int port, int listeningQueue = 10);
         int closeSocket(int socketDescriptor);
     };
 }
