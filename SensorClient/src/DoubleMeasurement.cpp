@@ -20,4 +20,5 @@ std::vector<unsigned char> DoubleMeasurement::getBytes() {
 
 int DoubleMeasurement::setValue(std::vector<unsigned char> bytes) {
     measurement = BytesParser::parse<double>(bytes);
+    return 0;
 }
