@@ -2,8 +2,9 @@
 #define SERVER_CONNECTIONEXCEPTION_H
 
 #include <exception>
+#include <string>
 
-class NetworkException : public std::exception
+class ConnectionException : public std::exception
 {
 public:
     enum ErrorType
@@ -11,11 +12,15 @@ public:
         NON_SPECIFIED,
         BIND,
         LISTEN,
-        ACCEPT
+        ACCEPT,
+        RECV,
+        SEND,
+        DATA_LEN,
+        CREATE_SOCKET
     };
 
-    NetworkException(std::string errorMsg);
-    NetworkException(ErrorType errorType, std::string errorMsg = "");
+    ConnectionException(std::string errorMsg);
+    ConnectionException(ErrorType errorType, std::string errorMsg = "");
 
     std::string what();
 private:

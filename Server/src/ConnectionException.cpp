@@ -2,18 +2,18 @@
 
 using namespace std;
 
-NetworkException::NetworkException(std::string errorMsg)
+ConnectionException::ConnectionException(std::string errorMsg)
 {
     this->errorMsg = errorMsg;
 }
 
-NetworkException::NetworkException(ErrorType errorType, std::string errorMsg)
+ConnectionException::ConnectionException(ErrorType errorType, std::string errorMsg)
 {
     this->errorType = errorType;
     this->errorType = errorType;
 }
 
-string NetworkException::what()
+string ConnectionException::what()
 {
     switch (errorType)
     {
@@ -25,6 +25,14 @@ string NetworkException::what()
             return "LISTEN " + errorMsg;
         case ACCEPT:
             return "ACCEPT " + errorMsg;
+        case RECV:
+            return "RECV " + errorMsg;
+        case SEND:
+            return "SEND " + errorMsg;
+        case DATA_LEN:
+            return "DATA_LEN " + errorMsg;
+        case CREATE_SOCKET:
+            return "CREATE_SOCKET: " + errorMsg;
     }
 
     return errorMsg;

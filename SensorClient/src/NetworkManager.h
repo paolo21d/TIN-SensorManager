@@ -13,6 +13,7 @@
 #include <arpa/inet.h>
 #endif
 
+#include "BytesParser.h"
 #include "INetworkManager.h"
 
 namespace nm
@@ -31,8 +32,12 @@ namespace nm
         const int port;
 
         int mainSocket;
+        sockaddr_in service;
+        bool connected;
 
         std::vector<INetworkStateListener*> listeners;
+
+        //appendBytes()
     };
 }
 

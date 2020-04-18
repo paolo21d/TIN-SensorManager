@@ -20,7 +20,7 @@ int initNetwork()
 
 void networkThread()
 {
-    nm::INetworkManager *networkManager = new nm::NetworkManager("127.0.0.1", 33334);
+    nm::INetworkManager *networkManager = new nm::NetworkManager("127.0.0.1", 33333);
     networkManager->start();
 }
 

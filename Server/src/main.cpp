@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
 
     cout << "START" << endl;
 
-    sc::IConnectionsManager *connectionsManager = new sc::ConnectionsManager("127.0.0.1", 33334);
+    sc::IConnectionsManager *connectionsManager = new sc::ConnectionsManager("127.0.0.1", 33333);
     connectionsManager->startAcceptingSensors();
 
     cout << "END" << endl;
