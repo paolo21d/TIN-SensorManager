@@ -1,6 +1,3 @@
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <zconf.h>
 #include "ISensorConnectionHandler.h"
 
 namespace sc
