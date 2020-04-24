@@ -45,6 +45,26 @@ public class ConnectionUtilTest {
                 (byte) 97, (byte) 72, (byte) 52, (byte) 35, (byte) 117, (byte) 56)
         );
         assertEquals(correctList, ConnectionUtil.stringToByteList("aH4#u8"));
+    }
 
+    @Test
+    public void checkByteListToInt() {
+        List<Byte> byteList = new ArrayList<Byte>(Arrays.asList(
+                (byte) 0, (byte) 0, (byte) 0, (byte) 10)
+        );
+        assertEquals(10, ConnectionUtil.byteListToInt(byteList));
+
+        List<Byte> byteList2 = new ArrayList<Byte>(Arrays.asList(
+                (byte) 81, (byte) 20, (byte) 81, (byte) 23)
+        );
+        assertEquals(1360285975, ConnectionUtil.byteListToInt(byteList2));
+    }
+
+    @Test
+    public void checkByteListToString() {
+        List<Byte> byteList = new ArrayList<Byte>(Arrays.asList(
+                (byte) 97, (byte) 72, (byte) 52, (byte) 35, (byte) 117, (byte) 56)
+        );
+        assertEquals("aH4#u8", ConnectionUtil.byteListToString(byteList));
     }
 }

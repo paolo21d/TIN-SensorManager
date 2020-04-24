@@ -9,12 +9,14 @@ public class MockupTestingConnection {
         Communication.getInstance().initConnection();
 
 //        Communication.getInstance().testStoppedConnection();
-//        Communication.getInstance().sendCommandUpdateSensorName(20, "nowySensor");
-        Communication.getInstance().sendCommandGetAllSensors();
+/*        Communication.getInstance().sendCommandGetAllSensors();
         Communication.getInstance().sendCommandUpdateSensorName(20, "jakasBardzoDlugaNazwaSensora");
         Communication.getInstance().sendCommandRevokeSensor(30);
         Communication.getInstance().sendCommandDisconnectSensor(35);
-        Communication.getInstance().sendCommandGenerateToken("tokenNowy");
-//        Communication.getInstance().sendCommandGenerateToken("tokenNowy");
+        Communication.getInstance().sendCommandGenerateToken("tokenNowy");*/
+
+        Communication.getInstance().testReceivingData();
+
+//        System.out.println(ConnectionUtil.ByteListToInt(ConnectionUtil.intToByteList(10)));
     }
 }

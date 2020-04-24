@@ -1,19 +1,21 @@
 package tin.administrator.communication;
 
 import com.google.common.primitives.Bytes;
+import org.apache.commons.lang3.ArrayUtils;
 import tin.administrator.model.Sensor;
 
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Communication {
     private static Communication instance = null;
     private Socket socket = null;
-    InputStream input = null;
+    DataInputStream inputStream = null;
     DataOutputStream outputStream = null;
     private static String serverAddress = "127.0.0.1";
     private static int serverPort = 28000;
@@ -28,7 +30,7 @@ public class Communication {
     public void initConnection() throws IOException {
         socket = new Socket(serverAddress, serverPort);
 //        socket.setTcpNoDelay(true);
-        input = socket.getInputStream();
+        inputStream = new DataInputStream(socket.getInputStream());
         outputStream = new DataOutputStream(socket.getOutputStream());
     }
 
@@ -61,6 +63,20 @@ public class Communication {
         String message = "tokenName";
         byte[] b = message.getBytes();
         outputStream.write(b);
+    }
+
+    public void testReceivingData() throws IOException {
+/*        String msg = new String(receiveMessage());
+        msg = new String(receiveMessage());
+        System.out.println("Size: " + msg.length() + " MSG:" + msg);*/
+        List<Byte> bytes = Arrays.asList(ArrayUtils.toObject(receiveMessage()));
+        for (Byte b : bytes) {
+            System.out.print(b + " ");
+        }
+
+//        Sensor sensor = readSensorFromByteMessage(bytes);
+        List<Sensor> sensors = constructSensors(bytes);
+//        System.out.println("INT: " + ConnectionUtil.byteListToInt(bytes));
     }
 
     public void sendCommandGetAllSensors() throws IOException, InterruptedException {
@@ -144,6 +160,52 @@ public class Communication {
         outputStream.flush();
     }
 
+    private byte[] receiveMessage() throws IOException {
+        return inputStream.readAllBytes();
+    }
+
+    Sensor constructSensorFromByteMessage(List<Byte> message) {
+        int readingBegin = 0;
+        //id
+        int sizeOfId = ConnectionUtil.byteListToInt(message.subList(readingBegin, readingBegin + 4));
+        readingBegin += 4;
+        int id = ConnectionUtil.byteListToInt(message.subList(readingBegin, readingBegin + sizeOfId));
+        readingBegin += sizeOfId;
+        //name
+        int sizeOfName = ConnectionUtil.byteListToInt(message.subList(readingBegin, readingBegin + 4));
+        readingBegin += 4;
+        String name = ConnectionUtil.byteListToString(message.subList(readingBegin, readingBegin + sizeOfName));
+        readingBegin += sizeOfName;
+        //ip
+        int sizeOfIp = ConnectionUtil.byteListToInt(message.subList(readingBegin, readingBegin + 4));
+        readingBegin += 4;
+        String ip = ConnectionUtil.byteListToString(message.subList(readingBegin, readingBegin + sizeOfIp));
+        readingBegin += sizeOfIp;
+        //port
+        int sizeOfPort = ConnectionUtil.byteListToInt(message.subList(readingBegin, readingBegin + 4));
+        readingBegin += 4;
+        int port = ConnectionUtil.byteListToInt(message.subList(readingBegin, readingBegin + sizeOfPort));
+        readingBegin += sizeOfPort;
+        System.out.println(String.format("\nidSize:%d id:%d\nnameSize:%d name:%s\nipSize:%d ip:%s\nportSize:%d port:%d\n",
+                sizeOfId, id, sizeOfName, name, sizeOfIp, ip, sizeOfPort, port));
+        return new Sensor(id, name, ip, port);
+    }
+
+    List<Sensor> constructSensors(List<Byte> message) {
+        List<Sensor> sensors = new ArrayList<>();
+        int readingBegin = 0;
+        int sensorsQuantity = ConnectionUtil.byteListToInt(message.subList(readingBegin, readingBegin + 4));
+        readingBegin += 4;
+
+        for (int i = 0; i < sensorsQuantity; i++) {
+            int sensorLength = ConnectionUtil.byteListToInt(message.subList(readingBegin, readingBegin + 4));
+            readingBegin += 4;
+            Sensor sensor = constructSensorFromByteMessage(message.subList(readingBegin, readingBegin + sensorLength));
+            readingBegin += sensorLength;
+            sensors.add(sensor);
+        }
+        return sensors;
+    }
 /*    private List<Byte> prepareBeginOfMessage(int parameterQuantity, int commandType) {
         List<Byte> byteList = new ArrayList<Byte>();
         byteList.addAll(intToByteList(parameterQuantity));

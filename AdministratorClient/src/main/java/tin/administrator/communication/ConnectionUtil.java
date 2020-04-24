@@ -30,4 +30,19 @@ public class ConnectionUtil {
         return Arrays.asList(ArrayUtils.toObject(name.getBytes()));
     }
 
+    public static synchronized int byteListToInt(List<Byte> byteList) {
+        return (byteList.get(0) << 24) & 0xff000000 |
+                (byteList.get(1) << 16) & 0x00ff0000 |
+                (byteList.get(2) << 8) & 0x0000ff00 |
+                (byteList.get(3)) & 0x000000ff;
+    }
+
+    public static synchronized String byteListToString(List<Byte> byteList) {
+        StringBuilder builder = new StringBuilder();
+        for (Byte sign : byteList) {
+            builder.append((char) sign.byteValue());
+        }
+        return builder.toString();
+    }
+
 }
