@@ -19,39 +19,16 @@ namespace sc
         const static int MAX_MSG;
         const int CLIENTS;
 
-        class MsgBuffer
-        {
-        public:
-
-            MsgBuffer() {}
-
-            MsgBuffer(int remaining) : remaining(remaining)
-            {
-                buffer.reserve(remaining);
-            }
-
-            void append(unsigned char *data, int length)
-            {
-                remaining -= length;
-                for (int i = 0; i < length; ++i)
-                    buffer.push_back(data[i]);
-            }
-
-            int remaining;
-            std::vector<unsigned char> buffer;
-        };
-
-        std::unordered_map<int, MsgBuffer> msgLenBuffer;
-        std::unordered_map<int, MsgBuffer> msgBuffer;
+        std::unordered_map<int, std::vector<unsigned char>> msgLenBuffer;
+        std::unordered_map<int, std::vector<unsigned char>> msgBuffer;
         std::unordered_map<int, int> clients;
 
         void gotMessage(int client, std::vector<unsigned char> &data);
 
-        std::vector<unsigned char> getBytes(const std::vector<unsigned char> &bytes, int length = -1, int offset = 0);
         template <class T>
         T getData(const std::vector<unsigned char> &bytes, int &offset);
 
-        bool contains(const std::unordered_map<int, MsgBuffer> &buffer, int key);
+        bool contains(const std::unordered_map<int, std::vector<unsigned char>> &buffer, int key);
     };
 }
 

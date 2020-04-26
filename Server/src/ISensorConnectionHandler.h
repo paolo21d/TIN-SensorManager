@@ -5,9 +5,9 @@
 
 #include <iostream>
 #include <string>
+#include <BytesParser.h>
 #include "IConnectionsManager.h"
-#include "BytesParser.h"
-#include "ConnectionException.h"
+#include <ConnectionException.h>
 
 namespace sc
 {
