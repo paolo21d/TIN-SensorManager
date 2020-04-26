@@ -5,13 +5,8 @@
 #include <string>
 #include <iostream>
 
-#ifdef WIN32
-#include "winsock.h"
-#else
-#include <netinet/in.h>
-#include <zconf.h>
-#include <arpa/inet.h>
-#endif
+#include <NetworkUtils.h>
+#include <SystemUtils.h>
 
 #include "BytesParser.h"
 #include "INetworkManager.h"

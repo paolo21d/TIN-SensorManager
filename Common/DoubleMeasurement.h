@@ -6,7 +6,7 @@
 #define SENSOR_DOUBLEMEASUREMENT_H
 
 
-#include "IMeasurement.h"
+#include <IMeasurement.h>
 
 class DoubleMeasurement : public IMeasurement {
 public:
@@ -14,6 +14,8 @@ public:
     DoubleMeasurement(long timestamp, double measurement);
 
     long getTimestamp() override;
+
+    void setTimestamp(long timestamp) override;
 
     std::vector<unsigned char> getBytes() override;
 
