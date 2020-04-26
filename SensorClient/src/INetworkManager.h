@@ -1,7 +1,7 @@
 #ifndef NetworkManager_h
 #define NetworkManager_h
 
-#include "IMeasurement.h"
+#include <IMeasurement.h>
 #include "INetworkStateListener.h"
 
 namespace nm

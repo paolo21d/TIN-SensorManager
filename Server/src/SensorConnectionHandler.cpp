@@ -74,7 +74,6 @@ namespace sc
             if ( (nactive = select(nfds, &ready, (fd_set *)0, (fd_set *)0, &to) ) == -1)
             {
                 throw ConnectionException(ConnectionException::SELECT);
-                continue;
             }
 
             if ( FD_ISSET(acceptingSocket, &ready))

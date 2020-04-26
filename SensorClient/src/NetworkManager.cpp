@@ -56,10 +56,49 @@ namespace nm
 
             BytesParser::appendBytes<int>(header, sizeof(long) + data.size());
             BytesParser::appendBytes<long>(header, measurement->getTimestamp());
+            BytesParser::moveBytes(header, data);
+            int remaining = header.size();
 
-            if (send(mainSocket, reinterpret_cast<const char *>(header.data()), header.size(), 0) <= 0 ||
-                send(mainSocket, reinterpret_cast<const char *>(data.data()), data.size(), 0) <= 0)
+            try
+            {
+                int sent = send(mainSocket, reinterpret_cast<const char *>(header.data()), header.size(), 0);
+                if (sent < 0)
+                    throw ConnectionException(ConnectionException::SEND);
+                remaining -= sent;
+
+                fd_set ready;
+                int nfds, nactive;
+                struct timeval to;
+
+                while (remaining != 0)
+                {
+                    FD_ZERO(&ready);
+                    FD_SET(mainSocket, &ready);
+                    to.tv_sec = 1;
+                    to.tv_usec = 0;
+                    if ((nactive = select(nfds, (fd_set *) 0, &ready, (fd_set *) 0, &to)) == -1)
+                        throw ConnectionException(ConnectionException::SELECT);
+
+                    if (FD_ISSET(mainSocket, &ready))
+                    {
+                        int sent = send(mainSocket, reinterpret_cast<const char *>(header.data()), header.size(), 0);
+                        if (sent < 0)
+                            throw ConnectionException(ConnectionException::SEND);
+
+                        remaining -= sent;
+                    }
+
+                    if (nactive == 0)
+                        cout << "Trying to send remaining " << remaining << " bytes" << endl;
+                }
+                cout << "Sent measurement" << endl;
+            }
+            catch (ConnectionException e)
+            {
                 connected = false;
+                closeSocket(mainSocket);
+                cout << e.what() << endl;
+            }
         }
 
         return connected ? 0 : -1;
