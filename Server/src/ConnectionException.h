@@ -16,7 +16,8 @@ public:
         RECV,
         SEND,
         DATA_LEN,
-        CREATE_SOCKET
+        CREATE_SOCKET,
+        SELECT
     };
 
     ConnectionException(std::string errorMsg);
