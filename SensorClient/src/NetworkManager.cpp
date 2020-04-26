@@ -37,14 +37,10 @@ namespace nm
         for (int i = 0; i < 100; ++i)
         {
             sendMeasurement(new DoubleMeasurement(i * 3, i * i));
-            sleepMillis(100);
+            sleepMillis(10);
         }
 
-#ifdef WIN32
-        closesocket(mainSocket);
-#else
-        close(mainSocket);
-#endif
+        closeSocket(mainSocket);
     }
 
     int NetworkManager::sendMeasurement(IMeasurement *measurement)

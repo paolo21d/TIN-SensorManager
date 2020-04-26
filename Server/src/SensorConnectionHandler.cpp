@@ -16,7 +16,7 @@ namespace sc
 
     }
 
-    bool SensorConnectionHandler::contains(const std::unordered_map<int, MsgBuffer> &buffer, int key)
+    bool SensorConnectionHandler::contains(const std::unordered_map<int, vector<unsigned char>> &buffer, int key)
     {
         return buffer.find(key) != buffer.end();
     }
@@ -36,10 +36,13 @@ namespace sc
         msgBuffer.clear();
         clients.clear();
 
+        int remaining[CLIENTS];
+
         for (int i = 0; i < CLIENTS; ++i)
         {
             msgsocks[i] = -1;
             clients[i] = i; //TODO: change to client ID
+            remaining[i] = 0;
         }
 
         nfds = acceptingSocket + 1;
@@ -70,7 +73,7 @@ namespace sc
             to.tv_usec = 0;
             if ( (nactive = select(nfds, &ready, (fd_set *)0, (fd_set *)0, &to) ) == -1)
             {
-                perror("select");
+                throw ConnectionException(ConnectionException::SELECT);
                 continue;
             }
 
@@ -89,57 +92,53 @@ namespace sc
                 {
                     if (!contains(msgLenBuffer, i) && !contains(msgBuffer, i))
                     {
-                        msgLenBuffer.insert({i, MsgBuffer(sizeof(int32_t))});
+                        msgLenBuffer.insert({i, std::vector<unsigned char>()});
+                        msgLenBuffer[i].reserve(sizeof(int32_t));
+                        remaining[i] = sizeof(int32_t);
                     }
+
+                    unsigned char data[remaining[i]];
+                    int read = recv(msgsocks[i], data, remaining[i], 0);
+                    if (read < 0)
+                        throw ConnectionException(ConnectionException::RECV);
+                    if (read == 0)
+                    {
+                        closeSocket(msgsocks[i]);
+                        msgsocks[i] = -1;
+                        cout << "Client disconnected" << endl;
+                    }
+
+                    remaining[i] -= read;
 
                     if (contains(msgBuffer, i))
                     {
-                        unsigned char data[msgBuffer[i].remaining];
-                        int read = recv(msgsocks[i], data, msgBuffer[i].remaining, 0);
-                        if (read < 0)
-                            throw ConnectionException(ConnectionException::RECV);
-                        if (read == 0)
+                        BytesParser::appendBytes(msgBuffer[i], data, read);
+                        if (remaining[i] == 0)
                         {
-                            closeSocket(msgsocks[i]);
-                            msgsocks[i] = -1;
-                            cout << "Client disconnected" << endl;
-                        }
-                        msgBuffer[i].append(data, read);
-                        if (msgBuffer[i].remaining == 0)
-                        {
-                            gotMessage(clients[i], msgBuffer[i].buffer);
+                            gotMessage(clients[i], msgBuffer[i]);
                             msgBuffer.erase(i);
                         }
                     }
                     else if (contains(msgLenBuffer, i))
                     {
-                        unsigned char data[msgLenBuffer[i].remaining];
-                        int read = recv(msgsocks[i], data, msgLenBuffer[i].remaining, 0);
-                        if (read < 0)
-                            throw ConnectionException(ConnectionException::RECV);
-                        if (read == 0)
+                        BytesParser::appendBytes(msgLenBuffer[i], data, read);
+                        if (remaining[i] == 0)
                         {
-                            closeSocket(msgsocks[i]);
-                            msgsocks[i] = -1;
-                            cout << "Client disconnected" << endl;
-                        }
-                        msgLenBuffer[i].append(data, read);
-                        if (msgLenBuffer[i].remaining == 0)
-                        {
-                            int msgLen = BytesParser::parse<int32_t>(msgLenBuffer[i].buffer);
+                            int msgLen = BytesParser::parse<int32_t>(msgLenBuffer[i]);
                             if (msgLen > MAX_MSG)
                                 throw ConnectionException(ConnectionException::DATA_LEN, "Message too long");
                             if (msgLen <= sizeof(long))
                                 throw ConnectionException(ConnectionException::DATA_LEN, "Message too short");
 
-                            msgBuffer.insert({i, MsgBuffer(msgLen)});
+                            msgBuffer.insert({i, vector<unsigned char>()});
                             msgLenBuffer.erase(i);
+                            remaining[i] = msgLen;
                         }
                     }
                 }
             }
             if (nactive==0)
-                printf("Timeout, restarting select...\n");
+                cout << "Timeout, restarting select..." << endl;
         }
         while(true);
     }
@@ -152,23 +151,11 @@ namespace sc
         cout << "client " << client << "     timestamp: " << timestamp << "     value: " << value << endl;
     }
 
-    std::vector<unsigned char> SensorConnectionHandler::getBytes(const vector<unsigned char> &bytes, int length, int offset)
-    {
-        if (length < 0)
-            length = bytes.size() - offset;
-
-        vector<unsigned char> result;
-        result.reserve(length);
-        result.insert(result.end(), bytes.begin()+offset, bytes.begin()+offset+length);
-
-        return result;
-    }
-
     template <class T>
     T SensorConnectionHandler::getData(const vector<unsigned char> &bytes, int &offset)
     {
         int fs = offset;
         offset += sizeof(T);
-        return BytesParser::parse<T>(getBytes(bytes, sizeof(T), fs));
+        return BytesParser::parse<T>(bytes, fs);
     }
 }

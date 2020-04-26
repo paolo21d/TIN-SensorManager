@@ -7,13 +7,17 @@ class BytesParser
 {
 public:
     template <class T>
-    static T parse(std::vector<unsigned char> bytes, int offset = 0);
+    static inline T parse(std::vector<unsigned char> bytes, int offset = 0);
     
     template <class T>
-    static std::vector<unsigned char> toBytes(T value);
+    static inline std::vector<unsigned char> toBytes(T value);
 
     template <class T>
-    static std::vector<unsigned char> appendBytes(std::vector<unsigned char> &bytes, T value);
+    static inline std::vector<unsigned char>& appendBytes(std::vector<unsigned char> &bytes, T value);
+
+    static inline std::vector<unsigned char>& appendBytes(std::vector<unsigned char> &bytes, unsigned char *data, int dataLen);
+
+    static inline std::vector<unsigned char>& moveBytes(std::vector<unsigned char> &bytes, std::vector<unsigned char> &toAppend);
 };
 
 template <class T>
@@ -33,10 +37,23 @@ std::vector<unsigned char> BytesParser::toBytes(T value)
 }
 
 template <class T>
-std::vector<unsigned char> BytesParser::appendBytes(std::vector<unsigned char> &bytes, T value)
+std::vector<unsigned char>& BytesParser::appendBytes(std::vector<unsigned char> &bytes, T value)
 {
     std::vector<unsigned char> temp = toBytes(value);
     bytes.insert(bytes.end(), make_move_iterator(temp.begin()), make_move_iterator(temp.end()));
+    return bytes;
+}
+
+std::vector<unsigned char>& BytesParser::appendBytes(std::vector<unsigned char> &bytes, unsigned char *data, int dataLen)
+{
+    bytes.reserve(bytes.size() + dataLen);
+    bytes.insert(bytes.end(), data, data+dataLen);
+    return bytes;
+}
+
+std::vector<unsigned char>& BytesParser::moveBytes(std::vector<unsigned char> &bytes, std::vector<unsigned char> &toAppend)
+{
+    bytes.insert(bytes.end(), make_move_iterator(toAppend.begin()), make_move_iterator(toAppend.end()));
     return bytes;
 }
 
