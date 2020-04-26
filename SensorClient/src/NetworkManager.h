@@ -8,6 +8,7 @@
 #include <NetworkUtils.h>
 #include <SystemUtils.h>
 
+#include <ConnectionException.h>
 #include "BytesParser.h"
 #include "INetworkManager.h"
 #include "DoubleMeasurement.h"
