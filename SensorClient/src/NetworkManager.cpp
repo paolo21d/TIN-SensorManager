@@ -23,12 +23,7 @@ namespace nm
         {
             while (connect(mainSocket, (sockaddr * ) & service, sizeof(service)) == -1)
             {
-#ifdef WIN32
-                Sleep(1000);
-#else
-                sleep(1);
-#endif
-
+                sleepSecs(1);
             }
             cout << "Connected to server" << endl;
             connected = true;
@@ -40,7 +35,10 @@ namespace nm
         }
 
         for (int i = 0; i < 100; ++i)
-            sendMeasurement(new DoubleMeasurement(i*3, i * i));
+        {
+            sendMeasurement(new DoubleMeasurement(i * 3, i * i));
+            sleepMillis(100);
+        }
 
 #ifdef WIN32
         closesocket(mainSocket);

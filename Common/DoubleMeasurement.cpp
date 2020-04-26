@@ -22,3 +22,8 @@ int DoubleMeasurement::setValue(std::vector<unsigned char> bytes) {
     measurement = BytesParser::parse<double>(bytes);
     return 0;
 }
+
+void DoubleMeasurement::setTimestamp(long timestamp)
+{
+    this->timestamp = timestamp;
+}
