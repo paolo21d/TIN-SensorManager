@@ -15,9 +15,14 @@ public:
     template <class T>
     static inline std::vector<unsigned char>& appendBytes(std::vector<unsigned char> &bytes, T value);
 
+    template <class T>
+    static inline std::vector<unsigned char>& appendFrontBytes(std::vector<unsigned char> &bytes, T value);
+
     static inline std::vector<unsigned char>& appendBytes(std::vector<unsigned char> &bytes, unsigned char *data, int dataLen);
 
     static inline std::vector<unsigned char>& moveBytes(std::vector<unsigned char> &bytes, std::vector<unsigned char> &toAppend);
+
+    static inline std::vector<unsigned char>& trimLeft(std::vector<unsigned char> &bytes, int toSkip);
 };
 
 template <class T>
@@ -44,6 +49,15 @@ std::vector<unsigned char>& BytesParser::appendBytes(std::vector<unsigned char> 
     return bytes;
 }
 
+template <class T>
+std::vector<unsigned char>& BytesParser::appendFrontBytes(std::vector<unsigned char> &bytes, T value)
+{
+    std::vector<unsigned char> temp = toBytes<T>(value);
+    std::swap(temp, bytes);
+    bytes.insert(bytes.end(), make_move_iterator(temp.begin()), make_move_iterator(temp.end()));
+    return bytes;
+}
+
 std::vector<unsigned char>& BytesParser::appendBytes(std::vector<unsigned char> &bytes, unsigned char *data, int dataLen)
 {
     bytes.reserve(bytes.size() + dataLen);
@@ -54,6 +68,12 @@ std::vector<unsigned char>& BytesParser::appendBytes(std::vector<unsigned char> 
 std::vector<unsigned char>& BytesParser::moveBytes(std::vector<unsigned char> &bytes, std::vector<unsigned char> &toAppend)
 {
     bytes.insert(bytes.end(), make_move_iterator(toAppend.begin()), make_move_iterator(toAppend.end()));
+    return bytes;
+}
+
+std::vector<unsigned char>& BytesParser::trimLeft(std::vector<unsigned char> &bytes, int toSkip)
+{
+    bytes.erase(bytes.begin(), bytes.begin() + toSkip);
     return bytes;
 }
 

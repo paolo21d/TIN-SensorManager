@@ -8,6 +8,7 @@
 #include <BytesParser.h>
 #include "IConnectionsManager.h"
 #include <ConnectionException.h>
+#include <IRequestListener.h>
 
 namespace sc
 {
@@ -15,7 +16,8 @@ namespace sc
     {
     public:
         virtual void handleSensor(int socketDescriptor) = 0;
-        virtual void acceptSensors(std::string ipAddress, int port, IConnectionsManager *connectionsListener) = 0;
+        virtual void acceptSensors(std::string ipAddress, int port) = 0;
+        virtual void addListener(IRequestListener *requestListener) = 0;
 
     protected:
         int getAcceptingSocket(std::string ipAddress, int port, int listeningQueue = 10);

@@ -33,6 +33,8 @@ string ConnectionException::what()
             return "DATA_LEN " + errorMsg;
         case CREATE_SOCKET:
             return "CREATE_SOCKET: " + errorMsg;
+        case SELECT:
+            return "SELECT: " + errorMsg;
     }
 
     return errorMsg;

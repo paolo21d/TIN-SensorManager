@@ -11,6 +11,11 @@ namespace sc
 
     }
 
+    void SensorConnectionHandler::addListener(IRequestListener *requestListener)
+    {
+        listener = requestListener;
+    }
+
     void SensorConnectionHandler::handleSensor(int socketDescriptor)
     {
 
@@ -21,7 +26,7 @@ namespace sc
         return buffer.find(key) != buffer.end();
     }
 
-    void SensorConnectionHandler::acceptSensors(std::string ipAddress, int port, IConnectionsManager *connectionsListener)
+    void SensorConnectionHandler::acceptSensors(std::string ipAddress, int port)
     {
         int acceptingSocket = getAcceptingSocket(ipAddress, port);
 
@@ -29,12 +34,15 @@ namespace sc
         int nfds, nactive;
         struct timeval to;
 
-        int msgsocks[CLIENTS];
         bool acceptNewClients = true;
+
+        msgsocks = new int [CLIENTS];
 
         msgLenBuffer.clear();
         msgBuffer.clear();
         clients.clear();
+
+        outgoingBuffer.clear();
 
         int remaining[CLIENTS];
 
@@ -47,8 +55,8 @@ namespace sc
 
         nfds = acceptingSocket + 1;
 
-        do {
-
+        do
+        {
             int freeSocket = -1;
             for (int i = 0; i < CLIENTS; ++i)
             {
@@ -81,7 +89,7 @@ namespace sc
                 msgsocks[freeSocket] = accept(acceptingSocket, NULL, NULL);
                 if (msgsocks[freeSocket] == -1)
                     throw ConnectionException(ConnectionException::ACCEPT);
-                nfds= max(msgsocks[freeSocket] + 1, nfds);
+                nfds = max(msgsocks[freeSocket] + 1, nfds);
                 cout << "Accepted client" << endl;
             }
 
@@ -140,21 +148,23 @@ namespace sc
                 cout << "Timeout, restarting select..." << endl;
         }
         while(true);
+
+        delete[] msgsocks;
     }
 
     void SensorConnectionHandler::gotMessage(int client, vector<unsigned char> &data)
     {
-        int cursorPos = 0;
-        long timestamp = getData<long>(data, cursorPos);
-        double value = getData<double>(data, cursorPos);
-        cout << "client " << client << "     timestamp: " << timestamp << "     value: " << value << endl;
+        vector<unsigned char> response = listener->onGotRequest(client, data);
+        if (response.size() > 0)
+            sendResponse(client, response);
     }
 
-    template <class T>
-    T SensorConnectionHandler::getData(const vector<unsigned char> &bytes, int &offset)
+    void SensorConnectionHandler::sendResponse(int client, vector<unsigned char> &data)
     {
-        int fs = offset;
-        offset += sizeof(T);
-        return BytesParser::parse<T>(bytes, fs);
+        int dataLen = data.size();
+        BytesParser::appendFrontBytes<int32_t>(data, (int32_t) dataLen);
+        int sent = send(msgsocks[client], data.data(), dataLen, 0);
+        if (sent < dataLen)
+            outgoingBuffer[client] = BytesParser::trimLeft(data, sent);
     }
 }
