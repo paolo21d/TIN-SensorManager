@@ -21,7 +21,6 @@ namespace sc
 
     protected:
         int getAcceptingSocket(std::string ipAddress, int port, int listeningQueue = 10);
-        int closeSocket(int socketDescriptor);
     };
 }
 
