@@ -23,12 +23,11 @@ public class MockupTestingConnection {
         com.start();
         Thread.sleep(2000);
 
-        for(int i=0; i<3; i++) {
-            com.sendMessage("1234");
-            Thread.sleep(2000);
+        for(int i=0; i<10; i++) {
+            com.sendMessage("wiadomosc");
+            Thread.sleep(100);
         }
 
-        com.sendMessage("5678");
         com.closeConnection();
     }
 }

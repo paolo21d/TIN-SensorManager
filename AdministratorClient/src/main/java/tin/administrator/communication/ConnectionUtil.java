@@ -17,13 +17,17 @@ public class ConnectionUtil {
 
     public static synchronized List<Byte> prepareStringMessageWithSize(String text) {
         List<Byte> byteList = new ArrayList<Byte>();
-        byteList.addAll(intToByteList(text.length())); //size of text
+        byteList.addAll(intToByteListLittleEndian(text.length())); //size of text
         byteList.addAll(stringToByteList(text));
         return byteList;
     }
 
     public static synchronized List<Byte> intToByteList(int number) {
         return new ArrayList<>(Arrays.asList((byte) (number >> 24), (byte) (number >> 16), (byte) (number >> 8), (byte) number));
+    }
+
+    public static synchronized List<Byte> intToByteListLittleEndian(int number) {
+        return new ArrayList<>(Arrays.asList((byte) (number >> 0), (byte) (number >> 8), (byte) (number >> 16), (byte) (number>>24)));
     }
 
     public static synchronized List<Byte> stringToByteList(String name) {

@@ -60,4 +60,8 @@ public class CommunicationNetty extends Thread {
         handler.sendMessage(message);
     }
 
+    public void sendMessage(byte[] msg) throws InterruptedException {
+        handler.sendMessage(msg);
+    }
+
 }

@@ -23,17 +23,33 @@ public:
     }
 };
 
+class AdministratorListener: public IRequestListener
+{
+public:
+    vector<unsigned char> onGotRequest(int clientId, vector<unsigned char> msg) override {
+        for(int i=0; i< msg.size(); i++) cout<<msg[i];
+        cout<<endl;
+        vector<unsigned char> response;
+        response.push_back('a');
+        response.push_back('a');
+        response.push_back('a');
+        response.push_back('a');
+        return response;
+    }
+};
+
 int main(int argc, char *argv[])
 {
     initNetwork();
 
     cout << "START" << endl;
 
-    IRequestListener *listener = new MockListener();
+//    IRequestListener *listener = new MockListener();
+    IRequestListener *listener = new AdministratorListener();
 
     sc::ISensorConnectionHandler *connectionHandler = new sc::SensorConnectionHandler();
     connectionHandler->addListener(listener);
-    connectionHandler->acceptSensors("127.0.0.1", 33333);
+    connectionHandler->acceptSensors("127.0.0.1", 28000);
 //    sc::IConnectionsManager *connectionsManager = new sc::ConnectionsManager("127.0.0.1", 33333);
 //    connectionsManager->startAcceptingSensors();
 
