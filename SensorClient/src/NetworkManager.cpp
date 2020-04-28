@@ -81,7 +81,7 @@ namespace nm
 
                     if (FD_ISSET(mainSocket, &ready))
                     {
-                        int sent = send(mainSocket, reinterpret_cast<const char *>(header.data()), header.size(), 0);
+                        int sent = send(mainSocket, reinterpret_cast<const char *>(header.data() + header.size() - remaining), header.size(), 0);
                         if (sent < 0)
                             throw ConnectionException(ConnectionException::SEND);
 

@@ -13,20 +13,25 @@ namespace sc
     public:
         SensorConnectionHandler();
         void handleSensor(int socketDescriptor) override ;
-        void acceptSensors(std::string ipAddress, int port, IConnectionsManager *connectionsListener) override ;
+        void acceptSensors(std::string ipAddress, int port) override ;
+        void addListener(IRequestListener *requestListener) override ;
 
     private:
         const static int MAX_MSG;
         const int CLIENTS;
 
+        IRequestListener *listener;
+
+        int *msgsocks;
+
         std::unordered_map<int, std::vector<unsigned char>> msgLenBuffer;
         std::unordered_map<int, std::vector<unsigned char>> msgBuffer;
         std::unordered_map<int, int> clients;
 
-        void gotMessage(int client, std::vector<unsigned char> &data);
+        std::unordered_map<int, std::vector<unsigned char>> outgoingBuffer;
 
-        template <class T>
-        T getData(const std::vector<unsigned char> &bytes, int &offset);
+        void gotMessage(int client, std::vector<unsigned char> &data);
+        void sendResponse(int client, std::vector<unsigned char> &data);
 
         bool contains(const std::unordered_map<int, std::vector<unsigned char>> &buffer, int key);
     };
