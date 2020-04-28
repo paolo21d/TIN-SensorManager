@@ -30,6 +30,7 @@ public class Communication {
     public void initConnection() throws IOException {
         socket = new Socket(serverAddress, serverPort);
 //        socket.setTcpNoDelay(true);
+        socket.setSoTimeout(2000);
         inputStream = new DataInputStream(socket.getInputStream());
         outputStream = new DataOutputStream(socket.getOutputStream());
     }
@@ -65,17 +66,29 @@ public class Communication {
         outputStream.write(b);
     }
 
-    public void testReceivingData() throws IOException {
+    public void testReceivingData() throws IOException, InterruptedException {
 /*        String msg = new String(receiveMessage());
         msg = new String(receiveMessage());
         System.out.println("Size: " + msg.length() + " MSG:" + msg);*/
+//        Thread.sleep(2000);
         List<Byte> bytes = Arrays.asList(ArrayUtils.toObject(receiveMessage()));
         for (Byte b : bytes) {
-            System.out.print(b + " ");
+            System.out.print(Character.toChars(b));
+        }
+        System.out.println("\nNEW READ!!");
+        bytes = Arrays.asList(ArrayUtils.toObject(receiveMessage()));
+        for (Byte b : bytes) {
+            System.out.print(Character.toChars(b));
         }
 
+/*        byte[] aaa = new byte[4084];
+        inputStream.read(aaa);
+        for (Byte b : aaa) {
+            System.out.print(Character.toChars(b));
+        }*/
+
 //        Sensor sensor = readSensorFromByteMessage(bytes);
-        List<Sensor> sensors = constructSensors(bytes);
+        //List<Sensor> sensors = constructSensors(bytes);
 //        System.out.println("INT: " + ConnectionUtil.byteListToInt(bytes));
     }
 
