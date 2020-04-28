@@ -109,9 +109,9 @@ namespace sc
                         }
                         if (sent < 0)
                             throw ConnectionException(ConnectionException::SEND);
-                        remaining -= sent;
+                        remaining[i] -= sent;
 
-                        if (remaining == 0)
+                        if (remaining[i] == 0)
                         {
                             outgoingBuffer[i].clear();
                         }
@@ -126,7 +126,7 @@ namespace sc
                         remaining[i] = sizeof(int32_t);
                     }
 
-                    unsigned char data[remaining[i]];
+                    char * data = new char[remaining[i]];
                     int read = recv(msgsocks[i], data, remaining[i], 0);
                     if (read < 0)
                         throw ConnectionException(ConnectionException::RECV);
@@ -141,7 +141,7 @@ namespace sc
 
                     if (contains(msgBuffer, i))
                     {
-                        BytesParser::appendBytes(msgBuffer[i], data, read);
+                        BytesParser::appendBytes(msgBuffer[i], (unsigned char *)data, read);
                         if (remaining[i] == 0)
                         {
                             gotMessage(clients[i], msgBuffer[i]);
@@ -150,7 +150,7 @@ namespace sc
                     }
                     else if (contains(msgLenBuffer, i))
                     {
-                        BytesParser::appendBytes(msgLenBuffer[i], data, read);
+                        BytesParser::appendBytes(msgLenBuffer[i], (unsigned char *)data, read);
                         if (remaining[i] == 0)
                         {
                             int msgLen = BytesParser::parse<int32_t>(msgLenBuffer[i]);
@@ -186,7 +186,7 @@ namespace sc
     {
         int dataLen = data.size();
         BytesParser::appendFrontBytes<int32_t>(data, (int32_t) dataLen);
-        int sent = send(msgsocks[client], data.data(), dataLen, 0);
+        int sent = send(msgsocks[client], reinterpret_cast<const char *>(data.data()), dataLen, 0);
         if (sent < dataLen)
             outgoingBuffer[client] = BytesParser::trimLeft(data, sent);
 
