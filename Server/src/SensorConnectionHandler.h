@@ -23,6 +23,7 @@ namespace sc
         IRequestListener *listener;
 
         int *msgsocks;
+        int *remaining;
 
         std::unordered_map<int, std::vector<unsigned char>> msgLenBuffer;
         std::unordered_map<int, std::vector<unsigned char>> msgBuffer;

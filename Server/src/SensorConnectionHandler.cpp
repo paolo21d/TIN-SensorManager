@@ -37,6 +37,7 @@ namespace sc
         bool acceptNewClients = true;
 
         msgsocks = new int [CLIENTS];
+        remaining = new int [CLIENTS];
 
         msgLenBuffer.clear();
         msgBuffer.clear();
@@ -44,7 +45,7 @@ namespace sc
 
         outgoingBuffer.clear();
 
-        int remaining[CLIENTS];
+
 
         for (int i = 0; i < CLIENTS; ++i)
         {
@@ -97,6 +98,27 @@ namespace sc
             {
                 if ( msgsocks[i]>0 && FD_ISSET(msgsocks[i], &ready))
                 {
+                    if (outgoingBuffer[i].size() > 0)
+                    {
+                        int sent = send(msgsocks[i], reinterpret_cast<const char *>(outgoingBuffer[i].data() + outgoingBuffer[i].size() - remaining[i]), remaining[i], 0);
+                        if (sent == 0)
+                        {
+                            closeSocket(msgsocks[i]);
+                            msgsocks[i] = -1;
+                            cout << "Client disconnected" << endl;
+                        }
+                        if (sent < 0)
+                            throw ConnectionException(ConnectionException::SEND);
+                        remaining -= sent;
+
+                        if (remaining == 0)
+                        {
+                            outgoingBuffer[i].clear();
+                        }
+
+                        continue;
+                    }
+
                     if (!contains(msgLenBuffer, i) && !contains(msgBuffer, i))
                     {
                         msgLenBuffer.insert({i, std::vector<unsigned char>()});
@@ -150,6 +172,7 @@ namespace sc
         while(true);
 
         delete[] msgsocks;
+        delete[] remaining;
     }
 
     void SensorConnectionHandler::gotMessage(int client, vector<unsigned char> &data)
@@ -166,5 +189,7 @@ namespace sc
         int sent = send(msgsocks[client], data.data(), dataLen, 0);
         if (sent < dataLen)
             outgoingBuffer[client] = BytesParser::trimLeft(data, sent);
+
+        remaining[client] = dataLen - sent;
     }
 }

@@ -31,13 +31,4 @@ namespace sc
 
         return acceptingSocket;
     }
-
-    int ISensorConnectionHandler::closeSocket(int socketDescriptor)
-    {
-    #ifdef WIN32
-        return closesocket(socketDescriptor);
-    #else
-        return close(socketDescriptor);
-    #endif
-    }
 }

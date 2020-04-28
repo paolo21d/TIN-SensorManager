@@ -2,6 +2,7 @@
 #define SERVER_IREQUESTLISTENER_H
 
 #include <vector>
+#include <BytesParser.h>
 
 class IRequestListener
 {
