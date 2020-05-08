@@ -1,18 +1,16 @@
 package tin.administrator.communication;
 
 import com.google.common.primitives.Bytes;
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.util.CharsetUtil;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class ClientHandler extends SimpleChannelInboundHandler {
+public class ClientHandler extends SimpleChannelInboundHandler<byte[]> {
     /*@Override
     public void channelActive(ChannelHandlerContext channelHandlerContext){
         System.out.println("Channel Active");
@@ -48,16 +46,26 @@ public class ClientHandler extends SimpleChannelInboundHandler {
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Object receivedBytes) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, byte[] receivedBytes) throws Exception {
         System.out.println("--------- channelRead0");
-        System.out.print("RECEIVED: ");
-        ByteBuf in = (ByteBuf) receivedBytes;
+        System.out.println("RECEIVED: ");
+/*        ByteBuf in = (ByteBuf) receivedBytes;
         List<Byte> list = Arrays.asList(ArrayUtils.toObject(in.array()));
         for(Byte b:list) {
             System.out.print(Character.toChars(b));
         }
-        System.out.println();
+        System.out.println();*/
 //        ctx.writeAndFlush(Unpooled.copiedBuffer("1234", CharsetUtil.UTF_8));
+
+
+        //working
+        List<Byte> mess = Arrays.asList(ArrayUtils.toObject(receivedBytes));
+        int length = ConnectionUtil.byteListToIntLittleEndian(mess.subList(0, 4));
+        System.out.println("SIZE: " + length);
+        for (Byte mm : mess.subList(4, mess.size())) {
+            System.out.println(mm + "| " + Arrays.toString(Character.toChars(mm)));
+        }
+        System.out.println();
     }
 
     @Override
@@ -70,14 +78,14 @@ public class ClientHandler extends SimpleChannelInboundHandler {
 //        ctx.writeAndFlush(Unpooled.copiedBuffer(msg, CharsetUtil.UTF_8));
 
 //        ctx.writeAndFlush(Unpooled.copiedBuffer(msg, CharsetUtil.US_ASCII));
-        String x = new String(Bytes.toArray(ConnectionUtil.prepareStringMessageWithSize(msg)));
-        ctx.writeAndFlush(Unpooled.copiedBuffer(x, CharsetUtil.US_ASCII));
+//        String x = new String(Bytes.toArray(ConnectionUtil.prepareStringMessageWithSize(msg)));
+//        ctx.writeAndFlush(Unpooled.copiedBuffer(x, CharsetUtil.US_ASCII));
+        ctx.writeAndFlush(Unpooled.copiedBuffer(Bytes.toArray(ConnectionUtil.prepareStringMessageWithSize(msg))));
     }
 
-    public void sendMessage(byte[] b) {
+    public void sendMessage(byte[] bytes) {
         System.out.println("SEND:");
-        String a = new String(b);
-        ctx.writeAndFlush(Unpooled.copiedBuffer(a, CharsetUtil.US_ASCII));
+        ctx.writeAndFlush(Unpooled.copiedBuffer(bytes));
     }
 
     public void closeConnection() {

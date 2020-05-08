@@ -23,9 +23,9 @@ public class MockupTestingConnection {
         com.start();
         Thread.sleep(2000);
 
-        for(int i=0; i<10; i++) {
-            com.sendMessage("wiadomosc");
-            Thread.sleep(100);
+        for(int i=0; i<1; i++) {
+            com.sendMessage("jebac tkom");
+            Thread.sleep(1000);
         }
 
         com.closeConnection();
