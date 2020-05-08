@@ -29,11 +29,11 @@ public:
     vector<unsigned char> onGotRequest(int clientId, vector<unsigned char> msg) override {
         for(int i=0; i< msg.size(); i++) cout<<msg[i];
         cout<<endl;
+        string responseMessage = "Odpowiedz od serwera";
         vector<unsigned char> response;
-        response.push_back('a');
-        response.push_back('a');
-        response.push_back('a');
-        response.push_back('a');
+        for(int i=0; i< responseMessage.size(); i++) {
+            response.push_back(responseMessage[i]);
+        }
         return response;
     }
 };
