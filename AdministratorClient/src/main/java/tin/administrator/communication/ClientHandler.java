@@ -49,23 +49,15 @@ public class ClientHandler extends SimpleChannelInboundHandler<byte[]> {
     protected void channelRead0(ChannelHandlerContext ctx, byte[] receivedBytes) throws Exception {
         System.out.println("--------- channelRead0");
         System.out.println("RECEIVED: ");
-/*        ByteBuf in = (ByteBuf) receivedBytes;
-        List<Byte> list = Arrays.asList(ArrayUtils.toObject(in.array()));
-        for(Byte b:list) {
-            System.out.print(Character.toChars(b));
-        }
-        System.out.println();*/
-//        ctx.writeAndFlush(Unpooled.copiedBuffer("1234", CharsetUtil.UTF_8));
-
-
-        //working
         List<Byte> mess = Arrays.asList(ArrayUtils.toObject(receivedBytes));
         int length = ConnectionUtil.byteListToIntLittleEndian(mess.subList(0, 4));
         System.out.println("SIZE: " + length);
+        StringBuilder messageContent = new StringBuilder();
         for (Byte mm : mess.subList(4, mess.size())) {
-            System.out.println(mm + "| " + Arrays.toString(Character.toChars(mm)));
+//            System.out.println(mm + "| " + Arrays.toString(Character.toChars(mm)));
+            messageContent.append(Character.toChars(mm));;
         }
-        System.out.println();
+        System.out.println(messageContent.toString());
     }
 
     @Override
@@ -80,7 +72,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<byte[]> {
 //        ctx.writeAndFlush(Unpooled.copiedBuffer(msg, CharsetUtil.US_ASCII));
 //        String x = new String(Bytes.toArray(ConnectionUtil.prepareStringMessageWithSize(msg)));
 //        ctx.writeAndFlush(Unpooled.copiedBuffer(x, CharsetUtil.US_ASCII));
-        ctx.writeAndFlush(Unpooled.copiedBuffer(Bytes.toArray(ConnectionUtil.prepareStringMessageWithSize(msg))));
+        ctx.writeAndFlush(Unpooled.copiedBuffer(Bytes.toArray(ConnectionUtil.prepareStringMessageWithSizeLittleEndian(msg))));
     }
 
     public void sendMessage(byte[] bytes) {

@@ -4,6 +4,7 @@
 #include <IRequestListener.h>
 #include "ConnectionsManager.h"
 #include "SensorConnectionHandler.h"
+#include "AdministratorListener.h"
 
 using namespace std;
 
@@ -23,7 +24,7 @@ public:
     }
 };
 
-class AdministratorListener: public IRequestListener
+/*class AdministratorListener: public IRequestListener
 {
 public:
     vector<unsigned char> onGotRequest(int clientId, vector<unsigned char> msg) override {
@@ -36,7 +37,7 @@ public:
         }
         return response;
     }
-};
+};*/
 
 int main(int argc, char *argv[])
 {

@@ -18,6 +18,14 @@ public class ConnectionUtil {
 
     public static synchronized List<Byte> prepareStringMessageWithSize(String text) {
         List<Byte> byteList = new ArrayList<Byte>();
+//        byteList.addAll(intToByteListLittleEndian(text.length())); //size of text
+        byteList.addAll(intToByteList(text.length())); //size of text
+        byteList.addAll(stringToByteList(text));
+        return byteList;
+    }
+
+    public static synchronized List<Byte> prepareStringMessageWithSizeLittleEndian(String text) {
+        List<Byte> byteList = new ArrayList<Byte>();
         byteList.addAll(intToByteListLittleEndian(text.length())); //size of text
 //        byteList.addAll(intToByteList(text.length())); //size of text
         byteList.addAll(stringToByteList(text));

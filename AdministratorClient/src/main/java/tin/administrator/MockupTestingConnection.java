@@ -1,6 +1,6 @@
 package tin.administrator;
 
-import tin.administrator.communication.CommunicationNetty;
+import tin.administrator.communication.CommunicationManager;
 
 import java.io.IOException;
 
@@ -19,14 +19,29 @@ public class MockupTestingConnection {
 
 //        System.out.println(ConnectionUtil.ByteListToInt(ConnectionUtil.intToByteList(10)));
 
-        CommunicationNetty com = new CommunicationNetty();
+        CommunicationManager com = new CommunicationManager();
         com.start();
         Thread.sleep(2000);
 
-        for(int i=0; i<1; i++) {
-            com.sendMessage("jebac tkom");
+/*        for (int i = 0; i < 5; i++) {
+            com.sendMessage("message from client " + i);
             Thread.sleep(1000);
         }
+//        Thread.sleep(2000);
+        com.sendAllMessagesFromBuffer();*/
+
+
+        com.sendCommandGetAllSensors();
+        Thread.sleep(2000);
+        com.sendCommandUpdateSensorName(1, "sensor1");
+        Thread.sleep(2000);
+        com.sendCommandRevokeSensor(2);
+        Thread.sleep(2000);
+        com.sendCommandDisconnectSensor(3);
+        Thread.sleep(2000);
+        com.sendCommandGenerateToken("tokenName");
+
+        Thread.sleep(2000);
 
         com.closeConnection();
     }

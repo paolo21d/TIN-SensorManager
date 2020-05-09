@@ -11,6 +11,8 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 
 import java.net.InetSocketAddress;
+import java.util.LinkedList;
+import java.util.Queue;
 
 public class CommunicationNetty extends Thread {
     @Getter
@@ -18,6 +20,7 @@ public class CommunicationNetty extends Thread {
     private ClientHandler handler;
     private Channel channel;
     private Boolean connectionReady = false;
+    private Queue<String> bufferedMessages = new LinkedList<>();
 
     public void connect(String ip, int port) throws InterruptedException {
         group = new NioEventLoopGroup();
@@ -31,14 +34,8 @@ public class CommunicationNetty extends Thread {
         clientBootstrap.handler(new ChannelInitializer<SocketChannel>() {
             protected void initChannel(SocketChannel socketChannel) throws Exception {
                 ChannelPipeline pipeline = socketChannel.pipeline();
-//                pipeline.addLast("decoder", new StringDecoder());
-//                pipeline.addLast("encoder", new StringEncoder());
-
-//                pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1048576, 0, 4, 0, 4));
                 pipeline.addLast("bytesDecoder", new ByteArrayDecoder());
-//                pipeline.addLast("frameEncoder", new LengthFieldPrepender(4));
                 pipeline.addLast("bytesEncoder", new ByteArrayEncoder());
-
                 pipeline.addLast("handler", handler);
             }
         });
@@ -49,6 +46,8 @@ public class CommunicationNetty extends Thread {
     }
 
     public void closeConnection() throws InterruptedException {
+        System.out.println("----------------- SENDING FROM BUFFER BEFORE CLOSE");
+        sendAllMessagesFromBuffer();
         System.out.println("---------------- CLOSING");
         handler.closeConnection();
         System.out.println("---------------- chanel closed");
@@ -68,14 +67,24 @@ public class CommunicationNetty extends Thread {
 
     public void sendMessage(String message) throws InterruptedException {
         if (!connectionReady) {
+            bufferedMessages.add(message);
             System.out.println("Connection isn't ready yet");
             return;
         }
+        sendAllMessagesFromBuffer();
         handler.sendMessage(message);
     }
 
-    public void sendMessage(byte[] msg) throws InterruptedException {
-        handler.sendMessage(msg);
+    public void sendAllMessagesFromBuffer() {
+        while(!bufferedMessages.isEmpty()) {
+            System.out.println("Extracting message from buffer");
+            handler.sendMessage(bufferedMessages.remove());
+        }
     }
+
+
+/*    public void sendMessage(byte[] msg) throws InterruptedException {
+        handler.sendMessage(msg);
+    }*/
 
 }
