@@ -80,6 +80,11 @@ public class ClientHandler extends SimpleChannelInboundHandler<byte[]> {
         ctx.writeAndFlush(Unpooled.copiedBuffer(bytes));
     }
 
+    public void sendMessage(List<Byte> message) {
+        System.out.println("SEND:");
+        ctx.writeAndFlush(Unpooled.copiedBuffer(Bytes.toArray(message)));
+    }
+
     public void closeConnection() {
         System.out.println("--------- HANDLER CLOSING");
         ctx.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);

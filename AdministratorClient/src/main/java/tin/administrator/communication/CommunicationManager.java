@@ -1,15 +1,18 @@
 package tin.administrator.communication;
 
-import com.google.common.primitives.Bytes;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.*;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.bytes.ByteArrayDecoder;
 import io.netty.handler.codec.bytes.ByteArrayEncoder;
 import lombok.Getter;
-import lombok.SneakyThrows;
+import lombok.Setter;
+import tin.administrator.model.Sensor;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
@@ -19,13 +22,19 @@ import java.util.Queue;
 
 public class CommunicationManager extends Thread {
     @Getter
+    @Setter
+    private String serverIp;
+    @Getter
+    @Setter
+    private int serverPort;
+
+    @Getter
     private EventLoopGroup group = new NioEventLoopGroup();
     private ClientHandler handler;
-    private Channel channel;
     private Boolean connectionReady = false;
-    private Queue<String> bufferedMessages = new LinkedList<>();
+    private Queue<List<Byte>> bufferedMessages = new LinkedList<>();
 
-    public void connect(String ip, int port) throws InterruptedException {
+    public void connect(String ip, int port) {
         group = new NioEventLoopGroup();
 
         Bootstrap clientBootstrap = new Bootstrap();
@@ -42,14 +51,18 @@ public class CommunicationManager extends Thread {
                 pipeline.addLast("handler", handler);
             }
         });
-        ChannelFuture channelFuture = clientBootstrap.connect().sync();
-        channel = channelFuture.channel();
+        try {
+            clientBootstrap.connect().sync();
+        } catch (InterruptedException e) {
+            connectionReady = false;
+            e.printStackTrace();
+        }
         connectionReady = true;
     }
 
     public void closeConnection() throws InterruptedException {
         System.out.println("----------------- SENDING FROM BUFFER BEFORE CLOSE");
-        sendAllMessagesFromBuffer();
+        sendAllMessagesFromBuffer(); //TODO zrobić jakieś czekanie żeby zdążyło się wszystko wysłac przed zamknięciem połaczenia
         System.out.println("---------------- CLOSING");
         handler.closeConnection();
         System.out.println("---------------- chanel closed");
@@ -58,9 +71,7 @@ public class CommunicationManager extends Thread {
         connectionReady = false;
     }
 
-    @SneakyThrows
     public void run() {
-//        handler = new ClientHandlerString();
         handler = new ClientHandler();
         System.out.println("---------------- CONNECTING");
         connect("127.0.0.1", 28000);
@@ -68,6 +79,11 @@ public class CommunicationManager extends Thread {
     }
 
     public void sendMessage(String message) throws InterruptedException {
+        List<Byte> messageInBytes = ConnectionUtil.prepareStringMessageWithSizeLittleEndian(message);
+        sendMessage(messageInBytes);
+    }
+
+    public void sendMessage(List<Byte> message) {
         if (!connectionReady) {
             bufferedMessages.add(message);
             System.out.println("Connection isn't ready yet");
@@ -86,31 +102,31 @@ public class CommunicationManager extends Thread {
 
     public void sendCommandGetAllSensors() {
         System.out.println("Sending GetAllSensors");
-        handler.sendMessage(Bytes.toArray(prefixMessageSize(prepareMessageGetAllSensors())));
+        sendMessage(prefixMessageSize(prepareMessageGetAllSensors()));
     }
 
     public void sendCommandUpdateSensorName(int id, String name) {
         System.out.println("Sending UpdateSensorName");
-        handler.sendMessage(Bytes.toArray(prefixMessageSize(prepareMessageUpdateSensorName(id, name))));
+        sendMessage(prefixMessageSize(prepareMessageUpdateSensorName(id, name)));
     }
 
     public void sendCommandRevokeSensor(int id) {
         System.out.println("Sending RevokeSensor");
-        handler.sendMessage(Bytes.toArray(prefixMessageSize(prepareMessageRevokeSensor(id))));
+        sendMessage(prefixMessageSize(prepareMessageRevokeSensor(id)));
     }
 
     public void sendCommandDisconnectSensor(int id) {
         System.out.println("Sending DisconnectSensor");
-        handler.sendMessage(Bytes.toArray(prefixMessageSize(prepareMessageDisconnectSensor(id))));
+        sendMessage(prefixMessageSize(prepareMessageDisconnectSensor(id)));
     }
 
     public void sendCommandGenerateToken(String tokenName) {
         System.out.println("Sending GenerateToken");
-        handler.sendMessage(Bytes.toArray(prefixMessageSize(prepareMessageGenerateToken(tokenName))));
+        sendMessage(prefixMessageSize(prepareMessageGenerateToken(tokenName)));
     }
 
     /////////////////////////////////////////
-    private List<Byte> prefixMessageSize(List<Byte> message) {
+    List<Byte> prefixMessageSize(List<Byte> message) {
         List<Byte> messageWithSize = new ArrayList<>();
         messageWithSize.addAll(ConnectionUtil.intToByteListLittleEndian(message.size()));
         messageWithSize.addAll(message);
@@ -155,6 +171,49 @@ public class CommunicationManager extends Thread {
         byteMessage.addAll(ConnectionUtil.prepareIntegerMessageWithSize(CommunicationManager.CommandsType.GENERATE_TOKEN.commandNumber));
         byteMessage.addAll(ConnectionUtil.prepareStringMessageWithSize(tokenName));
         return byteMessage;
+    }
+
+    Sensor constructSensorFromByteMessage(List<Byte> message) {
+        int readingBegin = 0;
+        //id
+        int sizeOfId = ConnectionUtil.byteListToInt(message.subList(readingBegin, readingBegin + 4));
+        readingBegin += 4;
+        int id = ConnectionUtil.byteListToInt(message.subList(readingBegin, readingBegin + sizeOfId));
+        readingBegin += sizeOfId;
+        //name
+        int sizeOfName = ConnectionUtil.byteListToInt(message.subList(readingBegin, readingBegin + 4));
+        readingBegin += 4;
+        String name = ConnectionUtil.byteListToString(message.subList(readingBegin, readingBegin + sizeOfName));
+        readingBegin += sizeOfName;
+        //ip
+        int sizeOfIp = ConnectionUtil.byteListToInt(message.subList(readingBegin, readingBegin + 4));
+        readingBegin += 4;
+        String ip = ConnectionUtil.byteListToString(message.subList(readingBegin, readingBegin + sizeOfIp));
+        readingBegin += sizeOfIp;
+        //port
+        int sizeOfPort = ConnectionUtil.byteListToInt(message.subList(readingBegin, readingBegin + 4));
+        readingBegin += 4;
+        int port = ConnectionUtil.byteListToInt(message.subList(readingBegin, readingBegin + sizeOfPort));
+        readingBegin += sizeOfPort;
+        System.out.println(String.format("\nidSize:%d id:%d\nnameSize:%d name:%s\nipSize:%d ip:%s\nportSize:%d port:%d\n",
+                sizeOfId, id, sizeOfName, name, sizeOfIp, ip, sizeOfPort, port));
+        return new Sensor(id, name, ip, port);
+    }
+
+    List<Sensor> constructSensors(List<Byte> message) {
+        List<Sensor> sensors = new ArrayList<>();
+        int readingBegin = 0;
+        int sensorsQuantity = ConnectionUtil.byteListToInt(message.subList(readingBegin, readingBegin + 4));
+        readingBegin += 4;
+
+        for (int i = 0; i < sensorsQuantity; i++) {
+            int sensorLength = ConnectionUtil.byteListToInt(message.subList(readingBegin, readingBegin + 4));
+            readingBegin += 4;
+            Sensor sensor = constructSensorFromByteMessage(message.subList(readingBegin, readingBegin + sensorLength));
+            readingBegin += sensorLength;
+            sensors.add(sensor);
+        }
+        return sensors;
     }
 
     private enum CommandsType {
