@@ -10,4 +10,5 @@ public class Sensor {
     private String name;
     private String ip;
     private Integer port;
+    private Integer currentMeasurement;
 }

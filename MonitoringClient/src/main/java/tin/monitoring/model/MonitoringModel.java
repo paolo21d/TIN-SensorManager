@@ -14,10 +14,10 @@ public class MonitoringModel {
 
 
     private MonitoringModel() {
-        Sensor sensor1 = new Sensor(1, "Sensor1", "192.168.1.1", 9000);
-        Sensor sensor2 = new Sensor(2, "Sensor2", "192.168.1.2", 9000);
-        Sensor sensor3 = new Sensor(3, "Sensor3", "192.168.1.3", 9000);
-        Sensor sensor4 = new Sensor(4, "Sensor4", "192.168.111.111", 9000);
+        Sensor sensor1 = new Sensor(1, "Sensor1", "192.168.1.1", 9000,0);
+        Sensor sensor2 = new Sensor(2, "Sensor2", "192.168.1.2", 9000,0);
+        Sensor sensor3 = new Sensor(3, "Sensor3", "192.168.1.3", 9000,0);
+        Sensor sensor4 = new Sensor(4, "Sensor4", "192.168.111.111", 9000,0);
 
         sensors.add(sensor1);
         sensors.add(sensor2);
