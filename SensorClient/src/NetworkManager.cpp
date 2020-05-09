@@ -37,7 +37,7 @@ namespace nm
         for (int i = 0; i < 100; ++i)
         {
             sendMeasurement(new DoubleMeasurement(i * 3, i * i));
-            sleepMillis(10);
+            sleepMillis(500);
         }
 
         closeSocket(mainSocket);
