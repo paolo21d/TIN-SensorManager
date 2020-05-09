@@ -186,10 +186,10 @@ namespace sc
     {
         int dataLen = data.size();
         BytesParser::appendFrontBytes<int32_t>(data, (int32_t) dataLen);
-        int sent = send(msgsocks[client], reinterpret_cast<const char *>(data.data()), dataLen, 0);
-        if (sent < dataLen)
+        int sent = send(msgsocks[client], reinterpret_cast<const char *>(data.data()), data.size(), 0);
+        if (sent < dataLen) {
             outgoingBuffer[client] = BytesParser::trimLeft(data, sent);
-
+        }
         remaining[client] = dataLen - sent;
     }
 }
