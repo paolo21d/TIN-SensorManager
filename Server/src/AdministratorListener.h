@@ -6,7 +6,7 @@
 #include <string>
 #include "Sensor.h"
 
-class AdministratorListener : public IRequestListener{
+class AdministratorListener : public IRequestListener {
 public:
     std::vector<unsigned char> onGotRequest(int clientId, std::vector<unsigned char> msg) override;
 
@@ -21,29 +21,9 @@ private:
     std::vector<char> IntToByte(int value);
 
     std::vector<char> StringToByte(std::string value);
-
-/*    int receiveBytes(int clientSocket, char *message, int bytesToReceive) {
-        int receivedByte = 0;
-        while (receivedByte < bytesToReceive) {
-            int rec = recv(clientSocket, message + receivedByte, bytesToReceive - receivedByte, 0);
-            if (rec < 0) {
-                printf("Connection error!!!\n");
-                message = nullptr;
-                return -1;
-            } else if (rec == 0) {
-                printf("Connection closed\n");
-                return 0;
-            }
-            receivedByte += rec;
-        }
-        return bytesToReceive;
-    }*/
-
-//    char *receiveCommandGetAllSensors(int clientSocket);
-//
 //    std::vector<char> receiveMessageCommand(int clientSocket);
 
-    void analyzeMessage(std::vector<char> message);
+    int analyzeMessage(std::vector<char> message);
 
     std::vector<char> constructIntMessageWithSize(int value);
 
@@ -52,6 +32,24 @@ private:
     std::vector<char> constructSensorMessage(Sensor sensor);
 
     std::vector<char> constructSensorListMessage(std::vector<Sensor> sensors);
+
+
+    std::vector<char> constructGetAllSensorsMessage(std::vector<Sensor> sensors);
+    std::vector<char> constructUpdateSensorNameMessage(int updatedSensorId);
+    std::vector<char> constructRevokeSensorMessage(int revokedSensorId);
+    std::vector<char> constructDisconnectSensorMessage(int disconnectedSensorId);
+    std::vector<char> constructGenerateTokenMessage(std::string token);
+
+
+public:
+    enum CommandTypes {
+        GET_ALL_SENSORS = 0, //1 param (commandType)
+        UPDATE_SENSOR_NAME = 1, //3 params (commandType, sensorId, sensorName)
+        REVOKE_SENSOR = 2, //2 param (commandType, sensorId)
+        DISCONNECT_SENSOR = 3, //2 param (commandType, sensorName)
+        GENERATE_TOKEN = 4 //2 param (commandType, sensorId)
+    };
+
 
 };
 

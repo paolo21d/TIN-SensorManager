@@ -5,38 +5,26 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ArrayUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+@RequiredArgsConstructor
 public class ClientHandler extends SimpleChannelInboundHandler<byte[]> {
-    /*@Override
-    public void channelActive(ChannelHandlerContext channelHandlerContext){
-        System.out.println("Channel Active");
-//        channelHandlerContext.writeAndFlush(Unpooled.copiedBuffer("Netty Rocks!", CharsetUtil.UTF_8));
-    }
-
-    @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Object o) throws Exception {
-        System.out.println("chanelRead0");
-        ByteBuf in = (ByteBuf) o;
-        System.out.println("Client received: " + in.toString(CharsetUtil.UTF_8));
-        ctx.writeAndFlush(Unpooled.copiedBuffer("1234!", CharsetUtil.US_ASCII));
-    }
-
+    List<Byte> buffer = new ArrayList<>();
+    @NonNull
+    private CommunicationManager communication;
+    /*
     @Override
     public void exceptionCaught(ChannelHandlerContext channelHandlerContext, Throwable cause){
         cause.printStackTrace();
         channelHandlerContext.close();
     }
-
-    @Override
-    public void channelReadComplete(ChannelHandlerContext ctx) {
-        System.out.println("Channel Read Complete");
-        ctx.writeAndFlush(Unpooled.copiedBuffer("AAA-ChannelReadComplete!!", CharsetUtil.UTF_8));
-    }*/
-
+*/
     private ChannelHandlerContext ctx;
 
     @Override
@@ -48,21 +36,27 @@ public class ClientHandler extends SimpleChannelInboundHandler<byte[]> {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, byte[] receivedBytes) throws Exception {
         System.out.println("--------- channelRead0");
-        System.out.println("RECEIVED: ");
+/*        System.out.println("RECEIVED: ");
         List<Byte> mess = Arrays.asList(ArrayUtils.toObject(receivedBytes));
         int length = ConnectionUtil.byteListToIntLittleEndian(mess.subList(0, 4));
         System.out.println("SIZE: " + length);
         StringBuilder messageContent = new StringBuilder();
-        for (Byte mm : mess.subList(4, mess.size())) {
+        for (Byte mm : mess.subList(0, mess.size())) {
 //            System.out.println(mm + "| " + Arrays.toString(Character.toChars(mm)));
-            messageContent.append(Character.toChars(mm));;
+//            messageContent.append(Character.toChars(mm));
+            messageContent.append(Integer.valueOf(mm) + " ");
         }
-        System.out.println(messageContent.toString());
+        System.out.println(messageContent.toString());*/
+
+        addMessageToBuffer(Arrays.asList(ArrayUtils.toObject(receivedBytes))); //wsadzenei do bufora
+
     }
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) {
         System.out.println("--------- Channel read complete");
+
+        analyzeBuffer();
     }
 
     public void sendMessage(String msg) {
@@ -89,5 +83,28 @@ public class ClientHandler extends SimpleChannelInboundHandler<byte[]> {
         System.out.println("--------- HANDLER CLOSING");
         ctx.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
     }
+
+/*    void receiveMessage(List<Byte> receivedMessage) {
+        int messageSize = ConnectionUtil.byteListToIntLittleEndian(receivedMessage.subList(0, 4));
+        List<Byte> messageContent = receivedMessage.subList(4, 4 + messageSize);
+//        buffer = buffer.subList(4 + messageSize, buffer.size());
+//        buffer.addAll(receivedMessage.subList(4 + messageSize, receivedMessage.size()));
+
+        communication.analyzeResponse(messageContent);
+    }*/
+
+    void analyzeBuffer() {
+        while (!buffer.isEmpty()) {
+            int messageSize = ConnectionUtil.byteListToIntLittleEndian(buffer.subList(0, 4));
+            List<Byte> message = buffer.subList(4, 4 + messageSize);
+            buffer = buffer.subList(4 + messageSize, buffer.size());
+            communication.analyzeResponse(message);
+        }
+    }
+
+    void addMessageToBuffer(List<Byte> receivedMessage) {
+        buffer.addAll(receivedMessage);
+    }
+
 
 }

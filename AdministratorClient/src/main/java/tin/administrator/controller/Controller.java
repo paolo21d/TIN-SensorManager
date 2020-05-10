@@ -64,6 +64,7 @@ public class Controller {
     public void addNewSensorClicked(ActionEvent actionEvent) {
         System.out.println("ADD NEW SENSOR!!");
         //sensors.add(new Sensor(4L, "Sensor4", "192.168.1.4", 9000L));
+        displayToken("nowy token");
     }
 
     public void disconnectClicked(ActionEvent actionEvent) {
@@ -85,5 +86,14 @@ public class Controller {
             buttonEditName.setText("Save");
         }
         isNameEditing = !isNameEditing;
+    }
+
+    public void displayToken(String token) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("New Token");
+        alert.setHeaderText("Note this token!");
+        alert.setContentText(token);
+
+        alert.showAndWait();
     }
 }

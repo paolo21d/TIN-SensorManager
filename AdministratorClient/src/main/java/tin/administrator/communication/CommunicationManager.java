@@ -72,7 +72,7 @@ public class CommunicationManager extends Thread {
     }
 
     public void run() {
-        handler = new ClientHandler();
+        handler = new ClientHandler(this);
         System.out.println("---------------- CONNECTING");
         connect("127.0.0.1", 28000);
         System.out.println("---------------- CONNECTED");
@@ -135,14 +135,12 @@ public class CommunicationManager extends Thread {
 
     List<Byte> prepareMessageGetAllSensors() {
         List<Byte> byteMessage = new ArrayList<Byte>();
-        byteMessage.addAll(ConnectionUtil.intToByteList(1));
         byteMessage.addAll(ConnectionUtil.prepareIntegerMessageWithSize(CommunicationManager.CommandsType.GET_ALL_SENSORS.commandNumber));
         return byteMessage;
     }
 
     List<Byte> prepareMessageUpdateSensorName(int id, String name) {
         List<Byte> byteMessage = new ArrayList<Byte>();
-        byteMessage.addAll(ConnectionUtil.intToByteList(3));
         byteMessage.addAll(ConnectionUtil.prepareIntegerMessageWithSize(CommunicationManager.CommandsType.UPDATE_SENSOR_NAME.commandNumber));
         byteMessage.addAll(ConnectionUtil.prepareIntegerMessageWithSize(id));
         byteMessage.addAll(ConnectionUtil.prepareStringMessageWithSize(name));
@@ -151,7 +149,6 @@ public class CommunicationManager extends Thread {
 
     List<Byte> prepareMessageRevokeSensor(int id) {
         List<Byte> byteMessage = new ArrayList<Byte>();
-        byteMessage.addAll(ConnectionUtil.intToByteList(3));
         byteMessage.addAll(ConnectionUtil.prepareIntegerMessageWithSize(CommunicationManager.CommandsType.REVOKE_SENSOR.commandNumber));
         byteMessage.addAll(ConnectionUtil.prepareIntegerMessageWithSize(id));
         return byteMessage;
@@ -159,7 +156,6 @@ public class CommunicationManager extends Thread {
 
     List<Byte> prepareMessageDisconnectSensor(int id) {
         List<Byte> byteMessage = new ArrayList<Byte>();
-        byteMessage.addAll(ConnectionUtil.intToByteList(3));
         byteMessage.addAll(ConnectionUtil.prepareIntegerMessageWithSize(CommunicationManager.CommandsType.DISCONNECT_SENSOR.commandNumber));
         byteMessage.addAll(ConnectionUtil.prepareIntegerMessageWithSize(id));
         return byteMessage;
@@ -167,11 +163,59 @@ public class CommunicationManager extends Thread {
 
     List<Byte> prepareMessageGenerateToken(String tokenName) {
         List<Byte> byteMessage = new ArrayList<Byte>();
-        byteMessage.addAll(ConnectionUtil.intToByteList(3));
         byteMessage.addAll(ConnectionUtil.prepareIntegerMessageWithSize(CommunicationManager.CommandsType.GENERATE_TOKEN.commandNumber));
         byteMessage.addAll(ConnectionUtil.prepareStringMessageWithSize(tokenName));
         return byteMessage;
     }
+
+    //////////////
+    public void analyzeResponse(List<Byte> message) {
+        System.out.println("ANALYZING RESPONSE");
+        int commandType = ConnectionUtil.byteListToInt(message.subList(0, 4));
+        if (commandType == 0) {
+            analyzeGetAllSensorsResponse(message.subList(4, message.size()));
+        } else if (commandType == 1) {
+            analyzeUpdateSensorNameResponse(message.subList(4, message.size()));
+        } else if (commandType == 2) {
+            analyzeRevokeSensorResponse(message.subList(4, message.size()));
+        } else if (commandType == 3) {
+            analyzeDisconnectSensorResponse(message.subList(4, message.size()));
+        } else if (commandType == 4) {
+            analyzeGenerateTokenResponse(message.subList(4, message.size()));
+        } else {
+            System.out.println("ERROR! Not recognized command type!!!!");
+        }
+    }
+
+    List<Sensor> analyzeGetAllSensorsResponse(List<Byte> message) {
+        System.out.println("ANALYZING get all sensors");
+        return constructSensors(message);
+    }
+
+    int analyzeUpdateSensorNameResponse(List<Byte> message) {
+        System.out.println("ANALYZING update sensor name");
+//        return ConnectionUtil.byteListToInt(message.subList(4, message.size()));
+        return ConnectionUtil.byteListToInt(message);
+    }
+
+    int analyzeRevokeSensorResponse(List<Byte> message) {
+        System.out.println("ANALYZING revoke sensor");
+//        return ConnectionUtil.byteListToInt(message.subList(4, message.size()));
+        return ConnectionUtil.byteListToInt(message);
+    }
+
+    int analyzeDisconnectSensorResponse(List<Byte> message) {
+        System.out.println("ANALYZING disconnect sensor");
+//        return ConnectionUtil.byteListToInt(message.subList(4, message.size()));
+        return ConnectionUtil.byteListToInt(message);
+    }
+
+    String analyzeGenerateTokenResponse(List<Byte> message) {
+        System.out.println("ANALYZING generate token");
+        //TODO dodac tutaj odczyt nazyw tokenu albo usunac wysylanie nazwy tokenu?!
+        return ConnectionUtil.byteListToString(message.subList(4, message.size()));
+    }
+    //////////
 
     Sensor constructSensorFromByteMessage(List<Byte> message) {
         int readingBegin = 0;
@@ -216,12 +260,13 @@ public class CommunicationManager extends Thread {
         return sensors;
     }
 
+
     private enum CommandsType {
-        GET_ALL_SENSORS(0), //1 param (commandType)
+        GET_ALL_SENSORS(0), //1 params (commandType)
         UPDATE_SENSOR_NAME(1), //3 params (commandType, sensorId, sensorName)
-        REVOKE_SENSOR(2), //2 param (commandType, sensorId)
-        DISCONNECT_SENSOR(3), //2 param (commandType, sensorName)
-        GENERATE_TOKEN(4); //2 param (commandType, sensorId)
+        REVOKE_SENSOR(2), //2 params (commandType, sensorId)
+        DISCONNECT_SENSOR(3), //2 params (commandType, sensorName)
+        GENERATE_TOKEN(4); //2 params (commandType, sensorId)
 
         int commandNumber;
 
