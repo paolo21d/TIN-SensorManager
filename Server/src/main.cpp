@@ -7,9 +7,11 @@
 
 using namespace std;
 
-class MockListener : public IRequestListener {
+class MockListener : public IRequestListener
+{
 public:
-    vector<unsigned char> onGotRequest(int clientId, vector<unsigned char> msg) override {
+    vector<unsigned char> onGotRequest(int clientId, vector<unsigned char> msg) override
+    {
         vector<unsigned char> response;
 
         int cursorPos = 0;
@@ -17,10 +19,9 @@ public:
         double value = getData<double>(msg, cursorPos);
         cout << "client " << clientId << "     timestamp: " << timestamp << "     value: " << value << endl;
 
-        BytesParser::appendBytes<double>(response, 27863.5);
-
         return response;
     }
+};
 
     void onClientConnected(int clientId) {
         cout << "Client " << clientId << " connected" << endl;
@@ -40,9 +41,11 @@ int main(int argc, char *argv[]) {
 
         IRequestListener *listener = new MockListener();
 
-        sc::IClientsHandler *connectionHandler = new sc::ClientsHandler();
-        connectionHandler->addListener(listener);
-        connectionHandler->startHandling("127.0.0.1", 33336);
+    sc::ISensorConnectionHandler *connectionHandler = new sc::SensorConnectionHandler();
+    connectionHandler->addListener(listener);
+    connectionHandler->acceptSensors("127.0.0.1", 28000);
+//    sc::IConnectionsManager *connectionsManager = new sc::ConnectionsManager("127.0.0.1", 33333);
+//    connectionsManager->startAcceptingSensors();
 
         cout << "END" << endl;
     }

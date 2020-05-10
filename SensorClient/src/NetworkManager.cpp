@@ -42,8 +42,6 @@ namespace nm
             sleepMillis(5);
         }
 
-        //while (true);
-
         closeSocket(mainSocket);
     }
 
@@ -95,7 +93,7 @@ namespace nm
                     if (nactive == 0)
                         cout << "Trying to send remaining " << remaining << " bytes" << endl;
                 }
-//                cout << "Sent measurement" << endl;
+                cout << "Sent measurement" << endl;
             }
             catch (ConnectionException e)
             {
