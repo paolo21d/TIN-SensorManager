@@ -2,9 +2,7 @@
 #include <NetworkUtils.h>
 #include <vector>
 #include <IRequestListener.h>
-#include "ConnectionsManager.h"
-#include "SensorConnectionHandler.h"
-#include "AdministratorListener.h"
+#include "ClientsHandler.h"
 
 using namespace std;
 
@@ -20,40 +18,41 @@ public:
         double value = getData<double>(msg, cursorPos);
         cout << "client " << clientId << "     timestamp: " << timestamp << "     value: " << value << endl;
 
+        BytesParser::appendBytes<double>(response, 27863.5);
+
         return response;
+    }
+
+    void onClientConnected(int clientId)
+    {
+        cout << "Client " << clientId << " connected" << endl;
+    }
+
+    void onClientDisconnected(int clientId)
+    {
+        cout << "Client " << clientId << " disconnected" << endl;
     }
 };
 
-/*class AdministratorListener: public IRequestListener
-{
-public:
-    vector<unsigned char> onGotRequest(int clientId, vector<unsigned char> msg) override {
-        for(int i=0; i< msg.size(); i++) cout<<msg[i];
-        cout<<endl;
-        string responseMessage = "Odpowiedz od serwera";
-        vector<unsigned char> response;
-        for(int i=0; i< responseMessage.size(); i++) {
-            response.push_back(responseMessage[i]);
-        }
-        return response;
-    }
-};*/
-
 int main(int argc, char *argv[])
 {
-    initNetwork();
+    try
+    {
+        initNetwork();
 
-    cout << "START" << endl;
+        cout << "START" << endl;
 
-//    IRequestListener *listener = new MockListener();
-    IRequestListener *listener = new AdministratorListener();
+        IRequestListener *listener = new MockListener();
 
-    sc::ISensorConnectionHandler *connectionHandler = new sc::SensorConnectionHandler();
-    connectionHandler->addListener(listener);
-    connectionHandler->acceptSensors("127.0.0.1", 28000);
-//    sc::IConnectionsManager *connectionsManager = new sc::ConnectionsManager("127.0.0.1", 33333);
-//    connectionsManager->startAcceptingSensors();
+        sc::IClientsHandler *connectionHandler = new sc::ClientsHandler();
+        connectionHandler->addListener(listener);
+        connectionHandler->startHandling("127.0.0.1", 33336);
 
-    cout << "END" << endl;
+        cout << "END" << endl;
+    }
+    catch (exception &e)
+    {
+        cout << "got exception " << e.what() << endl;
+    }
     return 0;
 }

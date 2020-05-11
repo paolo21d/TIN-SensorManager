@@ -13,6 +13,11 @@ public:
 
     template <class T>
     inline T getData(const std::vector<unsigned char> &bytes, int &offset);
+
+    void send(int clientId, std::vector<unsigned char> msg);
+
+    virtual void onClientConnected(int clientId);
+    virtual void onClientDisconnected(int clientId);
 };
 
 template <class T>

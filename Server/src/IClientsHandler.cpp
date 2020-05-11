@@ -1,8 +1,8 @@
-#include "ISensorConnectionHandler.h"
+#include "IClientsHandler.h"
 
 namespace sc
 {
-    int ISensorConnectionHandler::getAcceptingSocket(std::string ipAddress, int port, int listeningQueue)
+    int IClientsHandler::getAcceptingSocket(std::string ipAddress, int port, int listeningQueue)
     {
         sockaddr_in service;
         memset( & service, 0, sizeof( service ) );

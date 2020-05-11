@@ -10,7 +10,7 @@ using namespace std;
 
 void networkThread()
 {
-    nm::INetworkManager *networkManager = new nm::NetworkManager("127.0.0.1", 33333);
+    nm::INetworkManager *networkManager = new nm::NetworkManager("127.0.0.1", 33336);
     networkManager->start();
 }
 
