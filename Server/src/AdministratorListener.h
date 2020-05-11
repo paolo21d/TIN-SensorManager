@@ -21,6 +21,8 @@ private:
     std::vector<char> IntToByte(int value);
 
     std::vector<char> StringToByte(std::string value);
+
+    std::vector<char> BoolToByte(bool value);
 //    std::vector<char> receiveMessageCommand(int clientSocket);
 
     int analyzeMessage(std::vector<char> message);
@@ -29,15 +31,21 @@ private:
 
     std::vector<char> constructStringMessageWithSize(std::string value);
 
+    std::vector<char> constructBoolMessageWithSize(bool value);
+
     std::vector<char> constructSensorMessage(Sensor sensor);
 
     std::vector<char> constructSensorListMessage(std::vector<Sensor> sensors);
 
 
     std::vector<char> constructGetAllSensorsMessage(std::vector<Sensor> sensors);
+
     std::vector<char> constructUpdateSensorNameMessage(int updatedSensorId);
+
     std::vector<char> constructRevokeSensorMessage(int revokedSensorId);
+
     std::vector<char> constructDisconnectSensorMessage(int disconnectedSensorId);
+
     std::vector<char> constructGenerateTokenMessage(std::string token);
 
 

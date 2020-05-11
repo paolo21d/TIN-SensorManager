@@ -239,9 +239,15 @@ public class CommunicationManager extends Thread {
         readingBegin += 4;
         int port = ConnectionUtil.byteListToInt(message.subList(readingBegin, readingBegin + sizeOfPort));
         readingBegin += sizeOfPort;
-        System.out.println(String.format("\nidSize:%d id:%d\nnameSize:%d name:%s\nipSize:%d ip:%s\nportSize:%d port:%d\n",
-                sizeOfId, id, sizeOfName, name, sizeOfIp, ip, sizeOfPort, port));
-        return new Sensor(id, name, ip, port);
+        //connected
+        int sizeOfConnected = ConnectionUtil.byteListToInt(message.subList(readingBegin, readingBegin + 4));
+        readingBegin += 4;
+        Boolean sensorConnected = ConnectionUtil.byteListToBoolean(message.subList(readingBegin, readingBegin + sizeOfConnected));
+        readingBegin += sizeOfConnected;
+
+        System.out.println(String.format("\nidSize:%d id:%d\nnameSize:%d name:%s\nipSize:%d ip:%s\nportSize:%d port:%d\nconnectedSize:%d connected:%b",
+                sizeOfId, id, sizeOfName, name, sizeOfIp, ip, sizeOfPort, port, sizeOfConnected, sensorConnected));
+        return new Sensor(id, name, ip, port, sensorConnected);
     }
 
     List<Sensor> constructSensors(List<Byte> message) {

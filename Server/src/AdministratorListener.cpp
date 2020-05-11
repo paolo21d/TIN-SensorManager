@@ -27,9 +27,9 @@ vector<unsigned char> AdministratorListener::onGotRequest(int clientId, vector<u
 
     if (commandType == GET_ALL_SENSORS) {
         vector<Sensor> sensors;
-        sensors.push_back(Sensor(1, "sensor1", "192.168.0.1", 9000));
-        sensors.push_back(Sensor(2, "sensor2", "192.168.0.2", 9000));
-        sensors.push_back(Sensor(3, "sensor3", "192.168.0.3", 9000));
+        sensors.push_back(Sensor(1, "sensor1", "192.168.0.1", 9000, true));
+        sensors.push_back(Sensor(2, "sensor2", "192.168.0.2", 9000, false));
+        sensors.push_back(Sensor(3, "sensor3", "192.168.0.3", 9000, false));
         vector<char> text = constructGetAllSensorsMessage(sensors);
         for (int i = 0; i < text.size(); i++)
             response.push_back(text[i]);
@@ -83,6 +83,12 @@ vector<char> AdministratorListener::StringToByte(string value) {
     for (int i = 0; i < value.length(); i++) {
         bytes.push_back(value[i]);
     }
+    return bytes;
+}
+
+vector<char> AdministratorListener::BoolToByte(bool value) {
+    vector<char> bytes;
+    bytes.push_back((char) value);
     return bytes;
 }
 
@@ -243,6 +249,13 @@ vector<char> AdministratorListener::constructStringMessageWithSize(string value)
     return bytes;
 }
 
+vector<char> AdministratorListener::constructBoolMessageWithSize(bool value) {
+    vector<char> bytes = IntToByte(1);
+    vector<char> valueInBytes = BoolToByte(value);
+    bytes.insert(bytes.end(), valueInBytes.begin(), valueInBytes.end());
+    return bytes;
+}
+
 vector<char> AdministratorListener::constructSensorMessage(Sensor sensor) {
     vector<char> message;
     //id
@@ -256,6 +269,9 @@ vector<char> AdministratorListener::constructSensorMessage(Sensor sensor) {
     message.insert(message.end(), tmp.begin(), tmp.end());
     //port
     tmp = constructIntMessageWithSize(sensor.port);
+    message.insert(message.end(), tmp.begin(), tmp.end());
+    //connected
+    tmp = constructBoolMessageWithSize(sensor.connected);
     message.insert(message.end(), tmp.begin(), tmp.end());
 
     return message;

@@ -65,4 +65,8 @@ public class ConnectionUtil {
         return builder.toString();
     }
 
+    public static synchronized boolean byteListToBoolean(List<Byte> byteList) {
+        return byteList.get(0) != 0;
+    }
+
 }

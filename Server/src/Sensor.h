@@ -12,12 +12,14 @@ public:
     std::string name;
     std::string ip;
     int port;
+    bool connected;
 
-    Sensor(int id, std::string name, std::string ip, int port) {
+    Sensor(int id, std::string name, std::string ip, int port, bool connected) {
         this->id = id;
         this->name = name;
         this->ip = ip;
         this->port = port;
+        this->connected=connected;
     }
 };
 
