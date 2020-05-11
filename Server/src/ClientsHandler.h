@@ -4,16 +4,15 @@
 #include <exception>
 #include <vector>
 #include <deque>
-#include <unordered_map>
-#include <memory>
 #include <mutex>
-#include "IClientsHandler.h"
+#include <unordered_map>
+#include "ISensorConnectionHandler.h"
 
 namespace sc
 {
     class Client
     {
-    private:
+    public:
         const static int MAX_MSG;
 
         int socket;
@@ -31,7 +30,6 @@ namespace sc
 
         void reset();
 
-    public:
         Client();
 
         void setListener(IRequestListener *listener);
@@ -50,10 +48,9 @@ namespace sc
         int recvData();
 
         int getSocket();
-        int getClientId();
     };
 
-    class ClientsHandler : public IClientsHandler
+    class SensorConnectionHandler : public ISensorConnectionHandler
     {
     public:
         ClientsHandler();
