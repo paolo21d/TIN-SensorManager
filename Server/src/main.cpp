@@ -20,12 +20,21 @@ public:
 
         BytesParser::appendBytes<double>(response, 27863.5);
 
+        if (timestamp > 200)
+            disconnectClient(clientId);
+        for (int i = 0; i < 4; ++i)
+        {
+            vector<unsigned char> response;
+            BytesParser::appendBytes<double>(response, i);
+            send(clientId, response);
+        }
+
         return response;
     }
 
-    void onClientConnected(int clientId) override
+    void onClientConnected(int clientId, string ip, int port) override
     {
-        cout << "Client " << clientId << " connected" << endl;
+        cout << "Client " << clientId << " connected [" << ip << ":" << "]" << endl;
     }
 
     void onClientDisconnected(int clientId) override
@@ -49,6 +58,10 @@ int main(int argc, char *argv[])
         connectionHandler->startHandling("127.0.0.1", 33336);
 
         cout << "END" << endl;
+    }
+    catch (ConnectionException &e)
+    {
+        cout << "connection exception: " << e.what() << endl;
     }
     catch (exception &e)
     {

@@ -41,7 +41,7 @@ namespace nm
 
         //sendMeasurement(new DoubleMeasurement(123, 49));
 
-        for (int i = 0; i < 1000; ++i)
+        for (int i = 0; i < 100; ++i)
         {
             sendMeasurement(new DoubleMeasurement(i * 3, i * i));
             sleepMillis(5);
@@ -122,7 +122,7 @@ namespace nm
         double res = BytesParser::parse<double>(inBuffer, 0);
 //        cout << r << " Response: " << res << endl;
 
-        if (res != 27863.5) cout << "expected diff" << endl;
+        if (res != 27863.5) cout << "expected diff " << res << endl;
 
         delete[] msg;
 

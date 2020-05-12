@@ -6,16 +6,17 @@
 #include <deque>
 #include <mutex>
 #include <unordered_map>
-#include "ISensorConnectionHandler.h"
+#include "IClientsHandler.h"
 
 //namespace sc
 //{
     class Client
     {
-    public:
+    private:
         const static int MAX_MSG;
 
         int socket;
+        sockaddr_in service;
         int clientId;
         std::mutex sendLock;
         //std::mutex recvLock;
@@ -30,12 +31,13 @@
 
         void reset();
 
+    public:
         Client();
 
         void setListener(IRequestListener *listener);
 
         bool isConnected();
-        void connected(int socket, int clientId);
+        void connected(int socket, int clientId, sockaddr_in service);
         void disconnected();
 
         bool isSomethingToSend();
@@ -48,9 +50,13 @@
         int recvData();
 
         int getSocket();
+        int getClientId();
+
+        std::string getIp();
+        int getPort();
     };
 
-    class SensorConnectionHandler : public ISensorConnectionHandler
+    class ClientsHandler : public IClientsHandler
     {
     public:
         ClientsHandler();
@@ -77,7 +83,7 @@
         void tryRecv();
         void trySend();
 
-        void bindHandler(int socket);
+        void bindHandler(int socket, sockaddr_in service);
         void disconnectHandler(Client *client);
 
         std::vector<std::shared_ptr<Client>> clientHandlers;

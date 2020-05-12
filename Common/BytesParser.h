@@ -30,7 +30,8 @@ template <class T>
 T BytesParser::parse(std::vector<unsigned char> bytes, int offset)
 {
     T result;
-    std::memcpy(&result, &(bytes[offset]), sizeof(result));
+    //if (bytes.size() > 0)
+        std::memcpy(&result, &(bytes[offset]), sizeof(result));
     return result;
 }
 

@@ -18,6 +18,8 @@ using namespace std;
         remainingInLen = 0;
         listener = nullptr;
 
+        memset( & service, 0, sizeof( service ) );
+
         inBuffer.clear();
         outBuffer.clear();
     }
@@ -32,10 +34,11 @@ using namespace std;
         return socket > -1;
     }
 
-    void Client::connected(int socket, int clientId)
+    void Client::connected(int socket, int clientId, sockaddr_in service)
     {
         this->socket = socket;
         this->clientId = clientId;
+        this->service = service;
     }
 
     void Client::disconnected()
@@ -64,7 +67,7 @@ using namespace std;
 
     int Client::addOutMsg(std::vector<unsigned char> msg)
     {
-        if (!isConnected())
+        if (!isConnected() || msg.size() <= 0)
             return -1;
 
         int msgLen = msg.size();
@@ -149,6 +152,21 @@ using namespace std;
     int Client::getClientId()
     {
         return clientId;
+    }
+
+    std::string Client::getIp()
+    {
+        struct sockaddr_in* pV4Addr = (struct sockaddr_in*)&service;
+        struct in_addr ipAddr = pV4Addr->sin_addr;
+        char str[INET_ADDRSTRLEN];
+        inet_ntop( AF_INET, &ipAddr, str, INET_ADDRSTRLEN );
+
+        return string(str);
+    }
+
+    int Client::getPort()
+    {
+        return (int) ntohs(service.sin_port);
     }
 
     ClientsHandler::ClientsHandler() : CLIENTS(1000), DELAY_SELECT_SEC(5), DELAY_SELECT_MICROS(0)
@@ -253,11 +271,15 @@ using namespace std;
     {
         if ( FD_ISSET(acceptingSocket, &readyIn))
         {
-            int clientSocket = accept(acceptingSocket, NULL, NULL);
+            sockaddr_in service;
+            socklen_t sLen;
+            memset( & service, 0, sizeof( service ) );
+            int clientSocket = accept(acceptingSocket, (struct sockaddr *)&service, &sLen );
+
             if (clientSocket == -1)
                 throw ConnectionException(ConnectionException::ACCEPT);
             nfds = max(clientSocket + 1, nfds);
-            bindHandler(clientSocket);
+            bindHandler(clientSocket, service);
         }
     }
 
@@ -294,11 +316,12 @@ using namespace std;
         }
     }
 
-    void ClientsHandler::bindHandler(int socket)
+    void ClientsHandler::bindHandler(int socket, sockaddr_in service)
     {
-        clientHandlers[freeHandler].get()->connected(socket, freeHandler);
-        clientHandlers[freeHandler].get()->setListener(listener);
-        listener->onClientConnected(clientHandlers[freeHandler].get()->getClientId());
+        Client *handler = clientHandlers[freeHandler].get();
+        handler->connected(socket, freeHandler, service);
+        handler->setListener(listener);
+        listener->onClientConnected(handler->getClientId(), handler->getIp(), handler->getPort());
     }
 
     void ClientsHandler::disconnectHandler(Client *client)
