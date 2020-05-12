@@ -3,6 +3,7 @@
 #include <vector>
 #include <IRequestListener.h>
 #include "ClientsHandler.h"
+#include "DatabaseManager.h"
 
 using namespace std;
 
@@ -36,6 +37,9 @@ public:
 
 int main(int argc, char *argv[])
 {
+    auto* db = new DatabaseManager("ADMIN", "Seikonnoqwaser1!", "tin_high");
+    db->test();
+
     try
     {
         initNetwork();

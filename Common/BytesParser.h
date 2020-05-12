@@ -2,6 +2,7 @@
 #define BytesParser_h
 
 #include <vector>
+#include <memory>
 
 class BytesParser
 {
