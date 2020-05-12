@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.15)
 project(server)
 set(CMAKE_CXX_STANDARD 20)
-add_executable(server src/main.cpp
+add_executable(
+        server src/main.cpp
         src/ClientsHandler.cpp
         src/IClientsHandler.cpp
         ../Common/ConnectionException.cpp
@@ -9,8 +10,9 @@ add_executable(server src/main.cpp
         src/AdministratorListener.cpp
         src/AdministratorListener.h
         src/Sensor.h
-        ../Common/IRequestListener.cpp)
-target_include_directories(server PRIVATE ../Common)
+        src/IRequestListener.cpp
+        )
+target_include_directories(server PRIVATE ../Common ../Server)
 if(WIN32)
     target_link_libraries(server wsock32 ws2_32)
 endif()

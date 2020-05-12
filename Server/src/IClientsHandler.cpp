@@ -1,7 +1,7 @@
 #include "IClientsHandler.h"
 
-namespace sc
-{
+//namespace sc
+//{
     int IClientsHandler::getAcceptingSocket(std::string ipAddress, int port, int listeningQueue)
     {
         sockaddr_in service;
@@ -31,4 +31,4 @@ namespace sc
 
         return acceptingSocket;
     }
-}
+//}

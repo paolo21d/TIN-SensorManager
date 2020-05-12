@@ -8,8 +8,8 @@
 #include <unordered_map>
 #include "ISensorConnectionHandler.h"
 
-namespace sc
-{
+//namespace sc
+//{
     class Client
     {
     public:
@@ -41,7 +41,7 @@ namespace sc
         bool isSomethingToSend();
         bool isSomethingToRecv();
 
-        void addOutMsg(std::vector<unsigned char> msg);
+        int addOutMsg(std::vector<unsigned char> msg);
         void gotMsg(std::vector<unsigned char> &msg);
 
         int sendData();
@@ -56,6 +56,9 @@ namespace sc
         ClientsHandler();
         void startHandling(std::string ipAddress, int port) override ;
         void addListener(IRequestListener *requestListener) override ;
+
+        void disconnectClient(int clientId) override;
+        int send(int clientId, std::vector<unsigned char> msg) override;
 
     private:
 
@@ -86,6 +89,6 @@ namespace sc
         int freeHandler;
         int acceptingSocket;
     };
-}
+//}
 
 #endif /* ISensorConnectionHandler_h */

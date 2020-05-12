@@ -21,9 +21,14 @@ namespace nm
 
         while (true)
         {
-            while (connect(mainSocket, (sockaddr * ) & service, sizeof(service)) == -1)
+            int result = -1;
+            while (result == -1)
             {
+                mainSocket = socket( AF_INET, SOCK_STREAM, IPPROTO_TCP );
+                result = connect(mainSocket, (sockaddr * ) & service, sizeof(service));
+
                 sleepSecs(1);
+                cout << "." << endl;
             }
             cout << "Connected to server" << endl;
             connected = true;

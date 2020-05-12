@@ -2,8 +2,8 @@
 
 using namespace std;
 
-namespace sc
-{
+//namespace sc
+//{
     const int Client::MAX_MSG = 512;
 
     Client::Client()
@@ -62,8 +62,11 @@ namespace sc
         return result;
     }
 
-    void Client::addOutMsg(std::vector<unsigned char> msg)
+    int Client::addOutMsg(std::vector<unsigned char> msg)
     {
+        if (!isConnected())
+            return -1;
+
         int msgLen = msg.size();
         BytesParser::appendFrontBytes<int32_t>(msg, (int32_t) msgLen);
 
@@ -72,6 +75,8 @@ namespace sc
         sendLock.unlock();
 
         sendData();
+
+        return 0;
     }
 
     void Client::gotMsg(std::vector<unsigned char> &msg)
@@ -146,7 +151,7 @@ namespace sc
         return clientId;
     }
 
-    ClientsHandler::ClientsHandler() : CLIENTS(100), DELAY_SELECT_SEC(5), DELAY_SELECT_MICROS(0)
+    ClientsHandler::ClientsHandler() : CLIENTS(1000), DELAY_SELECT_SEC(5), DELAY_SELECT_MICROS(0)
     {
         for (int i = 0; i < CLIENTS; ++i)
         {
@@ -157,6 +162,7 @@ namespace sc
     void ClientsHandler::addListener(IRequestListener *requestListener)
     {
         listener = requestListener;
+        requestListener->setupListener(static_cast<IClientsHandler *>(this));
     }
 
     void ClientsHandler::startHandling(std::string ipAddress, int port)
@@ -176,6 +182,28 @@ namespace sc
             trySend();
         }
         while(true);
+    }
+
+    void ClientsHandler::disconnectClient(int clientId)
+    {
+        if (clientId < 0 || clientId >= CLIENTS)
+            return;
+
+        if (!clientHandlers[clientId]->isConnected())
+        {
+            cout << "Trying to disconnect a disconnected client" << endl;
+            return;
+        }
+
+        disconnectHandler(clientHandlers[clientId].get());
+    }
+
+    int ClientsHandler::send(int clientId, std::vector<unsigned char> msg)
+    {
+        if (clientId < 0 || clientId >= CLIENTS)
+            return -1;
+
+        return clientHandlers[clientId]->addOutMsg(msg);
     }
 
     int ClientsHandler::getFreeHandler()
@@ -280,4 +308,4 @@ namespace sc
         client->disconnected();
         listener->onClientDisconnected(clientId);
     }
-}
+//}

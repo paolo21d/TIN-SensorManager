@@ -2,8 +2,7 @@
 #include <NetworkUtils.h>
 #include <vector>
 #include <IRequestListener.h>
-#include "ConnectionsManager.h"
-#include "SensorConnectionHandler.h"
+#include "ClientsHandler.h"
 
 using namespace std;
 
@@ -24,12 +23,12 @@ public:
         return response;
     }
 
-    void onClientConnected(int clientId)
+    void onClientConnected(int clientId) override
     {
         cout << "Client " << clientId << " connected" << endl;
     }
 
-    void onClientDisconnected(int clientId)
+    void onClientDisconnected(int clientId) override
     {
         cout << "Client " << clientId << " disconnected" << endl;
     }
@@ -37,7 +36,7 @@ public:
 
 int main(int argc, char *argv[])
 {
-    //try
+    try
     {
         initNetwork();
 
@@ -45,17 +44,15 @@ int main(int argc, char *argv[])
 
         IRequestListener *listener = new MockListener();
 
-        sc::ISensorConnectionHandler *connectionHandler = new sc::SensorConnectionHandler();
+        sc::IClientsHandler *connectionHandler = new sc::ClientsHandler();
         connectionHandler->addListener(listener);
-        connectionHandler->acceptSensors("127.0.0.1", 33336);
-//    sc::IConnectionsManager *connectionsManager = new sc::ConnectionsManager("127.0.0.1", 33333);
-//    connectionsManager->startAcceptingSensors();
+        connectionHandler->startHandling("127.0.0.1", 33336);
 
         cout << "END" << endl;
     }
-    //catch (exception &e)
+    catch (exception &e)
     {
-        //cout << "got exception " << e.what() << endl;
+        cout << "got exception " << e.what() << endl;
     }
     return 0;
 }

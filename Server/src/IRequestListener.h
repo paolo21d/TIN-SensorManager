@@ -3,6 +3,9 @@
 
 #include <vector>
 #include <BytesParser.h>
+//#include "IClientsHandler.h"
+
+class IClientsHandler;
 
 class IRequestListener
 {
@@ -15,9 +18,15 @@ public:
     inline T getData(const std::vector<unsigned char> &bytes, int &offset);
 
     void send(int clientId, std::vector<unsigned char> msg);
+    void disconnectClient(int clientId);
 
     virtual void onClientConnected(int clientId);
     virtual void onClientDisconnected(int clientId);
+
+    void setupListener(IClientsHandler *clientsHandler);
+
+private:
+    IClientsHandler *clientsHandler;
 };
 
 template <class T>
