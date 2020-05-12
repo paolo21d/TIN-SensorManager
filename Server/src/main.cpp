@@ -3,15 +3,14 @@
 #include <vector>
 #include <IRequestListener.h>
 #include "ClientsHandler.h"
+#include "Sensor.h"
 #include "DatabaseManager.h"
 
 using namespace std;
 
-class MockListener : public IRequestListener
-{
+class MockListener : public IRequestListener {
 public:
-    vector<unsigned char> onGotRequest(int clientId, vector<unsigned char> msg) override
-    {
+    vector<unsigned char> onGotRequest(int clientId, vector<unsigned char> msg) override {
         vector<unsigned char> response;
 
         int cursorPos = 0;
@@ -24,24 +23,39 @@ public:
         return response;
     }
 
-    void onClientConnected(int clientId)
-    {
+    void onClientConnected(int clientId) {
         cout << "Client " << clientId << " connected" << endl;
     }
 
-    void onClientDisconnected(int clientId)
-    {
+    void onClientDisconnected(int clientId) {
         cout << "Client " << clientId << " disconnected" << endl;
     }
 };
 
-int main(int argc, char *argv[])
-{
-    auto* db = new DatabaseManager("ADMIN", "Seikonnoqwaser1!", "tin_high");
-    db->test();
+void testDB(){
+    try {
+        auto *db = new DatabaseManager("ADMIN", "Seikonnoqwaser1!", "tin_high");
+        cout << "ENV created" << endl;
+        auto *conn = db->getNewConnection();
+        cout << "CONN created" << endl;
 
-    try
-    {
+        auto* sens = conn->getSensor(1);
+        cout << sens->id << " " << sens->name << " " << sens->ip << " " << sens->port << endl;
+        /*
+        auto sensors = conn->getAllSensors();
+        for (auto sens : sensors){
+            cout << sens->id << " " << sens->name << " " << sens->ip << " " << sens->port << endl;
+        }*/
+
+    } catch (oracle::occi::SQLException e) {
+        cout << e.getErrorCode();
+    }
+}
+
+int main(int argc, char *argv[]) {
+    testDB();
+
+    try {
         initNetwork();
 
         cout << "START" << endl;
@@ -54,8 +68,7 @@ int main(int argc, char *argv[])
 
         cout << "END" << endl;
     }
-    catch (exception &e)
-    {
+    catch (exception &e) {
         cout << "got exception " << e.what() << endl;
     }
     return 0;

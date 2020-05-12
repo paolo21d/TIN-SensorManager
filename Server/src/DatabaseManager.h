@@ -6,14 +6,19 @@
 #define SERVER_DATABASEMANAGER_H
 
 #include <occi.h>
+#include "DatabaseConnection.h"
+#include "IDatabaseManager.h"
+#include <string>
 
-class DatabaseManager {
+class DatabaseManager : public IDatabaseManager{
+    std::string name;
+    std::string password;
+    std::string connection;
     oracle::occi::Environment* environment;
-    oracle::occi::Connection* connection;
 
 public:
     DatabaseManager(std::string name, std::string password, std::string connection);
-    void test();
+    IDatabaseConnection *getNewConnection() override ;
 };
 
 

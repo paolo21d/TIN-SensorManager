@@ -3,28 +3,23 @@
 //
 
 #include <iostream>
+#include <utility>
 #include "DatabaseManager.h"
+
 using namespace oracle::occi;
 
 DatabaseManager::DatabaseManager(std::string name, std::string password, std::string connection) {
-    try {
-        this->environment = Environment::createEnvironment(Environment::THREADED_MUTEXED);
-        this->connection = environment->createConnection(name, password, connection);
-    } catch (SQLException e){
-        std::cout<<e.getErrorCode();
-    }
+    this->name = std::move(name);
+    this->password = std::move(password);
+    this->connection = std::move(connection);
+    this->environment = Environment::createEnvironment(Environment::THREADED_MUTEXED);
 }
 
-void DatabaseManager::test() {
-    try {
-        Statement* statement = connection->createStatement("SELECT * FROM TEST1");
+IDatabaseConnection *DatabaseManager::getNewConnection() {
+    oracle::occi::Connection *conn = environment->createConnection(name, password, connection);
 
-        auto* rs = statement->executeQuery();
-
-        while(rs->next()){
-            std::cout<<rs->getInt(1) << " " << rs->getString(2)<<std::endl;
-        }
-    } catch (SQLException e){
-        std::cout<<e.getErrorCode();
-    }
+    return new DatabaseConnection(environment, conn);
+    //return new DatabaseConnection();
 }
+
+

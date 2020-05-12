@@ -15,10 +15,9 @@ add_executable(server src/main.cpp
         src/AdministratorListener.h
         src/Sensor.h
         ../Common/IRequestListener.cpp
-        src/DatabaseConnection.cpp
-        src/DatabaseConnection.h
         src/DatabaseManager.cpp
-        src/DatabaseManager.h)
+        src/DatabaseConnection.cpp
+        )
 
 target_include_directories(server PRIVATE ../Common)
 if(WIN32)
@@ -33,4 +32,9 @@ if (CMAKE_BUILD_TYPE STREQUAL "Release")
     target_link_libraries(server $ENV{INSTANT_CLIENT}/sdk/lib/msvc/vc14/oraocci12.lib)
 endif ()
 
-
+#
+#src/DatabaseConnection.h
+#
+#src/DatabaseManager.h
+#src/IDatabaseManager.h
+#src/IDatabaseConnection.h
