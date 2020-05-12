@@ -27,22 +27,22 @@ vector<unsigned char> AdministratorListener::onGotRequest(int clientId, vector<u
 
     if (commandType == GET_ALL_SENSORS) {
         vector<Sensor> sensors;
-        sensors.push_back(Sensor(1, "sensor1", "192.168.0.1", 9000, true));
-        sensors.push_back(Sensor(2, "sensor2", "192.168.0.2", 9000, false));
-        sensors.push_back(Sensor(3, "sensor3", "192.168.0.3", 9000, false));
+        sensors.push_back(Sensor(1, "sensor1", "192.168.0.1", 9200, true));
+        sensors.push_back(Sensor(2, "sensor2", "192.168.0.2", 9200, false));
+        sensors.push_back(Sensor(3, "sensor3", "192.168.0.3", 9200, false));
         vector<char> text = constructGetAllSensorsMessage(sensors);
         for (int i = 0; i < text.size(); i++)
             response.push_back(text[i]);
     } else if (commandType == UPDATE_SENSOR_NAME) {
-        vector<char> text = constructUpdateSensorNameMessage(20);
+        vector<char> text = constructUpdateSensorNameMessage(1);
         for (int i = 0; i < text.size(); i++)
             response.push_back(text[i]);
     } else if (commandType == REVOKE_SENSOR) {
-        vector<char> text = constructRevokeSensorMessage(20);
+        vector<char> text = constructRevokeSensorMessage(1);
         for (int i = 0; i < text.size(); i++)
             response.push_back(text[i]);
     } else if (commandType == DISCONNECT_SENSOR) {
-        vector<char> text = constructDisconnectSensorMessage(20);
+        vector<char> text = constructDisconnectSensorMessage(1);
         for (int i = 0; i < text.size(); i++)
             response.push_back(text[i]);
     } else if (commandType == GENERATE_TOKEN) {

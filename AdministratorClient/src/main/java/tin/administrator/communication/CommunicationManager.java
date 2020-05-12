@@ -11,7 +11,10 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.bytes.ByteArrayDecoder;
 import io.netty.handler.codec.bytes.ByteArrayEncoder;
 import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import tin.administrator.controller.ResponseExecutor;
 import tin.administrator.model.Sensor;
 
 import java.net.InetSocketAddress;
@@ -20,7 +23,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+@RequiredArgsConstructor
 public class CommunicationManager extends Thread {
+    @NonNull
+    ResponseExecutor responseExecutor;
+
     @Getter
     @Setter
     private String serverIp;
@@ -34,7 +41,7 @@ public class CommunicationManager extends Thread {
     private Boolean connectionReady = false;
     private Queue<List<Byte>> bufferedMessages = new LinkedList<>();
 
-    public void connect(String ip, int port) {
+    private void connect(String ip, int port) {
         group = new NioEventLoopGroup();
 
         Bootstrap clientBootstrap = new Bootstrap();
@@ -173,15 +180,20 @@ public class CommunicationManager extends Thread {
         System.out.println("ANALYZING RESPONSE");
         int commandType = ConnectionUtil.byteListToInt(message.subList(0, 4));
         if (commandType == 0) {
-            analyzeGetAllSensorsResponse(message.subList(4, message.size()));
+            List<Sensor> sensors = analyzeGetAllSensorsResponse(message.subList(4, message.size()));
+            responseExecutor.executeResponseGetAllSensors(sensors);
         } else if (commandType == 1) {
-            analyzeUpdateSensorNameResponse(message.subList(4, message.size()));
+            int updatedSensorId = analyzeUpdateSensorNameResponse(message.subList(4, message.size()));
+            responseExecutor.executeResponseUpdateSensorName(updatedSensorId);
         } else if (commandType == 2) {
-            analyzeRevokeSensorResponse(message.subList(4, message.size()));
+            int revokedSensorId = analyzeRevokeSensorResponse(message.subList(4, message.size()));
+            responseExecutor.executeResponseRevokeSensor(revokedSensorId);
         } else if (commandType == 3) {
-            analyzeDisconnectSensorResponse(message.subList(4, message.size()));
+            int disconnectedSensorId = analyzeDisconnectSensorResponse(message.subList(4, message.size()));
+            responseExecutor.executeResponseDisconnectSensor(disconnectedSensorId);
         } else if (commandType == 4) {
-            analyzeGenerateTokenResponse(message.subList(4, message.size()));
+            String tokenContent = analyzeGenerateTokenResponse(message.subList(4, message.size()));
+            responseExecutor.executeResponseGenerateToken(tokenContent);
         } else {
             System.out.println("ERROR! Not recognized command type!!!!");
         }

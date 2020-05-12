@@ -2,6 +2,7 @@ package tin.administrator.communication;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Test;
+import tin.administrator.controller.Controller;
 import tin.administrator.model.Sensor;
 
 import java.util.ArrayList;
@@ -11,7 +12,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 
 public class CommunicationManagerTest {
-    CommunicationManager communicationManager = new CommunicationManager();
+    CommunicationManager communicationManager = new CommunicationManager(new Controller());
 
     @Test
     public void checkPrepareMessageGetAllSensors() {
