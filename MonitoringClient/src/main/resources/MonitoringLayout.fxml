@@ -37,24 +37,24 @@
       </MenuBar>
    </top>
    <left>
-      <VBox prefHeight="375.0" prefWidth="205.0" BorderPane.alignment="CENTER">
+      <VBox prefHeight="456.0" prefWidth="250.0" BorderPane.alignment="CENTER">
          <children>
             <Label text="Sensors" />
-             <TableView fx:id="sensorsTable" prefHeight="437.0" prefWidth="263.0">
+             <TableView fx:id="sensorsTable" onMouseClicked="#tableClicked" prefHeight="438.0" prefWidth="230.0">
                  <columns>
-                     <TableColumn fx:id="tableSensorId" minWidth="33.0" prefWidth="33.0" sortable="true" text="ID" />
-                     <TableColumn fx:id="tableSensorName" minWidth="53.0" prefWidth="81.0" text="Name" />
-                     <TableColumn fx:id="tableSensorIp" minWidth="49.0" prefWidth="51.0" text="IP" />
-                     <TableColumn fx:id="tableSensorPort" minWidth="25.0" prefWidth="39.0" text="Port" />
+                     <TableColumn fx:id="tableSensorId" prefWidth="30.0" sortable="true" text="ID" />
+                     <TableColumn fx:id="tableSensorName" prefWidth="70.0" text="Name" />
+                     <TableColumn fx:id="tableSensorIp" prefWidth="100.0" text="IP" />
+                     <TableColumn fx:id="tableSensorPort" prefWidth="45.0" text="Port" />
                  </columns>
              </TableView>
-            <ListView prefHeight="0.0" prefWidth="205.0" />
+            <ListView prefHeight="0.0" prefWidth="250.0" />
          </children></VBox>
    </left>
    <center>
-      <AnchorPane prefHeight="456.0" prefWidth="472.0" BorderPane.alignment="CENTER">
+      <AnchorPane prefHeight="441.0" prefWidth="567.0" BorderPane.alignment="CENTER">
          <children>
-            <LineChart fx:id="lineChart" prefHeight="429.0" prefWidth="521.0" title="Measurements">
+            <LineChart fx:id="lineChart" layoutX="6.0" layoutY="2.0" prefHeight="427.0" prefWidth="473.0" title="Measurements">
               <xAxis>
                 <NumberAxis label="timestamps" prefHeight="44.0" prefWidth="447.0" side="BOTTOM" />
               </xAxis>
@@ -62,7 +62,7 @@
                 <NumberAxis label="CPU usage" prefHeight="313.0" prefWidth="43.0" side="LEFT" />
               </yAxis>
             </LineChart>
-            <Button alignment="CENTER" layoutY="430.0" mnemonicParsing="false" onAction="#loadData" prefHeight="25.0" prefWidth="520.0" text="Load Data" />
+            <Button alignment="CENTER" layoutX="5.0" layoutY="428.0" mnemonicParsing="false" onAction="#loadData" prefHeight="26.0" prefWidth="470.0" text="Load Data" />
          </children></AnchorPane>
    </center>
    <bottom>

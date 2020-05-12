@@ -39,4 +39,8 @@ public class MonitoringModel {
         }
         return null;
     }
+
+    public void changeCurrentSensor(Integer id) {
+        currentDisplayedSensor = findSensorById(id);
+    }
 }
