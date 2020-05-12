@@ -13,6 +13,7 @@
     class Client
     {
     private:
+        const bool IS_SERVER;
         const static int MAX_MSG;
 
         int socket;
@@ -32,7 +33,7 @@
         void reset();
 
     public:
-        Client();
+        Client(bool server);
 
         void setListener(IRequestListener *listener);
 

@@ -6,7 +6,7 @@ using namespace std;
 //{
     const int Client::MAX_MSG = 512;
 
-    Client::Client()
+    Client::Client(bool server) : IS_SERVER(server)
     {
         reset();
     }
@@ -14,14 +14,18 @@ using namespace std;
     void Client::reset()
     {
         socket = -1;
-        remainingIn = 0;
-        remainingInLen = 0;
-        listener = nullptr;
 
         memset( & service, 0, sizeof( service ) );
 
-        inBuffer.clear();
-        outBuffer.clear();
+        if (IS_SERVER)
+        {
+            remainingIn = 0;
+            remainingInLen = 0;
+            listener = nullptr;
+            
+            inBuffer.clear();
+            outBuffer.clear();
+        }
     }
 
     void Client::setListener(IRequestListener *listener)
@@ -87,7 +91,7 @@ using namespace std;
         if (listener == nullptr)
             return;
 
-        addOutMsg(listener->onGotRequest(clientId, msg));
+        listener->onGotRequest(clientId, msg);
     }
 
     int Client::sendData()
@@ -175,7 +179,7 @@ using namespace std;
     {
         for (int i = 0; i < CLIENTS; ++i)
         {
-            clientHandlers.push_back(shared_ptr<Client>(new Client()));
+            clientHandlers.push_back(shared_ptr<Client>(new Client(IS_SERVER)));
         }
     }
 
@@ -345,6 +349,8 @@ using namespace std;
 
     void ClientsHandler::disconnectHandler(Client *client)
     {
+        connected = false;
+        
         int clientId = client->getClientId();
         closeSocket(client->getSocket());
         client->disconnected();

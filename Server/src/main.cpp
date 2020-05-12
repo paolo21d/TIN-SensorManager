@@ -9,7 +9,7 @@ using namespace std;
 class MockListener : public IRequestListener
 {
 public:
-    vector<unsigned char> onGotRequest(int clientId, vector<unsigned char> msg) override
+    void onGotRequest(int clientId, vector<unsigned char> msg) override
     {
         int cursorPos = 0;
         int64_t timestamp = getData<long>(msg, cursorPos);
@@ -22,10 +22,6 @@ public:
         BytesParser::appendBytes<char>(response, '1');
         BytesParser::appendBytes<int64_t>(response, timestamp);
         send(clientId, response);
-
-
-        vector<unsigned char> dummy;
-        return dummy;
     }
 
     void onClientConnected(int clientId, string ip, int port) override

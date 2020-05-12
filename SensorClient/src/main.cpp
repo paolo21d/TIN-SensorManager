@@ -11,17 +11,13 @@ using namespace std;
 class MockListener : public IRequestListener
 {
 public:
-    vector<unsigned char> onGotRequest(int clientId, vector<unsigned char> msg) override
+    void onGotRequest(int clientId, vector<unsigned char> msg) override
     {
-        vector<unsigned char> response;
-
         int cursorPos = 0;
         //long timestamp = getData<long>(msg, cursorPos);
         char status = getData<char>(msg, cursorPos);
         int64_t lastTimestamp = getData<int64_t>(msg, cursorPos);
         cout << "response: " << status << "   " << lastTimestamp << endl;
-
-        return response;
     }
 
     void onClientConnected(int clientId, string ip, int port) override
@@ -47,12 +43,14 @@ void sensorThread()
 {
     for (int i = 2; ; ++i)
     {
-        cout << "diff thread" << endl;
+        int64_t timestamp = getPosixTime();
+        double measure = timestamp % 1000 * (timestamp % 100000 / 1000);
+        //cout << "Measure: " << measure << endl;
         sleepMillis(10);
 
         vector<unsigned char> response;
-        BytesParser::appendBytes<long>(response, getPosixTime());
-        BytesParser::appendBytes<double>(response, i * i);
+        BytesParser::appendBytes<long>(response, timestamp);
+        BytesParser::appendBytes<double>(response, measure);
 
         listener->send(0, response);
     }

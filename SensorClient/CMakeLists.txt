@@ -3,8 +3,6 @@ project(sensor)
 set(CMAKE_CXX_STANDARD 20)
 add_executable(
         sensor src/main.cpp
-        src/NetworkManager.cpp
-        src/NewNetworkManager.cpp
         ../Common/DoubleMeasurement.cpp
         ../Common/SystemUtils.cpp
         ../Common/NetworkUtils.cpp

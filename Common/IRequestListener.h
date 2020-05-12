@@ -10,7 +10,7 @@ class IClientsHandler;
 class IRequestListener
 {
 public:
-    virtual std::vector<unsigned char> onGotRequest(int clientId, std::vector<unsigned char> msg) = 0;
+    virtual void onGotRequest(int clientId, std::vector<unsigned char> msg) = 0;
 
     template <class T>
     inline T getData(const std::vector<unsigned char> &bytes, int &offset);
