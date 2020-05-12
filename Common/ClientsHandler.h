@@ -59,7 +59,7 @@
     class ClientsHandler : public IClientsHandler
     {
     public:
-        ClientsHandler();
+        ClientsHandler(int maxClients = 100, bool server = true);
         void startHandling(std::string ipAddress, int port) override ;
         void addListener(IRequestListener *requestListener) override ;
 
@@ -67,6 +67,8 @@
         int send(int clientId, std::vector<unsigned char> msg) override;
 
     private:
+
+        const bool IS_SERVER;
 
         const int CLIENTS;
         const int DELAY_SELECT_SEC;
@@ -78,7 +80,8 @@
         void recvData(Client &client);
 
         int getFreeHandler();
-        int setReadyHandlers(int acceptingSocket);
+        void setReadyHandlers(int acceptingSocket);
+        int  trySelect();
         void tryAccept();
         void tryRecv();
         void trySend();
@@ -90,10 +93,11 @@
 
         fd_set readyOut;
         fd_set readyIn;
-        int nfds;
 
         int freeHandler;
         int acceptingSocket;
+
+        bool connected = false;
     };
 //}
 

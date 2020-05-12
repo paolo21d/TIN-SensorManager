@@ -11,25 +11,21 @@ class MockListener : public IRequestListener
 public:
     vector<unsigned char> onGotRequest(int clientId, vector<unsigned char> msg) override
     {
-        vector<unsigned char> response;
-
         int cursorPos = 0;
-        long timestamp = getData<long>(msg, cursorPos);
+        int64_t timestamp = getData<long>(msg, cursorPos);
         double value = getData<double>(msg, cursorPos);
         cout << "client " << clientId << "     timestamp: " << timestamp << "     value: " << value << endl;
 
-        BytesParser::appendBytes<double>(response, 27863.5);
+        //BytesParser::appendBytes<double>(response, 27863.5);
 
-        if (timestamp > 200)
-            disconnectClient(clientId);
-        for (int i = 0; i < 4; ++i)
-        {
-            vector<unsigned char> response;
-            BytesParser::appendBytes<double>(response, i);
-            send(clientId, response);
-        }
+        vector<unsigned char> response;
+        BytesParser::appendBytes<char>(response, '1');
+        BytesParser::appendBytes<int64_t>(response, timestamp);
+        send(clientId, response);
 
-        return response;
+
+        vector<unsigned char> dummy;
+        return dummy;
     }
 
     void onClientConnected(int clientId, string ip, int port) override
@@ -55,7 +51,7 @@ int main(int argc, char *argv[])
 
         sc::IClientsHandler *connectionHandler = new sc::ClientsHandler();
         connectionHandler->addListener(listener);
-        connectionHandler->startHandling("127.0.0.1", 33336);
+        connectionHandler->startHandling("127.0.0.1", 33333);
 
         cout << "END" << endl;
     }

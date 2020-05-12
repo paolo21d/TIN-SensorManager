@@ -22,7 +22,7 @@ namespace nm
 
         void start() override ;
         int sendMeasurement(IMeasurement *measurement) override ;
-        void addListener(INetworkStateListener *listener) override ;
+        void addListener(INetworkStateListener *listener);
 
     private:
         const std::string ipAddress;

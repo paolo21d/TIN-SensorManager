@@ -11,7 +11,6 @@ namespace nm
     public:
         virtual void start() = 0;
         virtual int sendMeasurement(IMeasurement *measurement) = 0;
-        virtual void addListener(INetworkStateListener *listener) = 0;
     };
 }
 

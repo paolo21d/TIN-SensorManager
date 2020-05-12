@@ -43,7 +43,7 @@ namespace nm
 
         for (int i = 0; i < 100; ++i)
         {
-            sendMeasurement(new DoubleMeasurement(i * 3, i * i));
+            sendMeasurement(new DoubleMeasurement(getPosixTime(), i * i));
             sleepMillis(5);
         }
 
@@ -61,8 +61,8 @@ namespace nm
             vector<unsigned char> data = measurement->getBytes();
             vector<unsigned char> header;
 
-            BytesParser::appendBytes<int>(header, sizeof(long) + data.size());  //sizeof(long) - timestamp; data.size() - measurement
-            BytesParser::appendBytes<long>(header, measurement->getTimestamp());
+            BytesParser::appendBytes<int>(header, sizeof(int64_t) + data.size());  //sizeof(long) - timestamp; data.size() - measurement
+            BytesParser::appendBytes<int64_t>(header, measurement->getTimestamp());
             BytesParser::moveBytes(header, data);
             int remaining = header.size();
 

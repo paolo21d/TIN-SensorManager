@@ -4,10 +4,14 @@ set(CMAKE_CXX_STANDARD 20)
 add_executable(
         sensor src/main.cpp
         src/NetworkManager.cpp
+        src/NewNetworkManager.cpp
         ../Common/DoubleMeasurement.cpp
         ../Common/SystemUtils.cpp
         ../Common/NetworkUtils.cpp
         ../Common/ConnectionException.cpp
+        ../Common/IClientsHandler.cpp
+        ../Common/ClientsHandler.cpp
+        ../Common/IRequestListener.cpp
 )
 target_include_directories(sensor PRIVATE ../Common)
 if(WIN32)

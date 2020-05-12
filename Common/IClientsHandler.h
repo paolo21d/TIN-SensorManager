@@ -2,12 +2,13 @@
 #define ISensorConnectionHandler_h
 
 #include <NetworkUtils.h>
+#include <SystemUtils.h>
 
 #include <iostream>
 #include <string>
 #include <BytesParser.h>
 #include <ConnectionException.h>
-#include "IRequestListener.h"
+#include <IRequestListener.h>
 
 //class IRequestListener;
 
@@ -23,7 +24,10 @@
         virtual int send(int clientId, std::vector<unsigned char> msg) = 0;
 
     protected:
+        int nfds;
+
         int getAcceptingSocket(std::string ipAddress, int port, int listeningQueue = 10);
+        int tryConnect(std::string ipAddress, int port);
     };
 //}
 

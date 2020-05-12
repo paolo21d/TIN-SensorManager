@@ -169,7 +169,9 @@ using namespace std;
         return (int) ntohs(service.sin_port);
     }
 
-    ClientsHandler::ClientsHandler() : CLIENTS(1000), DELAY_SELECT_SEC(5), DELAY_SELECT_MICROS(0)
+    ClientsHandler::ClientsHandler(int maxClients, bool server) :
+        IS_SERVER(server), CLIENTS(maxClients),
+        DELAY_SELECT_SEC(5), DELAY_SELECT_MICROS(0)
     {
         for (int i = 0; i < CLIENTS; ++i)
         {
@@ -185,17 +187,31 @@ using namespace std;
 
     void ClientsHandler::startHandling(std::string ipAddress, int port)
     {
-        acceptingSocket = getAcceptingSocket(ipAddress, port);
+        acceptingSocket = IS_SERVER ? getAcceptingSocket(ipAddress, port) : -1;
         nfds = acceptingSocket + 1;
 
         do
         {
-            freeHandler = getFreeHandler();
+            if (IS_SERVER)
+                freeHandler = getFreeHandler();
+            else if (!connected)
+            {
+                int mainSocket = tryConnect(ipAddress, port);
+                Client *handler = clientHandlers[0].get();
+                sockaddr_in s;
+                handler->connected(mainSocket, freeHandler, s);
+                handler->setListener(listener);
+            }
 
-            if (setReadyHandlers(acceptingSocket) == 0)
+            connected = true;
+
+            setReadyHandlers(acceptingSocket);
+
+            if (trySelect() == 0)
                 cout << "Timeout, restarting select..." << endl;
 
-            tryAccept();
+            if (IS_SERVER)
+                tryAccept();
             tryRecv();
             trySend();
         }
@@ -233,12 +249,12 @@ using namespace std;
         return -1;
     }
 
-    int ClientsHandler::setReadyHandlers(int acceptingSocket)
+    void ClientsHandler::setReadyHandlers(int acceptingSocket)
     {
         FD_ZERO(&readyOut);
         FD_ZERO(&readyIn);
 
-        if (freeHandler >= 0)
+        if (freeHandler >= 0 && IS_SERVER)
             FD_SET(acceptingSocket, &readyIn);
 
         for (const auto handler : clientHandlers)
@@ -254,7 +270,10 @@ using namespace std;
             if (condition)
                 FD_SET(handler.get()->getSocket(), &readyIn);
         }
+    }
 
+    int ClientsHandler::trySelect()
+    {
         int nactive;
         struct timeval to;
         to.tv_sec = DELAY_SELECT_SEC;
