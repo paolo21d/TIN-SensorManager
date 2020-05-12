@@ -1,11 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<BorderPane fx:id="MainBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/10.0.2-internal"
-            xmlns:fx="http://javafx.com/fxml/1" fx:controller="tin.monitoring.controller.Controller">
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane fx:id="MainBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="725.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tin.monitoring.controller.Controller">
    <top>
-      <MenuBar BorderPane.alignment="CENTER">
+      <MenuBar prefHeight="0.0" prefWidth="585.0" BorderPane.alignment="CENTER">
         <menus>
           <Menu mnemonicParsing="false" text="File">
             <items>
@@ -29,14 +40,33 @@
       <VBox prefHeight="375.0" prefWidth="205.0" BorderPane.alignment="CENTER">
          <children>
             <Label text="Sensors" />
-            <ListView prefHeight="336.0" prefWidth="205.0" />
+             <TableView fx:id="sensorsTable" prefHeight="437.0" prefWidth="263.0">
+                 <columns>
+                     <TableColumn fx:id="tableSensorId" minWidth="33.0" prefWidth="33.0" sortable="true" text="ID" />
+                     <TableColumn fx:id="tableSensorName" minWidth="53.0" prefWidth="81.0" text="Name" />
+                     <TableColumn fx:id="tableSensorIp" minWidth="49.0" prefWidth="51.0" text="IP" />
+                     <TableColumn fx:id="tableSensorPort" minWidth="25.0" prefWidth="39.0" text="Port" />
+                 </columns>
+             </TableView>
+            <ListView prefHeight="0.0" prefWidth="205.0" />
          </children></VBox>
    </left>
    <center>
-      <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER" />
+      <AnchorPane prefHeight="456.0" prefWidth="472.0" BorderPane.alignment="CENTER">
+         <children>
+            <LineChart fx:id="lineChart" prefHeight="429.0" prefWidth="521.0" title="Measurements">
+              <xAxis>
+                <NumberAxis label="timestamps" prefHeight="44.0" prefWidth="447.0" side="BOTTOM" />
+              </xAxis>
+              <yAxis>
+                <NumberAxis label="CPU usage" prefHeight="313.0" prefWidth="43.0" side="LEFT" />
+              </yAxis>
+            </LineChart>
+            <Button alignment="CENTER" layoutY="430.0" mnemonicParsing="false" onAction="#loadData" prefHeight="25.0" prefWidth="520.0" text="Load Data" />
+         </children></AnchorPane>
    </center>
    <bottom>
-      <AnchorPane prefHeight="21.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+      <AnchorPane prefHeight="0.0" prefWidth="608.0" BorderPane.alignment="CENTER">
          <children>
             <Label layoutX="23.0" layoutY="2.0" text="Monitoring Panel" />
             <Label layoutX="516.0" layoutY="2.0" text="Version 0.1" />

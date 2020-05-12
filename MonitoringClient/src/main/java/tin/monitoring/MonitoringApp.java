@@ -23,7 +23,7 @@ public class MonitoringApp extends Application {
 
         Parent root = FXMLLoader.load(getClass().getResource("/MonitoringLayout.fxml"));
         stage.setTitle("Monitoring Panel");
-        Scene scene = new Scene(root, 600, 400);
+        Scene scene = new Scene(root, 725, 500);
         scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
 
         stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
