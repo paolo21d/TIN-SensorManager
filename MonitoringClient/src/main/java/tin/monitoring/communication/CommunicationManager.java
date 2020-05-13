@@ -11,7 +11,10 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.bytes.ByteArrayDecoder;
 import io.netty.handler.codec.bytes.ByteArrayEncoder;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
+import tin.monitoring.model.Measurement;
+import tin.monitoring.model.ResponseExecutor;
 import tin.monitoring.model.Sensor;
 
 import java.net.InetSocketAddress;
@@ -21,6 +24,9 @@ import java.util.List;
 import java.util.Queue;
 
 public class CommunicationManager extends Thread {
+    @NonNull
+    ResponseExecutor responseExecutor;
+
     @Getter
     @Setter
     private String serverIp;
@@ -72,7 +78,7 @@ public class CommunicationManager extends Thread {
     }
 
     public void run() {
-        handler = new ClientHandler();
+        handler = new ClientHandler(this);
         System.out.println("---------------- CONNECTING");
         connect("127.0.0.1", 28000);
         System.out.println("---------------- CONNECTED");
@@ -105,7 +111,10 @@ public class CommunicationManager extends Thread {
         sendMessage(prefixMessageSize(prepareMessageGetAllSensors()));
     }
 
-
+    public void sendCommandGetSetOfMeasurements(int sensorId, int type) {
+        System.out.println("Sending GetSetOfMeasurements");
+        sendMessage(prefixMessageSize(prepareMessageGetSetOfMeasurements(sensorId,type)));
+    }
 
     /////////////////////////////////////////
     List<Byte> prefixMessageSize(List<Byte> message) {
@@ -117,11 +126,41 @@ public class CommunicationManager extends Thread {
 
     List<Byte> prepareMessageGetAllSensors() {
         List<Byte> byteMessage = new ArrayList<Byte>();
-        byteMessage.addAll(ConnectionUtil.intToByteList(1));
-        byteMessage.addAll(ConnectionUtil.prepareIntegerMessageWithSize(CommunicationManager.CommandsType.GET_ALL_SENSORS.commandNumber));
+        byteMessage.addAll(ConnectionUtil.prepareIntegerMessageWithSize(CommandsType.GET_ALL_SENSORS.commandNumber));
         return byteMessage;
     }
 
+    List<Byte> prepareMessageGetSetOfMeasurements(int sensorId, int type) {
+        List<Byte> byteMessage = new ArrayList<Byte>();
+        byteMessage.addAll(ConnectionUtil.prepareIntegerMessageWithSize(CommandsType.GET_SET_OF_MEASUREMENTS.commandNumber));
+        byteMessage.addAll(ConnectionUtil.prepareIntegerMessageWithSize(sensorId));
+        byteMessage.addAll(ConnectionUtil.prepareIntegerMessageWithSize(type));
+        return byteMessage;
+    }
+
+    public void analyzeResponse(List<Byte> message) {
+        System.out.println("ANALYZING RESPONSE");
+        int commandType = ConnectionUtil.byteListToInt(message.subList(0, 4));
+        if (commandType == 0) {
+            List<Sensor> sensors = analyzeGetAllSensorsResponse(message.subList(4, message.size()));
+            responseExecutor.executeResponseGetAllSensors(sensors);
+        } else if (commandType == 1) {
+            List<Measurement> measurements = analyzeGetSetOfMeasurementsResponse(message.subList(4, message.size()));
+            responseExecutor.executeResponseGetSetOfMeasurements(measurements);
+        } else {
+            System.out.println("ERROR! Not recognized command type!!!!");
+        }
+    }
+
+    private List<Sensor> analyzeGetAllSensorsResponse(List<Byte> message) {
+        System.out.println("ANALYZING get all sensors");
+        return constructSensors(message);
+    }
+
+    private List<Measurement> analyzeGetSetOfMeasurementsResponse(List<Byte> message) {
+        System.out.println("ANALYZING get set of measurements");
+        return constructMeasurements(message);
+    }
 
     Sensor constructSensorFromByteMessage(List<Byte> message) {
         int readingBegin = 0;
@@ -170,9 +209,43 @@ public class CommunicationManager extends Thread {
         return sensors;
     }
 
+    private List<Measurement> constructMeasurements(List<Byte> message) {
+        List<Measurement> measurements = new ArrayList<>();
+        int readingBegin = 0;
+        int sensorID = ConnectionUtil.byteListToInt(message.subList(readingBegin, readingBegin + 4));
+        readingBegin += 4;
+        int measurementsQuantity = ConnectionUtil.byteListToInt(message.subList(readingBegin, readingBegin + 4));
+        readingBegin += 4;
+
+        for(int i = 0; i < measurementsQuantity; i++) {
+            int measurementLength = ConnectionUtil.byteListToInt(message.subList(readingBegin, readingBegin + 4));
+            readingBegin += 4;
+            Measurement measurement = constructMeasurementFromByteMessage(message.subList(readingBegin, readingBegin + measurementLength),sensorID);
+            readingBegin += measurementLength;
+            measurements.add(measurement);
+        }
+        return measurements;
+    }
+
+    private Measurement constructMeasurementFromByteMessage(List<Byte> message, int sensorID) {
+        int readingBegin = 0;
+        //value
+        int sizeOfValue = ConnectionUtil.byteListToInt(message.subList(readingBegin, readingBegin + 4));
+        readingBegin += 4;
+        int value = ConnectionUtil.byteListToInt(message.subList(readingBegin, readingBegin + sizeOfValue));
+        readingBegin += sizeOfValue;
+        //label
+        int sizeOfLabel = ConnectionUtil.byteListToInt(message.subList(readingBegin, readingBegin + 4));
+        readingBegin += 4;
+        String label = ConnectionUtil.byteListToString(message.subList(readingBegin, readingBegin + sizeOfLabel));
+        readingBegin += sizeOfLabel;
+        return new Measurement(sensorID,value,label);
+    }
+
+
     private enum CommandsType {
         GET_ALL_SENSORS(0), //1 param (commandType)
-        GET_SET_OF_MEASUREMENTS(1); //5 params (commandType, sensorID, start timestamp, end timestamp, precision)
+        GET_SET_OF_MEASUREMENTS(1); //3 params (commandType, sensorID, type)
         int commandNumber;
 
         CommandsType(int number) {

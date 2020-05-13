@@ -8,12 +8,14 @@ public class SensorTable {
     private SimpleStringProperty sensorName;
     private SimpleStringProperty sensorIp;
     private SimpleIntegerProperty sensorPort;
+    private SimpleIntegerProperty sensorCurrentMeasurement;
 
-    public SensorTable(Integer id, String name, String ip, Integer port) {
+    public SensorTable(Integer id, String name, String ip, Integer port, Integer currentMeasurement) {
         sensorId = new SimpleIntegerProperty(id);
         sensorName = new SimpleStringProperty(name);
         sensorIp = new SimpleStringProperty(ip);
         sensorPort = new SimpleIntegerProperty(port);
+        sensorCurrentMeasurement = new SimpleIntegerProperty(currentMeasurement);
     }
 
     public SensorTable(Sensor sensor) {
@@ -21,6 +23,7 @@ public class SensorTable {
         sensorName = new SimpleStringProperty(sensor.getName());
         sensorIp = new SimpleStringProperty(sensor.getIp());
         sensorPort = new SimpleIntegerProperty(sensor.getPort());
+        sensorCurrentMeasurement = new SimpleIntegerProperty(sensor.getCurrentMeasurement());
     }
 
     public int getSensorId() {
@@ -53,5 +56,17 @@ public class SensorTable {
 
     public SimpleIntegerProperty sensorPortProperty() {
         return sensorPort;
+    }
+
+    public int getSensorCurrentMeasurement() {
+        return sensorCurrentMeasurement.get();
+    }
+
+    public SimpleIntegerProperty sensorCurrentMeasurementProperty() {
+        return sensorCurrentMeasurement;
+    }
+
+    public void setSensorCurrentMeasurement(int sensorCurrentMeasurement) {
+        this.sensorCurrentMeasurement.set(sensorCurrentMeasurement);
     }
 }

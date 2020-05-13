@@ -10,16 +10,14 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
-import tin.monitoring.model.MonitoringModel;
-import tin.monitoring.model.Sensor;
-import tin.monitoring.model.SensorTable;
+import tin.monitoring.model.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 
-public class Controller {
+public class Controller implements ResponseExecutor {
     public BorderPane MainBox;
 
     @FXML
@@ -29,6 +27,7 @@ public class Controller {
     public TableColumn<SensorTable, String> tableSensorName;
     public TableColumn<SensorTable, String> tableSensorIp;
     public TableColumn<SensorTable, Integer> tableSensorPort;
+    public TableColumn<SensorTable, Integer> tableSensorCurrentMeasurement;
 
     @FXML
     public void initialize() {
@@ -36,6 +35,7 @@ public class Controller {
         tableSensorName.setCellValueFactory(new PropertyValueFactory<SensorTable, String>("SensorName"));
         tableSensorIp.setCellValueFactory(new PropertyValueFactory<SensorTable, String>("SensorIp"));
         tableSensorPort.setCellValueFactory(new PropertyValueFactory<SensorTable, Integer>("SensorPort"));
+        tableSensorCurrentMeasurement.setCellValueFactory(new PropertyValueFactory<SensorTable, Integer>("SensorCurrentMeasurement"));
 
         for (Sensor sensor : MonitoringModel.getInstance().getSensors()) {
             sensorsTable.getItems().add(new SensorTable(sensor));
@@ -107,4 +107,23 @@ public class Controller {
         lineChart.getData().add(series);
     }
 
+    public void refreshSensorTable() {
+        System.out.println("Refresh Sensor Table");
+        sensorsTable.getItems().clear();
+        for (Sensor sensor : MonitoringModel.getInstance().getSensors()) {
+            sensorsTable.getItems().add(new SensorTable(sensor));
+        }
+    }
+
+    @Override
+    public void executeResponseGetAllSensors(List<Sensor> sensors) {
+        System.out.println("EXECUTOR getAllSensors");
+        MonitoringModel.getInstance().setSensors(sensors);
+        refreshSensorTable();
+    }
+
+    @Override
+    public void executeResponseGetSetOfMeasurements(List<Measurement> measurements) {
+
+    }
 }
