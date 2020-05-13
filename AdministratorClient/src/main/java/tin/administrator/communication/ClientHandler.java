@@ -61,11 +61,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<byte[]> {
 
     public void sendMessage(String msg) {
         System.out.println("SEND: " + msg);
-//        ctx.writeAndFlush(Unpooled.copiedBuffer(msg, CharsetUtil.UTF_8));
 
-//        ctx.writeAndFlush(Unpooled.copiedBuffer(msg, CharsetUtil.US_ASCII));
-//        String x = new String(Bytes.toArray(ConnectionUtil.prepareStringMessageWithSize(msg)));
-//        ctx.writeAndFlush(Unpooled.copiedBuffer(x, CharsetUtil.US_ASCII));
         ctx.writeAndFlush(Unpooled.copiedBuffer(Bytes.toArray(ConnectionUtil.prepareStringMessageWithSizeLittleEndian(msg))));
     }
 
@@ -76,7 +72,8 @@ public class ClientHandler extends SimpleChannelInboundHandler<byte[]> {
 
     public void sendMessage(List<Byte> message) {
         System.out.println("SEND:");
-        ctx.writeAndFlush(Unpooled.copiedBuffer(Bytes.toArray(message)));
+        List<Byte> messageWithPrefixSize = ConnectionUtil.addPrefixMessageSize(message);
+        ctx.writeAndFlush(Unpooled.copiedBuffer(Bytes.toArray(messageWithPrefixSize)));
     }
 
     public void closeConnection() {

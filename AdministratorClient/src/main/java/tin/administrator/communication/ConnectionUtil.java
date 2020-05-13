@@ -69,4 +69,11 @@ public class ConnectionUtil {
         return byteList.get(0) != 0;
     }
 
+    public static synchronized List<Byte> addPrefixMessageSize(List<Byte> message) {
+        List<Byte> messageWithSize = new ArrayList<>();
+        messageWithSize.addAll(ConnectionUtil.intToByteListLittleEndian(message.size()));
+        messageWithSize.addAll(message);
+        return messageWithSize;
+    }
+
 }

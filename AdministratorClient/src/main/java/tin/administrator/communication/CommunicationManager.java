@@ -109,36 +109,30 @@ public class CommunicationManager extends Thread {
 
     public void sendCommandGetAllSensors() {
         System.out.println("Sending GetAllSensors");
-        sendMessage(prefixMessageSize(prepareMessageGetAllSensors()));
+        sendMessage(prepareMessageGetAllSensors());
     }
 
     public void sendCommandUpdateSensorName(int id, String name) {
         System.out.println("Sending UpdateSensorName");
-        sendMessage(prefixMessageSize(prepareMessageUpdateSensorName(id, name)));
+        sendMessage(prepareMessageUpdateSensorName(id, name));
     }
 
     public void sendCommandRevokeSensor(int id) {
         System.out.println("Sending RevokeSensor");
-        sendMessage(prefixMessageSize(prepareMessageRevokeSensor(id)));
+        sendMessage(prepareMessageRevokeSensor(id));
     }
 
     public void sendCommandDisconnectSensor(int id) {
         System.out.println("Sending DisconnectSensor");
-        sendMessage(prefixMessageSize(prepareMessageDisconnectSensor(id)));
+        sendMessage(prepareMessageDisconnectSensor(id));
     }
 
     public void sendCommandGenerateToken(String tokenName) {
         System.out.println("Sending GenerateToken");
-        sendMessage(prefixMessageSize(prepareMessageGenerateToken(tokenName)));
+        sendMessage(prepareMessageGenerateToken(tokenName));
     }
 
     /////////////////////////////////////////
-    List<Byte> prefixMessageSize(List<Byte> message) {
-        List<Byte> messageWithSize = new ArrayList<>();
-        messageWithSize.addAll(ConnectionUtil.intToByteListLittleEndian(message.size()));
-        messageWithSize.addAll(message);
-        return messageWithSize;
-    }
 
     List<Byte> prepareMessageGetAllSensors() {
         List<Byte> byteMessage = new ArrayList<Byte>();
