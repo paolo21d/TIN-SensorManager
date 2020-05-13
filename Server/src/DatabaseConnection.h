@@ -5,16 +5,14 @@
 #ifndef SERVER_DATABASECONNECTION_H
 #define SERVER_DATABASECONNECTION_H
 
-//#include <occi.h>
 #include "IDatabaseConnection.h"
 #include "Sensor.h"
-//#include <string>
 
 class DatabaseConnection : public IDatabaseConnection {
     oracle::occi::Environment *environment;
     oracle::occi::Connection *connection;
-    oracle::occi::Statement *createStatement(std::string sql);
 
+    oracle::occi::Statement *createStatement(std::string sql);
 
 
 public:
@@ -22,18 +20,25 @@ public:
 
     ~DatabaseConnection();
 
+    std::vector<Sensor *> getAllSensors() override;
 
-    std::vector<Sensor*> getAllSensors() override ;
+    Sensor *addSensor(std::string IP, int port, std::string token) override;
 
-    Sensor *addSensor(std::string IP, int port, std::string token) override ;
+    void revokeSensor(int id) override;
 
-    void revokeSensor(int id) override ;
+    void editSensor(int id, std::string name) override;
 
-    void editSensor(int id, std::string name) override ;
+    Sensor *getSensor(int id) override;
 
-    Sensor *getSensor(int id) override ;
+    void addMeasurement(int sensorId, int measure, int timestamp) override;
 
-    //void addMeasurement(IMeasurement measurement) override ;
+    std::vector<Sensor *> getAllSensorsWithMeasurements() override;
+
+    SensorMeasurement *getLastHour(int id) override;
+
+    SensorMeasurement *getLastDay(int id) override;
+
+    SensorMeasurement *getLastMonth(int id) override;
 };
 
 

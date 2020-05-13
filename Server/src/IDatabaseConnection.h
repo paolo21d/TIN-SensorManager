@@ -7,6 +7,7 @@
 
 #include "Sensor.h"
 #include "../Common/IMeasurement.h"
+#include "SensorMeasurement.h"
 #include <string>
 #include <vector>
 #include <occi.h>
@@ -14,6 +15,14 @@
 class IDatabaseConnection {
 public:
     virtual std::vector<Sensor*> getAllSensors() = 0;
+
+    virtual std::vector<Sensor *> getAllSensorsWithMeasurements() = 0;
+
+    virtual SensorMeasurement *getLastHour(int id) = 0;
+
+    virtual SensorMeasurement *getLastDay(int id) = 0;
+
+    virtual SensorMeasurement *getLastMonth(int id) = 0;
 
     virtual Sensor *addSensor(std::string IP, int port, std::string token) = 0;
 
@@ -23,7 +32,7 @@ public:
 
     virtual Sensor *getSensor(int id) = 0;
 
-    //virtual void addMeasurement(IMeasurement measurement) = 0;
+    virtual void addMeasurement(int sensorId, int measure, int timestamp) = 0;
 };
 
 #endif //SERVER_IDATABASECONNECTION_H

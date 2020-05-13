@@ -10,15 +10,16 @@
 #include "IDatabaseManager.h"
 #include <string>
 
-class DatabaseManager : public IDatabaseManager{
+class DatabaseManager : public IDatabaseManager {
     std::string name;
     std::string password;
     std::string connection;
-    oracle::occi::Environment* environment;
+    oracle::occi::Environment *environment;
 
 public:
     DatabaseManager(std::string name, std::string password, std::string connection);
-    IDatabaseConnection *getNewConnection() override ;
+
+    IDatabaseConnection *getNewConnection() override;
 };
 
 

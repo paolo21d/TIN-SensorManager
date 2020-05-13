@@ -17,7 +17,8 @@ add_executable(server src/main.cpp
         ../Common/IRequestListener.cpp
         src/DatabaseManager.cpp
         src/DatabaseConnection.cpp
-        )
+        src/SensorMeasurement.h
+        src/Measurement.h)
 
 target_include_directories(server PRIVATE ../Common)
 if(WIN32)

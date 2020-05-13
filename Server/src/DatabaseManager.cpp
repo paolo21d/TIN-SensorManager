@@ -19,7 +19,6 @@ IDatabaseConnection *DatabaseManager::getNewConnection() {
     oracle::occi::Connection *conn = environment->createConnection(name, password, connection);
 
     return new DatabaseConnection(environment, conn);
-    //return new DatabaseConnection();
 }
 
 

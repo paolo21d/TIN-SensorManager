@@ -3,7 +3,6 @@
 #include <vector>
 #include <IRequestListener.h>
 #include "ClientsHandler.h"
-#include "Sensor.h"
 #include "DatabaseManager.h"
 
 using namespace std;
@@ -32,28 +31,7 @@ public:
     }
 };
 
-void testDB(){
-    try {
-        auto *db = new DatabaseManager("ADMIN", "Seikonnoqwaser1!", "tin_high");
-        cout << "ENV created" << endl;
-        auto *conn = db->getNewConnection();
-        cout << "CONN created" << endl;
-
-        auto* sens = conn->getSensor(1);
-        cout << sens->id << " " << sens->name << " " << sens->ip << " " << sens->port << endl;
-        /*
-        auto sensors = conn->getAllSensors();
-        for (auto sens : sensors){
-            cout << sens->id << " " << sens->name << " " << sens->ip << " " << sens->port << endl;
-        }*/
-
-    } catch (oracle::occi::SQLException e) {
-        cout << e.getErrorCode();
-    }
-}
-
 int main(int argc, char *argv[]) {
-    testDB();
 
     try {
         initNetwork();
