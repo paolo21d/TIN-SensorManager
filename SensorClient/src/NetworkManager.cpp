@@ -34,11 +34,15 @@ namespace nm
             break;
         }
 
-        for (int i = 0; i < 100; ++i)
+        //sendMeasurement(new DoubleMeasurement(123, 49));
+
+        for (int i = 0; i < 1000; ++i)
         {
             sendMeasurement(new DoubleMeasurement(i * 3, i * i));
-            sleepMillis(500);
+            sleepMillis(5);
         }
+
+        //while (true);
 
         closeSocket(mainSocket);
     }
@@ -54,7 +58,7 @@ namespace nm
             vector<unsigned char> data = measurement->getBytes();
             vector<unsigned char> header;
 
-            BytesParser::appendBytes<int>(header, sizeof(long) + data.size());
+            BytesParser::appendBytes<int>(header, sizeof(long) + data.size());  //sizeof(long) - timestamp; data.size() - measurement
             BytesParser::appendBytes<long>(header, measurement->getTimestamp());
             BytesParser::moveBytes(header, data);
             int remaining = header.size();
@@ -91,7 +95,7 @@ namespace nm
                     if (nactive == 0)
                         cout << "Trying to send remaining " << remaining << " bytes" << endl;
                 }
-                cout << "Sent measurement" << endl;
+//                cout << "Sent measurement" << endl;
             }
             catch (ConnectionException e)
             {
@@ -100,6 +104,24 @@ namespace nm
                 cout << e.what() << endl;
             }
         }
+
+        vector<unsigned char> inBuffer;
+
+        char data[4];
+        recv(mainSocket, data, 4, 0);
+        BytesParser::appendBytes(inBuffer, (unsigned char *)data, 4);
+        int remainingIn = BytesParser::parse<int32_t>(inBuffer);
+//        cout << "remaining: " << remainingIn << endl;
+        char *msg = new char[remainingIn];
+        int r = recv(mainSocket, msg, remainingIn, 0);
+        inBuffer.clear();
+        BytesParser::appendBytes(inBuffer, (unsigned char *)msg, r);
+        double res = BytesParser::parse<double>(inBuffer, 0);
+//        cout << r << " Response: " << res << endl;
+
+        if (res != 27863.5) cout << "expected diff" << endl;
+
+        delete[] msg;
 
         return connected ? 0 : -1;
     }
