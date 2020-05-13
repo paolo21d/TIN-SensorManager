@@ -3,14 +3,13 @@
 #include <vector>
 #include <IRequestListener.h>
 #include "ClientsHandler.h"
+#include "DatabaseManager.h"
 
 using namespace std;
 
-class MockListener : public IRequestListener
-{
+class MockListener : public IRequestListener {
 public:
-    vector<unsigned char> onGotRequest(int clientId, vector<unsigned char> msg) override
-    {
+    vector<unsigned char> onGotRequest(int clientId, vector<unsigned char> msg) override {
         vector<unsigned char> response;
 
         int cursorPos = 0;
@@ -23,21 +22,18 @@ public:
         return response;
     }
 
-    void onClientConnected(int clientId)
-    {
+    void onClientConnected(int clientId) {
         cout << "Client " << clientId << " connected" << endl;
     }
 
-    void onClientDisconnected(int clientId)
-    {
+    void onClientDisconnected(int clientId) {
         cout << "Client " << clientId << " disconnected" << endl;
     }
 };
 
-int main(int argc, char *argv[])
-{
-    try
-    {
+int main(int argc, char *argv[]) {
+
+    try {
         initNetwork();
 
         cout << "START" << endl;
@@ -50,8 +46,7 @@ int main(int argc, char *argv[])
 
         cout << "END" << endl;
     }
-    catch (exception &e)
-    {
+    catch (exception &e) {
         cout << "got exception " << e.what() << endl;
     }
     return 0;

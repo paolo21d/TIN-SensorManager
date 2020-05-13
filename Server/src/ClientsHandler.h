@@ -4,8 +4,9 @@
 #include <exception>
 #include <vector>
 #include <deque>
-#include <mutex>
 #include <unordered_map>
+#include <memory>
+#include <mutex>
 #include "IClientsHandler.h"
 
 namespace sc
