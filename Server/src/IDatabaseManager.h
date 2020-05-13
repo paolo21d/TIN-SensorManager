@@ -1,12 +1,15 @@
-#ifndef IDatabaseManager_h
-#define IDatabaseManager_h
+//
+// Created by alexe on 12.05.2020.
+//
 
-#include "IMeasurement.h"
+#ifndef SERVER_IDATABASEMANAGER_H
+#define SERVER_IDATABASEMANAGER_H
 
-class IDatabaseManager
-{
-public:
-    virtual void gotMeasurement(IMeasurement measurement) = 0;
+#include "IDatabaseConnection.h"
+
+class IDatabaseManager {
+    virtual IDatabaseConnection *getNewConnection() = 0;
 };
 
-#endif /* IDatabaseManager_h */
+
+#endif //SERVER_IDATABASEMANAGER_H
