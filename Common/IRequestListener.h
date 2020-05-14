@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <BytesParser.h>
+#include <string>
 //#include "IClientsHandler.h"
 
 class IClientsHandler;
