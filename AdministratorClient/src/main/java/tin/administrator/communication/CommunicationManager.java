@@ -171,7 +171,6 @@ public class CommunicationManager extends Thread {
 
     //////////////
     public void analyzeResponse(List<Byte> message) {
-        System.out.println("ANALYZING RESPONSE");
         int commandType = ConnectionUtil.byteListToInt(message.subList(0, 4));
         if (commandType == 0) {
             List<Sensor> sensors = analyzeGetAllSensorsResponse(message.subList(4, message.size()));

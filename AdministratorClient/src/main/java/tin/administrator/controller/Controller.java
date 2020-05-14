@@ -132,36 +132,36 @@ public class Controller implements ResponseExecutor {
     @Override
     public void executeResponseGetAllSensors(List<Sensor> sensors) {
         System.out.println("EXECUTOR getAllSensors");
-        model.setSensors(sensors);
-        refreshAllViews();
+        /*model.setSensors(sensors);
+        refreshAllViews();*/
     }
 
     @Override
     public void executeResponseUpdateSensorName(int sensorId) {
         System.out.println("EXECUTOR updateSensorName");
-        refreshAllViews();
+        /*refreshAllViews();*/
     }
 
     @Override
     public void executeResponseRevokeSensor(int sensorId) {
         System.out.println("EXECUTOR revokeSensor");
-        model.removeSensor(sensorId);
-        refreshAllViews();
+        /*model.removeSensor(sensorId);
+        refreshAllViews();*/
     }
 
     @Override
     public void executeResponseDisconnectSensor(int sensorId) {
         System.out.println("EXECUTOR disconnectSensor");
-        model.disconnectSensor(sensorId);
+        /*model.disconnectSensor(sensorId);
         if (model.getCurrentDisplayedSensorId().equals(sensorId)) {
             displaySensorDetails(model.getCurrentDisplayedSensor());
-        }
+        }*/
     }
 
     @Override
     public void executeResponseGenerateToken(String tokenContent) {
         System.out.println("EXECUTOR generateToken");
-        displayToken(tokenContent);
+        /*displayToken(tokenContent);*/
     }
 
     ///
