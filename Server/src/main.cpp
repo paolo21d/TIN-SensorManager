@@ -4,6 +4,8 @@
 #include <thread>
 #include <IRequestListener.h>
 #include "ClientsHandler.h"
+#include "DatabaseManager.h"
+#include "AdministratorListener.h"
 
 using namespace std;
 
@@ -41,11 +43,9 @@ void sensorThread()
     try
     {
         initNetwork();
-
-        cout << "START" << endl;
+        cout << "START SENSOR CONNECTION" << endl;
 
         IRequestListener *listener = new MockListener();
-
         IClientsHandler *connectionHandler = new ClientsHandler();
         connectionHandler->addListener(listener);
         connectionHandler->startHandling("127.0.0.1", 33333);
@@ -69,7 +69,13 @@ void monitoringThread()
 
 void adminThread()
 {
+    initNetwork();
+    cout << "START ADMIN CONNECTION" << endl;
 
+    IRequestListener *listener = new AdministratorListener();
+    IClientsHandler *connectionHandler = new ClientsHandler();
+    connectionHandler->addListener(listener);
+    connectionHandler->startHandling("127.0.0.1", 28000);
 }
 
 int main(int argc, char *argv[])

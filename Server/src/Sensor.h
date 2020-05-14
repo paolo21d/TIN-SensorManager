@@ -14,6 +14,7 @@ public:
     std::string name;
     std::string ip;
     int port;
+    bool connected;
     Measurement *currentMeasurement;
 
     Sensor(int id, std::string name, std::string ip, int port) {
@@ -31,6 +32,14 @@ public:
         this->port = port;
         this->currentMeasurement = measurement;
     }
+
+    Sensor(int id, std::string name, std::string ip, int port, bool connected) {
+            this->id = id;
+            this->name = name;
+            this->ip = ip;
+            this->port = port;
+            this->connected=connected;
+        }
 };
 
 

@@ -1,6 +1,7 @@
 package tin.administrator;
 
 import tin.administrator.communication.CommunicationManager;
+import tin.administrator.controller.Controller;
 
 import java.io.IOException;
 
@@ -19,9 +20,9 @@ public class MockupTestingConnection {
 
 //        System.out.println(ConnectionUtil.ByteListToInt(ConnectionUtil.intToByteList(10)));
 
-        CommunicationManager com = new CommunicationManager();
+        CommunicationManager com = new CommunicationManager(new Controller());
         com.start();
-//        Thread.sleep(2000);
+        Thread.sleep(2000);
 
 /*        for (int i = 0; i < 5; i++) {
             com.sendMessage("message from client " + i);
@@ -31,15 +32,23 @@ public class MockupTestingConnection {
         com.sendAllMessagesFromBuffer();*/
 
 
-        com.sendCommandGetAllSensors();
+//        com.sendCommandGetAllSensors();
 //        Thread.sleep(2000);
-        com.sendCommandUpdateSensorName(1, "sensor1");
+/*        com.sendCommandUpdateSensorName(1, "sensor1");
 //        Thread.sleep(2000);
         com.sendCommandRevokeSensor(2);
 //        Thread.sleep(2000);
         com.sendCommandDisconnectSensor(3);
         Thread.sleep(2000);
-        com.sendCommandGenerateToken("tokenName");
+        com.sendCommandGenerateToken("tokenName");*/
+
+        ///
+        com.sendCommandGetAllSensors();
+        com.sendCommandUpdateSensorName(1, "sensor1"); //OK
+        com.sendCommandRevokeSensor(2); //OK
+        com.sendCommandDisconnectSensor(3); //OK
+        com.sendCommandGenerateToken("tokenName"); //OK
+        ///
 
         Thread.sleep(2000);
 

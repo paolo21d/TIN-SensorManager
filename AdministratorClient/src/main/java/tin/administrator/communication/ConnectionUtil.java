@@ -4,7 +4,6 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 public class ConnectionUtil {
@@ -52,12 +51,10 @@ public class ConnectionUtil {
     }
 
     public static synchronized int byteListToIntLittleEndian(List<Byte> byteList) {
-        Collections.reverse(byteList);
-        return byteListToInt(byteList);
-//        return (byteList.get(0) << 0) & 0xff000000 |
-//                (byteList.get(1) << 8) & 0x00ff0000 |
-//                (byteList.get(2) << 16) & 0x0000ff00 |
-//                (byteList.get(3) << 24) & 0x000000ff;
+        return byteList.get(0) & 0x000000ff |
+                (byteList.get(1) << 8) & 0x0000ff00 |
+                (byteList.get(2) << 16) & 0x00ff0000 |
+                (byteList.get(3) << 24) & 0xff000000;
     }
 
     public static synchronized String byteListToString(List<Byte> byteList) {
@@ -66,6 +63,17 @@ public class ConnectionUtil {
             builder.append((char) sign.byteValue());
         }
         return builder.toString();
+    }
+
+    public static synchronized boolean byteListToBoolean(List<Byte> byteList) {
+        return byteList.get(0) != 0;
+    }
+
+    public static synchronized List<Byte> addPrefixMessageSize(List<Byte> message) {
+        List<Byte> messageWithSize = new ArrayList<>();
+        messageWithSize.addAll(ConnectionUtil.intToByteListLittleEndian(message.size()));
+        messageWithSize.addAll(message);
+        return messageWithSize;
     }
 
 }
