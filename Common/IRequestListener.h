@@ -3,21 +3,29 @@
 
 #include <vector>
 #include <BytesParser.h>
+#include <string>
+//#include "IClientsHandler.h"
+
+class IClientsHandler;
 
 class IRequestListener
 {
 public:
-    virtual std::vector<unsigned char> onGotRequest(int clientId, std::vector<unsigned char> msg) = 0;
-//    virtual int onClientAccepted(int socketId) = 0;
-//    virtual void onClientDisconnected(int socketId) = 0;
+    virtual void onGotRequest(int clientId, std::vector<unsigned char> msg) = 0;
 
     template <class T>
     inline T getData(const std::vector<unsigned char> &bytes, int &offset);
 
     void send(int clientId, std::vector<unsigned char> msg);
+    void disconnectClient(int clientId);
 
-    virtual void onClientConnected(int clientId);
+    virtual void onClientConnected(int clientId, std::string ip, int port);
     virtual void onClientDisconnected(int clientId);
+
+    void setupListener(IClientsHandler *clientsHandler);
+
+private:
+    IClientsHandler *clientsHandler;
 };
 
 template <class T>

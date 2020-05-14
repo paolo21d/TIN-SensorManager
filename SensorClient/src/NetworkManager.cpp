@@ -21,9 +21,14 @@ namespace nm
 
         while (true)
         {
-            while (connect(mainSocket, (sockaddr * ) & service, sizeof(service)) == -1)
+            int result = -1;
+            while (result == -1)
             {
+                mainSocket = socket( AF_INET, SOCK_STREAM, IPPROTO_TCP );
+                result = connect(mainSocket, (sockaddr * ) & service, sizeof(service));
+
                 sleepSecs(1);
+                cout << "." << endl;
             }
             cout << "Connected to server" << endl;
             connected = true;
@@ -36,13 +41,11 @@ namespace nm
 
         //sendMeasurement(new DoubleMeasurement(123, 49));
 
-        for (int i = 0; i < 1000; ++i)
+        for (int i = 0; i < 100; ++i)
         {
-            sendMeasurement(new DoubleMeasurement(i * 3, i * i));
+            sendMeasurement(new DoubleMeasurement(getPosixTime(), i * i));
             sleepMillis(5);
         }
-
-        //while (true);
 
         closeSocket(mainSocket);
     }
@@ -58,8 +61,8 @@ namespace nm
             vector<unsigned char> data = measurement->getBytes();
             vector<unsigned char> header;
 
-            BytesParser::appendBytes<int>(header, sizeof(long) + data.size());  //sizeof(long) - timestamp; data.size() - measurement
-            BytesParser::appendBytes<long>(header, measurement->getTimestamp());
+            BytesParser::appendBytes<int>(header, sizeof(int64_t) + data.size());  //sizeof(long) - timestamp; data.size() - measurement
+            BytesParser::appendBytes<int64_t>(header, measurement->getTimestamp());
             BytesParser::moveBytes(header, data);
             int remaining = header.size();
 
@@ -95,7 +98,7 @@ namespace nm
                     if (nactive == 0)
                         cout << "Trying to send remaining " << remaining << " bytes" << endl;
                 }
-//                cout << "Sent measurement" << endl;
+                cout << "Sent measurement" << endl;
             }
             catch (ConnectionException e)
             {
@@ -119,7 +122,7 @@ namespace nm
         double res = BytesParser::parse<double>(inBuffer, 0);
 //        cout << r << " Response: " << res << endl;
 
-        if (res != 27863.5) cout << "expected diff" << endl;
+        if (res != 27863.5) cout << "expected diff " << res << endl;
 
         delete[] msg;
 

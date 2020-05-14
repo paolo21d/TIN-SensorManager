@@ -17,3 +17,8 @@ void sleepMillis(int millis)
     usleep(millis * 1000);
 #endif
 }
+
+int64_t getPosixTime()
+{
+    return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+}

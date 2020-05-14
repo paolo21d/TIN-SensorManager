@@ -4,13 +4,13 @@
 
 #include "DoubleMeasurement.h"
 
-DoubleMeasurement::DoubleMeasurement(long timestamp, double measurement)
+DoubleMeasurement::DoubleMeasurement(int64_t timestamp, double measurement)
     : timestamp(timestamp), measurement(measurement)
 {
 
 }
 
-long DoubleMeasurement::getTimestamp() {
+int64_t DoubleMeasurement::getTimestamp() {
     return timestamp;
 }
 
@@ -23,7 +23,7 @@ int DoubleMeasurement::setValue(std::vector<unsigned char> bytes) {
     return 0;
 }
 
-void DoubleMeasurement::setTimestamp(long timestamp)
+void DoubleMeasurement::setTimestamp(int64_t timestamp)
 {
     this->timestamp = timestamp;
 }

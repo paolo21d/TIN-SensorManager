@@ -11,5 +11,6 @@
 
 int initNetwork();
 int closeSocket(int socketDescriptor);
+void prepareSocket(int &socket, bool server);
 
 #endif //SERVER_NETWORKUTILS_H
