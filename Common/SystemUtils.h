@@ -7,7 +7,10 @@
 #include <unistd.h>
 #endif
 
+#include <chrono>
+
 void sleepSecs(int secs);
 void sleepMillis(int millis);
+int64_t getPosixTime();
 
 #endif //SERVER_SYSTEMUTILS_H

@@ -4,19 +4,20 @@
 #include <exception>
 #include <vector>
 #include <deque>
-#include <unordered_map>
-#include <memory>
 #include <mutex>
+#include <unordered_map>
 #include "IClientsHandler.h"
 
-namespace sc
-{
+//namespace sc
+//{
     class Client
     {
     private:
+        const bool IS_SERVER;
         const static int MAX_MSG;
 
         int socket;
+        sockaddr_in service;
         int clientId;
         std::mutex sendLock;
         //std::mutex recvLock;
@@ -32,18 +33,18 @@ namespace sc
         void reset();
 
     public:
-        Client();
+        Client(bool server);
 
         void setListener(IRequestListener *listener);
 
         bool isConnected();
-        void connected(int socket, int clientId);
+        void connected(int socket, int clientId, sockaddr_in service);
         void disconnected();
 
         bool isSomethingToSend();
         bool isSomethingToRecv();
 
-        void addOutMsg(std::vector<unsigned char> msg);
+        int addOutMsg(std::vector<unsigned char> msg);
         void gotMsg(std::vector<unsigned char> &msg);
 
         int sendData();
@@ -51,16 +52,24 @@ namespace sc
 
         int getSocket();
         int getClientId();
+
+        std::string getIp();
+        int getPort();
     };
 
     class ClientsHandler : public IClientsHandler
     {
     public:
-        ClientsHandler();
+        ClientsHandler(int maxClients = 100, bool server = true);
         void startHandling(std::string ipAddress, int port) override ;
         void addListener(IRequestListener *requestListener) override ;
 
+        void disconnectClient(int clientId) override;
+        int send(int clientId, std::vector<unsigned char> msg) override;
+
     private:
+
+        const bool IS_SERVER;
 
         const int CLIENTS;
         const int DELAY_SELECT_SEC;
@@ -72,23 +81,25 @@ namespace sc
         void recvData(Client &client);
 
         int getFreeHandler();
-        int setReadyHandlers(int acceptingSocket);
+        void setReadyHandlers(int acceptingSocket);
+        int  trySelect();
         void tryAccept();
         void tryRecv();
         void trySend();
 
-        void bindHandler(int socket);
+        void bindHandler(int socket, sockaddr_in service);
         void disconnectHandler(Client *client);
 
         std::vector<std::shared_ptr<Client>> clientHandlers;
 
         fd_set readyOut;
         fd_set readyIn;
-        int nfds;
 
         int freeHandler;
         int acceptingSocket;
+
+        bool connected = false;
     };
-}
+//}
 
 #endif /* ISensorConnectionHandler_h */

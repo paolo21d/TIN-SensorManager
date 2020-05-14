@@ -18,3 +18,16 @@ int closeSocket(int socketDescriptor)
     return close(socketDescriptor);
 #endif
 }
+
+void prepareSocket(int &socket, bool server)
+{
+#ifdef WIN32
+
+#else
+    if (server)
+    {
+        int set = 1;
+        //setsockopt(socket, SOL_SOCKET, SO_NOSIGPIPE, (void *) &set, sizeof(int));
+    }
+#endif
+}
