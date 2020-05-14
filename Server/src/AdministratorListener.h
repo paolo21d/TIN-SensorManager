@@ -1,14 +1,14 @@
 #ifndef SERVER_ADMINISTRATORLISTENER_H
 #define SERVER_ADMINISTRATORLISTENER_H
 
-#include <IRequestListener.h>
+#include "IRequestListener.h"
 #include <vector>
 #include <string>
 #include "Sensor.h"
 
 class AdministratorListener : public IRequestListener {
 public:
-    std::vector<unsigned char> onGotRequest(int clientId, std::vector<unsigned char> msg) override;
+    void onGotRequest(int clientId, std::vector<unsigned char> msg) override;
 
 
 private:

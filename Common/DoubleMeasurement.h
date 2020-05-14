@@ -11,11 +11,11 @@
 class DoubleMeasurement : public IMeasurement {
 public:
 
-    DoubleMeasurement(long timestamp, double measurement);
+    DoubleMeasurement(int64_t timestamp, double measurement);
 
-    long getTimestamp() override;
+    int64_t getTimestamp() override;
 
-    void setTimestamp(long timestamp) override;
+    void setTimestamp(int64_t timestamp) override;
 
     std::vector<unsigned char> getBytes() override;
 
@@ -23,7 +23,7 @@ public:
 
 private:
     double measurement;
-    long timestamp;
+    int64_t timestamp;
 };
 
 

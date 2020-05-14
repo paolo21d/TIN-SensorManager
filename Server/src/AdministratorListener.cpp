@@ -5,7 +5,7 @@
 using namespace std;
 
 
-vector<unsigned char> AdministratorListener::onGotRequest(int clientId, vector<unsigned char> msg) {
+void AdministratorListener::onGotRequest(int clientId, vector<unsigned char> msg) {
     vector<char> msgChar;
     cout << "MESSAGE ------------------------" << endl;
     for (int i = 0; i < msg.size(); i++)
@@ -50,7 +50,7 @@ vector<unsigned char> AdministratorListener::onGotRequest(int clientId, vector<u
         for (int i = 0; i < text.size(); i++)
             response.push_back(text[i]);
     }
-    return response;
+    send(clientId, response);
 }
 
 
