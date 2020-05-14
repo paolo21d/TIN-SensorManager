@@ -10,11 +10,13 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import tin.monitoring.communication.CommunicationManager;
 import tin.monitoring.model.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Timer;
 
 
 public class Controller implements ResponseExecutor {
@@ -29,6 +31,15 @@ public class Controller implements ResponseExecutor {
     public TableColumn<SensorTable, Integer> tableSensorPort;
     public TableColumn<SensorTable, Integer> tableSensorCurrentMeasurement;
 
+    private CommunicationManager communicationManager;
+    private SensorTableRefreshTask sensorTableRefreshTask;
+    Timer timer = new Timer();
+
+    public Controller() {
+        communicationManager = new CommunicationManager(this);
+        sensorTableRefreshTask = new SensorTableRefreshTask(this);
+    }
+
     @FXML
     public void initialize() {
         tableSensorId.setCellValueFactory(new PropertyValueFactory<SensorTable, Integer>("SensorId"));
@@ -40,6 +51,10 @@ public class Controller implements ResponseExecutor {
         for (Sensor sensor : MonitoringModel.getInstance().getSensors()) {
             sensorsTable.getItems().add(new SensorTable(sensor));
         }
+
+        timer.scheduleAtFixedRate(sensorTableRefreshTask, 5000, 3000);
+
+        communicationManager.run();
     }
 
     public void tableClicked(MouseEvent mouseEvent) {
@@ -115,6 +130,10 @@ public class Controller implements ResponseExecutor {
         }
     }
 
+    public void sendRequestGetAllSensors() {
+        communicationManager.sendCommandGetAllSensors();
+    }
+
     @Override
     public void executeResponseGetAllSensors(List<Sensor> sensors) {
         System.out.println("EXECUTOR getAllSensors");
@@ -126,4 +145,6 @@ public class Controller implements ResponseExecutor {
     public void executeResponseGetSetOfMeasurements(List<Measurement> measurements) {
 
     }
+
+
 }

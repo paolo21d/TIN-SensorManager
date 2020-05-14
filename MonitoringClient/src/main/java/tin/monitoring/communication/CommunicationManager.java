@@ -12,6 +12,7 @@ import io.netty.handler.codec.bytes.ByteArrayDecoder;
 import io.netty.handler.codec.bytes.ByteArrayEncoder;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import tin.monitoring.model.Measurement;
 import tin.monitoring.model.ResponseExecutor;
@@ -23,6 +24,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+@RequiredArgsConstructor
 public class CommunicationManager extends Thread {
     @NonNull
     ResponseExecutor responseExecutor;
@@ -188,7 +190,7 @@ public class CommunicationManager extends Thread {
         readingBegin += 4;
         int currMeasurement = ConnectionUtil.byteListToInt(message.subList(readingBegin, readingBegin + sizeOfCurrMeasurement));
         readingBegin += sizeOfCurrMeasurement;
-        System.out.println(String.format("\nidSize:%d id:%d\nnameSize:%d name:%s\nipSize:%d ip:%s\nportSize:%d port:%d\ncurrMeasurementSize:%d currMeasurement:%d",
+        System.out.println(String.format("\nidSize:%d id:%d\nnameSize:%d name:%s\nipSize:%d ip:%s\nportSize:%d port:%d\ncurrMeasurementSize:%d",
                 sizeOfId, id, sizeOfName, name, sizeOfIp, ip, sizeOfPort, port, currMeasurement));
         return new Sensor(id, name, ip, port, currMeasurement);
     }

@@ -1,6 +1,7 @@
 package tin.monitoring;
 
 import tin.monitoring.communication.CommunicationManager;
+import tin.monitoring.controller.Controller;
 
 import java.io.IOException;
 
@@ -19,7 +20,7 @@ public class MockupTestingConnection {
 
 //        System.out.println(ConnectionUtil.ByteListToInt(ConnectionUtil.intToByteList(10)));
 
-        CommunicationManager com = new CommunicationManager();
+        CommunicationManager com = new CommunicationManager(new Controller());
         com.start();
 //        Thread.sleep(2000);
 

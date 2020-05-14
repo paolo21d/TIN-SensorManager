@@ -8,6 +8,7 @@ import java.util.List;
 
 public class ConnectionUtil {
 
+
     public static synchronized List<Byte> prepareIntegerMessageWithSize(int number) {
         List<Byte> byteList = new ArrayList<Byte>();
         byteList.addAll(intToByteList(4)); //size of int
@@ -75,5 +76,4 @@ public class ConnectionUtil {
         messageWithSize.addAll(message);
         return messageWithSize;
     }
-
 }
