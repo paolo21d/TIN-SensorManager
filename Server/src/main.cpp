@@ -73,7 +73,7 @@ void adminThread()
     cout << "START ADMIN CONNECTION" << endl;
 
     IRequestListener *listener = new AdministratorListener();
-    sc::IClientsHandler *connectionHandler = new sc::ClientsHandler();
+    IClientsHandler *connectionHandler = new ClientsHandler();
     connectionHandler->addListener(listener);
     connectionHandler->startHandling("127.0.0.1", 28000);
 }
