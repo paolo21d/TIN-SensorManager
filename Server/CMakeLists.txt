@@ -24,7 +24,7 @@ add_executable(
         src/Measurement.h
         src/MonitoringListener.cpp src/MonitoringListener.h
 
-)
+        src/ServerModel.cpp src/ServerModel.h src/IModelForSensor.h src/IModelForAdministrator.h src/IModelForMonitoring.h)
 target_include_directories(server PRIVATE ../Common ../Server)
 if(WIN32)
     target_link_libraries(server wsock32 ws2_32)
