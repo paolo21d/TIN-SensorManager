@@ -298,6 +298,7 @@ using namespace std;
             socklen_t sLen;
             memset( & service, 0, sizeof( service ) );
             int clientSocket = accept(acceptingSocket, (struct sockaddr *)&service, &sLen );
+            prepareSocket(clientSocket, IS_SERVER);
 
             if (clientSocket == -1)
                 throw ConnectionException(ConnectionException::ACCEPT);
