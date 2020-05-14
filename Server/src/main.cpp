@@ -1,6 +1,7 @@
 #include <iostream>
 #include <NetworkUtils.h>
 #include <vector>
+#include <thread>
 #include <IRequestListener.h>
 #include "ClientsHandler.h"
 
@@ -35,7 +36,7 @@ public:
     }
 };
 
-int main(int argc, char *argv[])
+void sensorThread()
 {
     try
     {
@@ -45,7 +46,7 @@ int main(int argc, char *argv[])
 
         IRequestListener *listener = new MockListener();
 
-        sc::IClientsHandler *connectionHandler = new sc::ClientsHandler();
+        IClientsHandler *connectionHandler = new ClientsHandler();
         connectionHandler->addListener(listener);
         connectionHandler->startHandling("127.0.0.1", 33333);
 
@@ -59,5 +60,28 @@ int main(int argc, char *argv[])
     {
         cout << "got exception " << e.what() << endl;
     }
+}
+
+void monitoringThread()
+{
+
+}
+
+void adminThread()
+{
+
+}
+
+int main(int argc, char *argv[])
+{
+    thread t1(sensorThread);
+    thread t2(monitoringThread);
+    thread t3(adminThread);
+
+    t1.join();
+    t2.join();
+    t3.join();
+
+
     return 0;
 }
