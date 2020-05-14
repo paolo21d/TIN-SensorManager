@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 3.15)
 project(server)
 set(CMAKE_CXX_STANDARD 20)
+
+find_path(OCCI occi.h $ENV{INSTANT_CLIENT}/sdk/include)
+
+include_directories(${OCCI})
+
+
 add_executable(
         server
         src/main.cpp
@@ -12,7 +18,12 @@ add_executable(
         src/AdministratorListener.h
         src/Sensor.h
         ../Common/IRequestListener.cpp
-        )
+        src/DatabaseManager.cpp
+        src/DatabaseConnection.cpp
+        src/SensorMeasurement.h
+        src/Measurement.h
+
+)
 target_include_directories(server PRIVATE ../Common ../Server)
 if(WIN32)
     target_link_libraries(server wsock32 ws2_32)
