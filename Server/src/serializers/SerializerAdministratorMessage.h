@@ -7,6 +7,7 @@
 
 
 #include "SerializerMessage.h"
+#include <src/commandTypes/AdministratorCommandTypes.h>
 #include <src/Sensor.h>
 #include <vector>
 #include <string>
@@ -31,14 +32,6 @@ private:
 
     std::vector<char> constructSensorListMessage(std::vector<Sensor> sensors);
 
-public:
-    enum CommandTypes {
-        GET_ALL_SENSORS = 0, //1 param (commandType)
-        UPDATE_SENSOR_NAME = 1, //3 params (commandType, sensorId, sensorName)
-        REVOKE_SENSOR = 2, //2 param (commandType, sensorId)
-        DISCONNECT_SENSOR = 3, //2 param (commandType, sensorName)
-        GENERATE_TOKEN = 4 //2 param (commandType, sensorId)
-    };
 };
 
 

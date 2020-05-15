@@ -33,7 +33,7 @@ add_executable(
         src/serializers/SerializerSensorMessage.h
         src/serializers/SerializerAdministratorMessage.h src/serializers/SerializerAdministratorMessage.cpp
         src/serializers/SerializerMonitoringMessage.h
-)
+        src/commandTypes/AdministratorCommandTypes.h src/commandTypes/MonitoringCommandTypes.h)
 target_include_directories(server PRIVATE ../Common ../Server)
 if (WIN32)
     target_link_libraries(server wsock32 ws2_32)
