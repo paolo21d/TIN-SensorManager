@@ -22,6 +22,7 @@ add_executable(
         src/DatabaseConnection.cpp
         src/SensorMeasurement.h
         src/Measurement.h
+        src/MonitoringListener.cpp src/MonitoringListener.h
 
 )
 target_include_directories(server PRIVATE ../Common ../Server)
