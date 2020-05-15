@@ -17,7 +17,7 @@ public:
 
     virtual void administratorCommandDisconnectSensor(int clientId, int sensorId) = 0;
 
-    virtual void administratorCommandGenerateToken(int clientId) = 0;
+    virtual void administratorCommandGenerateToken(int clientId, std::string tokenName) = 0;
 
 };
 
