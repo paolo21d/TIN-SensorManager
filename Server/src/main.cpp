@@ -6,6 +6,7 @@
 #include "ClientsHandler.h"
 #include "DatabaseManager.h"
 #include "AdministratorListener.h"
+#include "MonitoringListener.h"
 
 using namespace std;
 
@@ -64,6 +65,13 @@ void sensorThread()
 
 void monitoringThread()
 {
+    initNetwork();
+    cout << "START MONITORING CONNECTION" << endl;
+
+    IRequestListener *listener = new MonitoringListener();
+    IClientsHandler *connectionHandler = new ClientsHandler();
+    connectionHandler->addListener(listener);
+    connectionHandler->startHandling("127.0.0.1", 28000);
 
 }
 
