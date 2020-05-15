@@ -18,9 +18,9 @@ void MonitoringListener::onGotRequest(int clientId, std::vector<unsigned char> m
     vector<unsigned char> response;
     if (commandType == GET_ALL_SENSORS) {
         vector<Sensor> sensors;
-        sensors.push_back(Sensor(1, "sensor1", "192.168.0.1", 9200, 1));
-        sensors.push_back(Sensor(2, "sensor2", "192.168.0.2", 9200, 2));
-        sensors.push_back(Sensor(3, "sensor3", "192.168.0.3", 9200, 3));
+        sensors.push_back(Sensor(1, "sensor1", "192.168.0.1", 9200, true));
+        sensors.push_back(Sensor(2, "sensor2", "192.168.0.2", 9200, true));
+        sensors.push_back(Sensor(3, "sensor3", "192.168.0.3", 9200, true));
         vector<char> text = constructGetAllSensorsMessage(sensors);
         for (int i = 0; i < text.size(); i++)
             response.push_back(text[i]);
@@ -148,7 +148,8 @@ vector<char> MonitoringListener::constructSensorMessage(Sensor sensor) {
     tmp = constructIntMessageWithSize(sensor.port);
     message.insert(message.end(), tmp.begin(), tmp.end());
     //connected
-    tmp = constructIntMessageWithSize(sensor.currentMeasurement);
+//    tmp = constructIntMessageWithSize(sensor.currentMeasurement);
+    tmp = constructIntMessageWithSize(1);
     message.insert(message.end(), tmp.begin(), tmp.end());
 
     return message;
