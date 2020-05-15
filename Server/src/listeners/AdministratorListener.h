@@ -5,14 +5,16 @@
 #include <vector>
 #include <string>
 #include <src/serializers/SerializerAdministratorMessage.h>
+#include <src/serverModel/IModelForAdministrator.h>
 #include "src/Sensor.h"
 
 class AdministratorListener : public IRequestListener {
 public:
+    AdministratorListener(IModelForAdministrator *model);
     void onGotRequest(int clientId, std::vector<unsigned char> msg) override;
 
 private:
-    SerializerAdministratorMessage serializer;
+    SerializerAdministratorMessage* serializer;
 };
 
 

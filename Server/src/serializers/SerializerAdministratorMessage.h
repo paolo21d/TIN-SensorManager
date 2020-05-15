@@ -11,11 +11,16 @@
 #include <src/Sensor.h>
 #include <vector>
 #include <string>
+#include <src/serverModel/IModelForAdministrator.h>
 
 
 class SerializerAdministratorMessage : public SerializerMessage {
+    IModelForAdministrator *model;
+
 public:
-    int analyzeMessage(std::vector<char> message);
+    SerializerAdministratorMessage(IModelForAdministrator* model);
+
+    int analyzeMessage(int clientId, std::vector<char> message);
 
     std::vector<char> constructGetAllSensorsMessage(std::vector<Sensor> sensors);
 

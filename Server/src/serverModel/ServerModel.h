@@ -8,6 +8,7 @@
 
 #include <IRequestListener.h>
 #include <queue>
+#include <iostream>
 #include <src/requests/AdministratorRequest.h>
 #include <src/requests/MonitoringRequest.h>
 #include <src/requests/SensorRequest.h>
@@ -18,7 +19,23 @@
 #include "IModelForAdministrator.h"
 #include "IModelForSensor.h"
 
-class ServerModel : IModelForSensor, IModelForMonitoring, IModelForAdministrator {
+/*#ifdef _WIN32
+
+#include <windows.h>
+
+void sleep(unsigned milliseconds) {
+    Sleep(milliseconds);
+}
+
+#else
+#include <unistd.h>
+
+void sleep(unsigned milliseconds) {
+    usleep(milliseconds * 1000); // takes microseconds
+}
+#endif*/
+
+class ServerModel : public IModelForSensor, public IModelForMonitoring, public IModelForAdministrator {
     IRequestListener *sensorConnectionListener;
     IRequestListener *administratorConnectionListener;
     IRequestListener *monitoringConnectionListener;
@@ -47,7 +64,8 @@ public:
     //SENSOR INTERFACE
     virtual void sensorCommandAddMeasurement(int clientId, int64_t timestamp, double value);
 
-    virtual void sensorCommandConnectedSensor(int clientId, std::string sensorIp, int sensorPort, std::string sensorToken);
+    virtual void
+    sensorCommandConnectedSensor(int clientId, std::string sensorIp, int sensorPort, std::string sensorToken);
 
     virtual void sensorCommandDisconnectedSensor(int clientId);
 

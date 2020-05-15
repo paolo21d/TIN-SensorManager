@@ -6,7 +6,11 @@
 
 using namespace std;
 
-int SerializerAdministratorMessage::analyzeMessage(vector<char> message) {
+SerializerAdministratorMessage::SerializerAdministratorMessage(IModelForAdministrator* model){
+    this->model = model;
+}
+
+int SerializerAdministratorMessage::analyzeMessage(int clientId, vector<char> message) {
     if (message.empty()) {
         return -1;
     }
@@ -24,6 +28,7 @@ int SerializerAdministratorMessage::analyzeMessage(vector<char> message) {
 
     if (commandType == GET_ALL_SENSORS) { //GET_ALL_SENSORS
         printf("Command: GetAllSensors\n");
+        model->administratorCommandGetAllSensors(clientId);
         return GET_ALL_SENSORS;
     } else if (commandType == UPDATE_SENSOR_NAME) { //UPDATE_SENSOR_NAME
         printf("Command: UpdateSensorName\n");
@@ -42,6 +47,7 @@ int SerializerAdministratorMessage::analyzeMessage(vector<char> message) {
         }
 
         printf("SizeOfId: %d; Id: %d; SizeOfName: %d; Name: %s\n", sizeOfId, id, sizeOfName, name.c_str());
+        model->administratorCommandUpdateSensorName(clientId, id, name);
         return UPDATE_SENSOR_NAME;
     } else if (commandType == REVOKE_SENSOR) { //REVOKE_SENSOR
         printf("Command: RevokeSensor\n");
@@ -53,6 +59,7 @@ int SerializerAdministratorMessage::analyzeMessage(vector<char> message) {
         readingBegin += 4;
 
         printf("SizeOfId: %d; Id: %d\n", sizeOfId, id);
+        model->administratorCommandRevokeSensor(clientId, id);
         return REVOKE_SENSOR;
     } else if (commandType == DISCONNECT_SENSOR) { //DISCONNECT_SENSOR
         printf("Command: DisconnectSensor\n");
@@ -64,6 +71,7 @@ int SerializerAdministratorMessage::analyzeMessage(vector<char> message) {
         readingBegin += 4;
 
         printf("SizeOfId: %d; Id: %d\n", sizeOfId, id);
+        model->administratorCommandDisconnectSensor(clientId, id);
         return DISCONNECT_SENSOR;
     } else if (commandType == GENERATE_TOKEN) { //GENERATE_TOKEN
         printf("Command: GenerateToken\n");
@@ -78,6 +86,7 @@ int SerializerAdministratorMessage::analyzeMessage(vector<char> message) {
         }
 
         printf("SizeOfName: %d; Name: %s\n", sizeOfName, name.c_str());
+        model->administratorCommandGenerateToken(clientId, name);
         return GENERATE_TOKEN;
     } else {
         printf("Error command type unrecogized");

@@ -13,7 +13,6 @@ void SensorListener::onGotRequest(int clientId, vector<unsigned char> msg) {
     double value = getData<double>(msg, cursorPos);
     cout << "client " << clientId << "     timestamp: " << timestamp << "     value: " << value << endl;
 
-//BytesParser::appendBytes<double>(response, 27863.5);
 
     vector<unsigned char> response;
     BytesParser::appendBytes<char>(response, '1');

@@ -4,6 +4,8 @@
 
 #include "ServerModel.h"
 
+using namespace std;
+
 ServerModel::ServerModel(IRequestListener *sensor, IRequestListener *administrator, IRequestListener *monitoring) {
     sensorConnectionListener = sensor;
     administratorConnectionListener = administrator;
@@ -107,6 +109,23 @@ void ServerModel::monitoringCommandGetSetOfMeasurements(int clientId, int sensor
 ///EXECUTE
 void ServerModel::executeAdministratorRequests() {
 
+    while(1==1) {
+        administratorRequestsQueueMutex.lock();
+        int queueSize = administratorRequestsQueue.size();
+        administratorRequestsQueueMutex.unlock();
+
+        if(queueSize>0) {
+            administratorRequestsQueueMutex.lock();
+            AdministratorRequest request = administratorRequestsQueue.front();
+            administratorRequestsQueue.pop();
+            administratorRequestsQueueMutex.unlock();
+
+            cout<<"AdministratorRequest\tCommandType: " + request.commandType<<endl;
+
+        } else {
+//            sleep(1000);
+        }
+    }
 }
 
 void ServerModel::executeMonitoringRequests() {

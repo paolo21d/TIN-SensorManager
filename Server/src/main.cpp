@@ -5,6 +5,7 @@
 #include <IRequestListener.h>
 #include <src/serverModel/ServerModel.h>
 #include <src/listeners/MonitoringListener.h>
+#include <src/listeners/SensorListener.h>
 #include "ClientsHandler.h"
 #include "src/database/DatabaseManager.h"
 #include "src/listeners/AdministratorListener.h"
@@ -44,7 +45,7 @@ void sensorThread() {
         cout << "START SENSOR CONNECTION" << endl;
 
 //        IRequestListener *listener = new MockListener();
-        IRequestListener *listener = new AdministratorListener();
+        IRequestListener *listener = new SensorListener();
         serverModel->setSensorConnectionListener(listener);
         IClientsHandler *connectionHandler = new ClientsHandler();
         connectionHandler->addListener(listener);
@@ -76,7 +77,7 @@ void adminThread() {
     initNetwork();
     cout << "START ADMIN CONNECTION" << endl;
 
-    IRequestListener *listener = new AdministratorListener();
+    IRequestListener *listener = new AdministratorListener(serverModel);
     serverModel->setAdministratorConnectionListener(listener);
     IClientsHandler *connectionHandler = new ClientsHandler();
     connectionHandler->addListener(listener);

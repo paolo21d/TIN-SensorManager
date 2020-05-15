@@ -7,6 +7,7 @@
 
 
 #include <IRequestListener.h>
+#include <src/serializers/SerializerSensorMessage.h>
 
 class SensorListener : public IRequestListener {
     void onGotRequest(int clientId, std::vector<unsigned char> msg);
@@ -14,6 +15,7 @@ class SensorListener : public IRequestListener {
     void onClientConnected(int clientId, std::string ip, int port);
 
     void onClientDisconnected(int clientId);
+
 };
 
 
