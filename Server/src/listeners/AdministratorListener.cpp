@@ -29,7 +29,7 @@ void AdministratorListener::onGotRequest(int clientId, vector<unsigned char> msg
 //    for (int i = 0; i < text.size(); i++)
 //            response.push_back(text[i]);
 
-    if (commandType == GET_ALL_SENSORS) {
+    /*if (commandType == GET_ALL_SENSORS) {
         vector<Sensor> sensors;
         sensors.push_back(Sensor(1, "sensor1", "192.168.0.1", 9200, true));
         sensors.push_back(Sensor(2, "sensor2", "192.168.0.2", 9200, false));
@@ -54,5 +54,5 @@ void AdministratorListener::onGotRequest(int clientId, vector<unsigned char> msg
         for (int i = 0; i < text.size(); i++)
             response.push_back(text[i]);
     }
-    send(clientId, response);
+    send(clientId, response);*/
 }

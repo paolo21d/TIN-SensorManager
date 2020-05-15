@@ -29,7 +29,9 @@ void ServerModel::setMonitoringConnectionListener(IRequestListener *listener) {
 }
 
 void ServerModel::init() {
+    thread administratorRequestsExecutor(&ServerModel::executeAdministratorRequests, this);
 
+    administratorRequestsExecutor.join();
 }
 
 ///SENSOR INTERFACE
@@ -112,19 +114,21 @@ void ServerModel::executeAdministratorRequests() {
     while(1==1) {
         administratorRequestsQueueMutex.lock();
         int queueSize = administratorRequestsQueue.size();
-        administratorRequestsQueueMutex.unlock();
+
 
         if(queueSize>0) {
-            administratorRequestsQueueMutex.lock();
             AdministratorRequest request = administratorRequestsQueue.front();
             administratorRequestsQueue.pop();
-            administratorRequestsQueueMutex.unlock();
 
-            cout<<"AdministratorRequest\tCommandType: " + request.commandType<<endl;
+            cout <<"AdministratorRequest\tCommandType: " << request.commandType<<endl;
+
 
         } else {
-//            sleep(1000);
+
         }
+        administratorRequestsQueueMutex.unlock();
+        std::chrono::milliseconds timespan(1000); // or whatever
+        std::this_thread::sleep_for(timespan);
     }
 }
 

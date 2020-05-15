@@ -19,22 +19,6 @@
 #include "IModelForAdministrator.h"
 #include "IModelForSensor.h"
 
-/*#ifdef _WIN32
-
-#include <windows.h>
-
-void sleep(unsigned milliseconds) {
-    Sleep(milliseconds);
-}
-
-#else
-#include <unistd.h>
-
-void sleep(unsigned milliseconds) {
-    usleep(milliseconds * 1000); // takes microseconds
-}
-#endif*/
-
 class ServerModel : public IModelForSensor, public IModelForMonitoring, public IModelForAdministrator {
     IRequestListener *sensorConnectionListener;
     IRequestListener *administratorConnectionListener;
