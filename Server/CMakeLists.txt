@@ -24,11 +24,20 @@ add_executable(
         src/Measurement.h
         src/MonitoringListener.cpp src/MonitoringListener.h
 
-        src/ServerModel.cpp src/ServerModel.h src/IModelForSensor.h src/IModelForAdministrator.h src/IModelForMonitoring.h)
+        src/ServerModel.cpp src/ServerModel.h
+        src/IModelForSensor.h
+        src/IModelForAdministrator.h
+        src/IModelForMonitoring.h
+
+        src/serializers/SerializerMessage.h src/serializers/SerializerMessage.cpp
+        src/serializers/SerializerSensorMessage.h
+        src/serializers/SerializerAdministratorMessage.h src/serializers/SerializerAdministratorMessage.cpp
+        src/serializers/SerializerMonitoringMessage.h
+)
 target_include_directories(server PRIVATE ../Common ../Server)
-if(WIN32)
+if (WIN32)
     target_link_libraries(server wsock32 ws2_32)
-endif()
+endif ()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_link_libraries(server $ENV{INSTANT_CLIENT}/sdk/lib/msvc/vc14/oraocci12d.lib)
