@@ -5,7 +5,7 @@
 #include <vector>
 #include <string>
 #include <src/serializers/SerializerAdministratorMessage.h>
-#include "Sensor.h"
+#include "src/Sensor.h"
 
 class AdministratorListener : public IRequestListener {
 public:

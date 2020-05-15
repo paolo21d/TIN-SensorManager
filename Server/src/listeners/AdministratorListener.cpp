@@ -1,5 +1,5 @@
 #include "AdministratorListener.h"
-#include "Sensor.h"
+#include "src/Sensor.h"
 #include <iostream>
 #include <src/commandTypes/AdministratorCommandTypes.h>
 

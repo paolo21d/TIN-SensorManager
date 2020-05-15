@@ -5,8 +5,8 @@
 #ifndef SERVER_IMODELFORSENSOR_H
 #define SERVER_IMODELFORSENSOR_H
 
-#include "Measurement.h"
-#include "Sensor.h"
+#include "src/Measurement.h"
+#include "src/Sensor.h"
 
 class IModelForSensor {
 public:

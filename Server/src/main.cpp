@@ -3,10 +3,10 @@
 #include <vector>
 #include <thread>
 #include <IRequestListener.h>
+#include <src/listeners/MonitoringListener.h>
 #include "ClientsHandler.h"
-#include "DatabaseManager.h"
-#include "AdministratorListener.h"
-#include "MonitoringListener.h"
+#include "src/database/DatabaseManager.h"
+#include "src/listeners/AdministratorListener.h"
 
 using namespace std;
 
