@@ -9,12 +9,13 @@
 #include "src/Sensor.h"
 
 class AdministratorListener : public IRequestListener {
+    IModelForAdministrator *model;
 public:
     AdministratorListener(IModelForAdministrator *model);
     void onGotRequest(int clientId, std::vector<unsigned char> msg) override;
 
 private:
-    SerializerAdministratorMessage* serializer;
+    SerializerAdministratorMessage serializer;
 };
 
 

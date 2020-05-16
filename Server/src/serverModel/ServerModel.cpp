@@ -2,6 +2,7 @@
 // Created by paolo on 14.05.2020.
 //
 
+#include <src/serializers/SerializerAdministratorMessage.h>
 #include "ServerModel.h"
 
 using namespace std;
@@ -110,6 +111,7 @@ void ServerModel::monitoringCommandGetSetOfMeasurements(int clientId, int sensor
 
 ///EXECUTE
 void ServerModel::executeAdministratorRequests() {
+    SerializerAdministratorMessage serializer;
 
     while(1==1) {
         administratorRequestsQueueMutex.lock();

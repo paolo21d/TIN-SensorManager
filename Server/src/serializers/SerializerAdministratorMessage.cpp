@@ -6,11 +6,7 @@
 
 using namespace std;
 
-SerializerAdministratorMessage::SerializerAdministratorMessage(IModelForAdministrator* model){
-    this->model = model;
-}
-
-int SerializerAdministratorMessage::analyzeMessage(int clientId, vector<char> message) {
+int SerializerAdministratorMessage::analyzeMessage(int clientId, vector<char> message, IModelForAdministrator* model) {
     if (message.empty()) {
         return -1;
     }

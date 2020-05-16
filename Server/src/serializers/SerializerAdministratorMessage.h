@@ -15,12 +15,8 @@
 
 
 class SerializerAdministratorMessage : public SerializerMessage {
-    IModelForAdministrator *model;
-
 public:
-    SerializerAdministratorMessage(IModelForAdministrator* model);
-
-    int analyzeMessage(int clientId, std::vector<char> message);
+    int analyzeMessage(int clientId, std::vector<char> message, IModelForAdministrator* model);
 
     std::vector<char> constructGetAllSensorsMessage(std::vector<Sensor> sensors);
 
