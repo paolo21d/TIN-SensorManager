@@ -89,13 +89,13 @@ int main(int argc, char *argv[]) {
 
 
     thread t1(sensorThread);
-    thread t2(monitoringThread);
+    //thread t2(monitoringThread);
     thread t3(adminThread);
 
     serverModel->init();
 
     t1.join();
-    t2.join();
+    //t2.join();
     t3.join();
 
 
