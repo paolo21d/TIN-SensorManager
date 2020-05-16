@@ -66,7 +66,7 @@ void monitoringThread()
     initNetwork();
     cout << "START MONITORING CONNECTION" << endl;
 
-    IRequestListener *listener = new MonitoringListener();
+    IRequestListener *listener = new MonitoringListener(serverModel);
     IClientsHandler *connectionHandler = new ClientsHandler();
     connectionHandler->addListener(listener);
     connectionHandler->startHandling("127.0.0.1", 28000);
