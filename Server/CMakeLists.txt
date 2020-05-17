@@ -14,21 +14,30 @@ add_executable(
         ../Common/IClientsHandler.cpp
         ../Common/ConnectionException.cpp
         ../Common/NetworkUtils.cpp
-        src/AdministratorListener.cpp
-        src/AdministratorListener.h
+        src/listeners/AdministratorListener.cpp
+        src/listeners/AdministratorListener.h
         src/Sensor.h
         ../Common/IRequestListener.cpp
-        src/DatabaseManager.cpp
-        src/DatabaseConnection.cpp
+        src/database/DatabaseManager.cpp
+        src/database/DatabaseConnection.cpp
         src/SensorMeasurement.h
         src/Measurement.h
-        src/MonitoringListener.cpp src/MonitoringListener.h
+        src/listeners/MonitoringListener.cpp src/listeners/MonitoringListener.h
 
-)
+        src/serverModel/ServerModel.cpp src/serverModel/ServerModel.h
+        src/serverModel/IModelForSensor.h
+        src/serverModel/IModelForAdministrator.h
+        src/serverModel/IModelForMonitoring.h
+
+        src/serializers/SerializerMessage.h src/serializers/SerializerMessage.cpp
+        src/serializers/SerializerSensorMessage.h
+        src/serializers/SerializerAdministratorMessage.h src/serializers/SerializerAdministratorMessage.cpp
+        src/serializers/SerializerMonitoringMessage.h
+        src/commandTypes/AdministratorCommandTypes.h src/commandTypes/MonitoringCommandTypes.h src/requests/AdministratorRequest.h src/requests/MonitoringRequest.h src/requests/SensorRequest.h src/requests/Request.h src/commandTypes/SensorCommandTypes.h src/listeners/SensorListener.cpp src/listeners/SensorListener.h src/listeners/MonitoringListener.cpp src/listeners/MonitoringListener.h)
 target_include_directories(server PRIVATE ../Common ../Server)
-if(WIN32)
+if (WIN32)
     target_link_libraries(server wsock32 ws2_32)
-endif()
+endif ()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_link_libraries(server $ENV{INSTANT_CLIENT}/sdk/lib/msvc/vc14/oraocci12d.lib)
