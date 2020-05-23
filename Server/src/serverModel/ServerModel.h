@@ -15,6 +15,7 @@
 #include <src/commandTypes/AdministratorCommandTypes.h>
 #include <src/commandTypes/SensorCommandTypes.h>
 #include <mutex>
+#include <src/responses/AdministratorResponse.h>
 #include "IModelForMonitoring.h"
 #include "IModelForAdministrator.h"
 #include "IModelForSensor.h"
@@ -32,6 +33,10 @@ class ServerModel : public IModelForSensor, public IModelForMonitoring, public I
     std::mutex monitoringRequestsQueueMutex;
     std::mutex sensorRequestsQueueMutex;
 
+    std::queue<AdministratorResponse> administratorResponsesQueue;
+
+    std::mutex administratorResponsesQueueMutex;
+
 public:
     ServerModel(IRequestListener *sensor, IRequestListener *administrator, IRequestListener *monitoring);
 
@@ -48,21 +53,14 @@ public:
     //SENSOR INTERFACE
     virtual void sensorCommandAddMeasurement(int clientId, int64_t timestamp, double value);
 
-    virtual void
-    sensorCommandConnectedSensor(int clientId, std::string sensorIp, int sensorPort, std::string sensorToken);
+    virtual void sensorCommandConnectedSensor(int clientId, std::string sensorIp, int sensorPort, std::string sensorToken);
 
     virtual void sensorCommandDisconnectedSensor(int clientId);
 
     //ADMINISTRATOR INTERFACE
-    virtual void administratorCommandGetAllSensors(int clientId);
+    virtual void addAdministratorRequestToExecute(AdministratorRequest request);
 
-    virtual void administratorCommandUpdateSensorName(int clientId, int sensorId, std::string sensorName);
-
-    virtual void administratorCommandRevokeSensor(int clientId, int sensorId);
-
-    virtual void administratorCommandDisconnectSensor(int clientId, int sensorId);
-
-    virtual void administratorCommandGenerateToken(int clientId, std::string tokenName);
+    void addAdministratorResponseToSend(AdministratorResponse response);
 
     //MONITORING INTERFACE
     virtual void monitoringCommandGetAllSensors(int clientId);
@@ -72,9 +70,12 @@ public:
 private:
     void executeAdministratorRequests();
 
+    void sendAdministratorResponse();
+
     void executeMonitoringRequests();
 
     void executeSensorRequests();
+
 };
 
 

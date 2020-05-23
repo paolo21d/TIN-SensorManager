@@ -14,7 +14,9 @@ void AdministratorListener::onGotRequest(int clientId, vector<unsigned char> msg
     cout << "MESSAGE ------------------------" << endl;
     for (int i = 0; i < msg.size(); i++)
         msgChar.push_back(msg[i]);
-    int commandType = serializer.analyzeMessage(clientId, msgChar, model);
+    AdministratorRequest* request = serializer.analyzeMessage(clientId, msgChar);
+    model->addAdministratorRequestToExecute(*request);
+    delete(request); //TODO trzeba to sprawdzic czy nie rozwali danych w kolejce
 
 //    for(int i=0; i< msg.size(); i++) cout<<msg[i];
 //    cout<<endl;

@@ -6,19 +6,11 @@
 #define SERVER_IMODELFORADMINISTRATOR_H
 
 #include <string>
+#include <src/requests/AdministratorRequest.h>
 
 class IModelForAdministrator {
 public:
-    virtual void administratorCommandGetAllSensors(int clientId) = 0;
-
-    virtual void administratorCommandUpdateSensorName(int clientId, int sensorId, std::string sensorName) = 0;
-
-    virtual void administratorCommandRevokeSensor(int clientId, int sensorId) = 0;
-
-    virtual void administratorCommandDisconnectSensor(int clientId, int sensorId) = 0;
-
-    virtual void administratorCommandGenerateToken(int clientId, std::string tokenName) = 0;
-
+    virtual void addAdministratorRequestToExecute(AdministratorRequest request) = 0;
 };
 
 #endif //SERVER_IMODELFORADMINISTRATOR_H

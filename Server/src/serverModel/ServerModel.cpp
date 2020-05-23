@@ -31,8 +31,10 @@ void ServerModel::setMonitoringConnectionListener(IRequestListener *listener) {
 
 void ServerModel::init() {
     thread administratorRequestsExecutor(&ServerModel::executeAdministratorRequests, this);
+    thread administratorResponsesSender(&ServerModel::sendAdministratorResponse, this);
 
     administratorRequestsExecutor.join();
+    administratorResponsesSender.join();
 }
 
 ///SENSOR INTERFACE
@@ -45,7 +47,8 @@ void ServerModel::sensorCommandAddMeasurement(int clientId, int64_t timestamp, d
     sensorRequestsQueueMutex.unlock();
 }
 
-void ServerModel::sensorCommandConnectedSensor(int clientId, std::string sensorIp, int sensorPort, std::string sensorToken) {
+void
+ServerModel::sensorCommandConnectedSensor(int clientId, std::string sensorIp, int sensorPort, std::string sensorToken) {
     SensorRequest request(clientId, CONNECTED_SENSOR);
     request.sensorIp = sensorIp;
     request.sensorPort = sensorPort;
@@ -63,42 +66,18 @@ void ServerModel::sensorCommandDisconnectedSensor(int clientId) {
 }
 
 ///ADMINISTRATOR INTERFACE
-void ServerModel::administratorCommandGetAllSensors(int clientId) {
-    AdministratorRequest request(clientId, GET_ALL_SENSORS);
+void ServerModel::addAdministratorRequestToExecute(AdministratorRequest request) {
     administratorRequestsQueueMutex.lock();
     administratorRequestsQueue.push(request);
     administratorRequestsQueueMutex.unlock();
 }
 
-void ServerModel::administratorCommandUpdateSensorName(int clientId, int sensorId, std::string sensorName) {
-    AdministratorRequest request(clientId, UPDATE_SENSOR_NAME);
-    request.sensorName = sensorName;
-    administratorRequestsQueueMutex.lock();
-    administratorRequestsQueue.push(request);
-    administratorRequestsQueueMutex.unlock();
+void ServerModel::addAdministratorResponseToSend(AdministratorResponse response) {
+    administratorResponsesQueueMutex.lock();
+    administratorResponsesQueue.push(response);
+    administratorResponsesQueueMutex.unlock();
 }
 
-void ServerModel::administratorCommandRevokeSensor(int clientId, int sensorId) {
-    AdministratorRequest request(clientId, REVOKE_SENSOR);
-    administratorRequestsQueueMutex.lock();
-    administratorRequestsQueue.push(request);
-    administratorRequestsQueueMutex.unlock();
-}
-
-void ServerModel::administratorCommandDisconnectSensor(int clientId, int sensorId) {
-    AdministratorRequest request(clientId, DISCONNECT_SENSOR);
-    administratorRequestsQueueMutex.lock();
-    administratorRequestsQueue.push(request);
-    administratorRequestsQueueMutex.unlock();
-}
-
-void ServerModel::administratorCommandGenerateToken(int clientId, std::string tokenName) {
-    AdministratorRequest request(clientId, GENERATE_TOKEN);
-    request.tokenName = tokenName;
-    administratorRequestsQueueMutex.lock();
-    administratorRequestsQueue.push(request);
-    administratorRequestsQueueMutex.unlock();
-}
 
 ///MONITORING INTERFACE
 void ServerModel::monitoringCommandGetAllSensors(int clientId) {
@@ -113,17 +92,18 @@ void ServerModel::monitoringCommandGetSetOfMeasurements(int clientId, int sensor
 void ServerModel::executeAdministratorRequests() {
     SerializerAdministratorMessage serializer;
 
-    while(1==1) {
+    while (1 == 1) {
         administratorRequestsQueueMutex.lock();
         int queueSize = administratorRequestsQueue.size();
 
 
-        if(queueSize>0) {
+        if (queueSize > 0) {
             AdministratorRequest request = administratorRequestsQueue.front();
             administratorRequestsQueue.pop();
 
-            cout <<"AdministratorRequest\tCommandType: " << request.commandType<<endl;
-
+            cout << "AdministratorRequest\tCommandType: " << request.commandType << endl;
+            //Tutaj ma być wykokane zapytanie do bazy/cacheu
+            //stworzenie AdministratorResponse i wrzucenie go do administratorResponsesQueue (korzystając z mutexa administratorResponsesQueueMutex
 
         } else {
 
@@ -134,6 +114,37 @@ void ServerModel::executeAdministratorRequests() {
     }
 }
 
+void ServerModel::sendAdministratorResponse() {
+    SerializerAdministratorMessage serializer;
+    vector<char> byteMessage;
+    AdministratorResponse response(-1, -1);
+
+    while (true) {
+        byteMessage.clear();
+        response = AdministratorResponse(-1, -1);
+        administratorResponsesQueueMutex.lock();
+        int queueSize = administratorResponsesQueue.size();
+        if (queueSize > 0) {
+            response = administratorResponsesQueue.front();
+            administratorResponsesQueue.pop();
+        }
+        administratorResponsesQueueMutex.unlock();
+
+        if(response.clientId != -1) {
+            vector<char> byteMessage = serializer.serializeResponseMessage(response);
+
+            vector<unsigned char> toSend; //TODO ogarnac to unsinged char
+            for (int i = 0; i < byteMessage.size(); i++) {
+                toSend.push_back(byteMessage[i]);
+            }
+            administratorConnectionListener->send(response.clientId, toSend);
+        }
+        std::chrono::milliseconds timespan(1000); // or whatever
+        std::this_thread::sleep_for(timespan);
+    }
+
+}
+
 void ServerModel::executeMonitoringRequests() {
 
 }
@@ -141,3 +152,5 @@ void ServerModel::executeMonitoringRequests() {
 void ServerModel::executeSensorRequests() {
 
 }
+
+
