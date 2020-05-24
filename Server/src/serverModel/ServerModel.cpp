@@ -3,6 +3,7 @@
 //
 
 #include <src/serializers/SerializerAdministratorMessage.h>
+#include <src/serializers/SerializerMonitoringMessage.h>
 #include "ServerModel.h"
 
 using namespace std;
@@ -80,11 +81,15 @@ void ServerModel::addAdministratorResponseToSend(AdministratorResponse response)
 
 
 ///MONITORING INTERFACE
-void ServerModel::monitoringCommandGetAllSensors(int clientId) {
+void ServerModel::addMonitoringRequestToExecute(MonitoringRequest request) {
+
+    monitoringRequestsQueue.push(request);
 
 }
 
-void ServerModel::monitoringCommandGetSetOfMeasurements(int clientId, int sensorId, int type) {
+void ServerModel::addMonitoringResponseToSend(MonitoringResponse response) {
+
+    monitoringResponsesQueue.push(response);
 
 }
 
@@ -99,7 +104,7 @@ void ServerModel::executeAdministratorRequests() {
 
             cout << "AdministratorRequest\tCommandType: " << request.commandType << endl;
             //Tutaj ma być wykokane zapytanie do bazy/cacheu
-            //stworzenie AdministratorResponse i wrzucenie go do administratorResponsesQueue (korzystając z mutexa administratorResponsesQueueMutex
+            //stworzenie AdministratorResponse i wrzucenie go do administratorResponsesQueue
 
 
 
@@ -139,10 +144,50 @@ void ServerModel::sendAdministratorResponse() {
 }
 
 void ServerModel::executeMonitoringRequests() {
+    while (1 == 1) {
+
+
+        AdministratorRequest request = administratorRequestsQueue.pop();
+
+        cout << "MonitoringRequest\tCommandType: " << request.commandType << endl;
+        //Tutaj ma być wykokane zapytanie do bazy/cacheu
+        //stworzenie MonitoringResponse i wrzucenie go do monitoringResponsesQueue
+
+
+
+        //std::chrono::milliseconds timespan(1000); // or whatever
+        //std::this_thread::sleep_for(timespan);
+    }
 
 }
 
 void ServerModel::executeSensorRequests() {
+    SerializerMonitoringMessage serializer;
+    vector<char> byteMessage;
+    MonitoringResponse response(-1, -1);
+
+    while (true) {
+        byteMessage.clear();
+        response = MonitoringResponse(-1, -1);
+
+
+        response = monitoringResponsesQueue.pop();
+
+
+
+
+        if(response.clientId != -1) {
+            vector<char> byteMessage = serializer.serializeResponseMessage(response);
+
+            vector<unsigned char> toSend; //TODO ogarnac to unsinged char
+            for (int i = 0; i < byteMessage.size(); i++) {
+                toSend.push_back(byteMessage[i]);
+            }
+            monitoringConnectionListener->send(response.clientId, toSend);
+        }
+        std::chrono::milliseconds timespan(1000); // or whatever
+        std::this_thread::sleep_for(timespan);
+    }
 
 }
 

@@ -16,6 +16,7 @@
 #include <src/commandTypes/SensorCommandTypes.h>
 #include <mutex>
 #include <src/responses/AdministratorResponse.h>
+#include <src/responses/MonitoringResponse.h>
 #include "IModelForMonitoring.h"
 #include "IModelForAdministrator.h"
 #include "IModelForSensor.h"
@@ -35,6 +36,7 @@ class ServerModel : public IModelForSensor, public IModelForMonitoring, public I
 //    std::mutex sensorRequestsQueueMutex;
 
     Queue<AdministratorResponse> administratorResponsesQueue;
+    Queue<MonitoringResponse> monitoringResponsesQueue;
 
 //    std::mutex administratorResponsesQueueMutex;
 
@@ -64,9 +66,9 @@ public:
     void addAdministratorResponseToSend(AdministratorResponse response);
 
     //MONITORING INTERFACE
-    virtual void monitoringCommandGetAllSensors(int clientId);
+    virtual void addMonitoringRequestToExecute(MonitoringRequest request);
 
-    virtual void monitoringCommandGetSetOfMeasurements(int clientId, int sensorId, int type);
+    void addMonitoringResponseToSend(MonitoringResponse response);
 
 private:
     void executeAdministratorRequests();

@@ -5,10 +5,17 @@
 #ifndef SERVER_MONITORINGREQUEST_H
 #define SERVER_MONITORINGREQUEST_H
 
+#include "Request.h"
 
-class MonitoringRequest :Request{
+class MonitoringRequest : public Request{
 public:
+    MonitoringRequest(int clientId, int commandType) {
+        this->clientId = clientId;
+        this->commandType = commandType;
+    }
 
+    int sensorId;
+    int type; //time period for set of measurements
 
 };
 

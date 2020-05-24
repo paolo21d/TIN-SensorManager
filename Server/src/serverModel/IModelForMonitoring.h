@@ -5,12 +5,11 @@
 #ifndef SERVER_IMODELFORMONITORING_H
 #define SERVER_IMODELFORMONITORING_H
 
+#include <src/requests/MonitoringRequest.h>
 
 class IModelForMonitoring {
 public:
-    virtual void monitoringCommandGetAllSensors(int clientId) = 0;
-
-    virtual void monitoringCommandGetSetOfMeasurements(int clientId, int sensorId, int type) = 0;
+    virtual void addMonitoringRequestToExecute(MonitoringRequest request) = 0;
 };
 
 

@@ -43,6 +43,7 @@ AdministratorRequest *SerializerAdministratorMessage::analyzeMessage(int clientI
 
         printf("SizeOfId: %d; Id: %d; SizeOfName: %d; Name: %s\n", sizeOfId, id, sizeOfName, name.c_str());
         AdministratorRequest *request = new AdministratorRequest(clientId, UPDATE_SENSOR_NAME);
+        request->sensorId = id;
         request->sensorName = name;
         return request;
     } else if (commandType == REVOKE_SENSOR) { //REVOKE_SENSOR
@@ -55,7 +56,9 @@ AdministratorRequest *SerializerAdministratorMessage::analyzeMessage(int clientI
         readingBegin += 4;
 
         printf("SizeOfId: %d; Id: %d\n", sizeOfId, id);
-        return new AdministratorRequest(clientId, REVOKE_SENSOR);
+        AdministratorRequest *request = new AdministratorRequest(clientId, REVOKE_SENSOR);
+        request->sensorId = id;
+        return request;
     } else if (commandType == DISCONNECT_SENSOR) { //DISCONNECT_SENSOR
         printf("Command: DisconnectSensor\n");
 
@@ -66,7 +69,9 @@ AdministratorRequest *SerializerAdministratorMessage::analyzeMessage(int clientI
         readingBegin += 4;
 
         printf("SizeOfId: %d; Id: %d\n", sizeOfId, id);
-        return new AdministratorRequest(clientId, DISCONNECT_SENSOR);
+        AdministratorRequest *request = new AdministratorRequest(clientId, DISCONNECT_SENSOR);
+        request->sensorId = id;
+        return request;
     } else if (commandType == GENERATE_TOKEN) { //GENERATE_TOKEN
         printf("Command: GenerateToken\n");
 
