@@ -208,6 +208,7 @@ public class CommunicationManager extends Thread {
             readingBegin += sensorLength;
             sensors.add(sensor);
         }
+        System.out.println(sensors.size());
         return sensors;
     }
 

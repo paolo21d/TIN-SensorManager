@@ -79,6 +79,7 @@ private:
 
     void executeSensorRequests();
 
+    void sendMonitoringResponse();
 };
 
 

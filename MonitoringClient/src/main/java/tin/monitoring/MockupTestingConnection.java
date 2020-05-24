@@ -32,7 +32,9 @@ public class MockupTestingConnection {
         com.sendAllMessagesFromBuffer();*/
 
 
-        com.sendCommandGetAllSensors();
+//        com.sendCommandGetAllSensors();
+
+        com.sendCommandGetSetOfMeasurements(0,1);
 //        Thread.sleep(2000);
 //        com.sendCommandUpdateSensorName(1, "sensor1");
 ////        Thread.sleep(2000);

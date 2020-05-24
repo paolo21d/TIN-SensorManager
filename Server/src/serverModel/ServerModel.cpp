@@ -34,6 +34,12 @@ void ServerModel::init() {
     thread administratorRequestsExecutor(&ServerModel::executeAdministratorRequests, this);
     thread administratorResponsesSender(&ServerModel::sendAdministratorResponse, this);
 
+    thread monitoringRequestsExecutor(&ServerModel::executeMonitoringRequests, this);
+    thread monitoringResponsesSender(&ServerModel::sendMonitoringResponse, this);
+
+    monitoringRequestsExecutor.join();
+    monitoringResponsesSender.join();
+
     administratorRequestsExecutor.join();
     administratorResponsesSender.join();
 }
@@ -144,14 +150,35 @@ void ServerModel::sendAdministratorResponse() {
 }
 
 void ServerModel::executeMonitoringRequests() {
+
     while (1 == 1) {
 
 
-        AdministratorRequest request = administratorRequestsQueue.pop();
+        MonitoringRequest request = monitoringRequestsQueue.pop();
 
         cout << "MonitoringRequest\tCommandType: " << request.commandType << endl;
         //Tutaj ma być wykokane zapytanie do bazy/cacheu
         //stworzenie MonitoringResponse i wrzucenie go do monitoringResponsesQueue
+        vector<Measurement> measurements;
+        for(int i = 0 ; i < 60; i++) {
+            measurements.push_back(Measurement(i,to_string(i)));
+        }
+        vector<Sensor> sensors;
+        for(int i = 0 ; i < 5; i++) {
+            sensors.push_back(Sensor(i,"sensor","1.2.3.4",1,measurements[i]));
+        }
+        if(request.commandType == GET_ALL_SENSORS_MONITORING) {
+            auto response = new MonitoringResponse(request.clientId, request.commandType);
+            response->sensors=sensors;
+
+            addMonitoringResponseToSend(*response);
+        }
+        if(request.commandType == GET_SET_OF_MEASUREMENTS) {
+            auto response = new MonitoringResponse(request.clientId, request.commandType);
+            response->sensorId = request.sensorId;
+            response->measurements = measurements;
+            addMonitoringResponseToSend(*response);
+        }
 
 
 
@@ -161,7 +188,7 @@ void ServerModel::executeMonitoringRequests() {
 
 }
 
-void ServerModel::executeSensorRequests() {
+void ServerModel::sendMonitoringResponse() {
     SerializerMonitoringMessage serializer;
     vector<char> byteMessage;
     MonitoringResponse response(-1, -1);
@@ -170,10 +197,7 @@ void ServerModel::executeSensorRequests() {
         byteMessage.clear();
         response = MonitoringResponse(-1, -1);
 
-
         response = monitoringResponsesQueue.pop();
-
-
 
 
         if(response.clientId != -1) {

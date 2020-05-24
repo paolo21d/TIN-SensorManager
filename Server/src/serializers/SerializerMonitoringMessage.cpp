@@ -38,6 +38,8 @@ MonitoringRequest * SerializerMonitoringMessage::analyzeMessage(int clientId, st
         int type = ByteToInt(message, readingBegin);
         readingBegin += 4;
 
+        printf("sensorID: %d type: %d \n", id,type);
+
         auto request = new MonitoringRequest(clientId,GET_SET_OF_MEASUREMENTS);
         request->sensorId = id;
         request->type = type;
@@ -61,6 +63,7 @@ std::vector<char> SerializerMonitoringMessage::constructGetAllSensorsMessage(std
     std::vector<char> message = IntToByte(GET_ALL_SENSORS_MONITORING);
     std::vector<char> sensorsMessage = constructSensorListMessage(sensors);
     message.insert(message.end(), sensorsMessage.begin(), sensorsMessage.end());
+    printf("rozmiar vectora sensors: %d, liczba bajtow get all sensors : %d\n",sensors.size(), message.size());
     return message;
 }
 
@@ -92,7 +95,7 @@ std::vector<char> SerializerMonitoringMessage::constructSensorMessage(Sensor &se
     tmp = constructIntMessageWithSize(sensor.port);
     message.insert(message.end(), tmp.begin(), tmp.end());
     //currentMeasurement
-    tmp = constructIntMessageWithSize(sensor.currentMeasurement->value);
+    tmp = constructIntMessageWithSize(sensor.currentMeasurement.value);
     message.insert(message.end(), tmp.begin(), tmp.end());
 
     return message;

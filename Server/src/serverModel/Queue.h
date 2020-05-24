@@ -18,7 +18,7 @@ private:
 
 public:
 
-    void push(T const & elem) {
+    void push(T elem) {
 
         std::unique_lock<std::mutex> lock(mutex);
 
@@ -28,14 +28,14 @@ public:
             emptyQueue.notify_one();
     }
 
-    const T & pop() {
+    T  pop() {
 
         std::unique_lock<std::mutex> lock(mutex);
 
         while(queue.empty())
             emptyQueue.wait(lock);
 
-        T & value = queue.front();
+        T  value = queue.front();
         queue.pop();
         return value;
     }
