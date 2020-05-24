@@ -1,4 +1,4 @@
-package tin.administrator.communication;
+package tin.monitoring.communication;
 
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ConnectionUtil {
+
 
     public static synchronized List<Byte> prepareIntegerMessageWithSize(int number) {
         List<Byte> byteList = new ArrayList<Byte>();
@@ -75,5 +76,4 @@ public class ConnectionUtil {
         messageWithSize.addAll(message);
         return messageWithSize;
     }
-
 }

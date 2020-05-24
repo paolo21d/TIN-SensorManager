@@ -9,6 +9,8 @@ using namespace std;
     Client::Client(bool server) : IS_SERVER(server)
     {
         reset();
+        remainingIn = 0;
+        remainingInLen = 0;
     }
 
     void Client::reset()
@@ -160,12 +162,13 @@ using namespace std;
 
     std::string Client::getIp()
     {
-        struct sockaddr_in* pV4Addr = (struct sockaddr_in*)&service;
+/*        struct sockaddr_in* pV4Addr = (struct sockaddr_in*)&service;
         struct in_addr ipAddr = pV4Addr->sin_addr;
         char str[INET_ADDRSTRLEN];
         inet_ntop( AF_INET, &ipAddr, str, INET_ADDRSTRLEN );
 
-        return string(str);
+        return string(str);*/
+        return "127.0.0.1";
     }
 
     int Client::getPort()
@@ -203,6 +206,7 @@ using namespace std;
                 int mainSocket = tryConnect(ipAddress, port);
                 Client *handler = clientHandlers[0].get();
                 sockaddr_in s;
+                memset(&s, 0, sizeof(sockaddr_in));
                 handler->connected(mainSocket, freeHandler, s);
                 handler->setListener(listener);
             }
@@ -295,9 +299,10 @@ using namespace std;
         if ( FD_ISSET(acceptingSocket, &readyIn))
         {
             sockaddr_in service;
-            socklen_t sLen;
+            int sLen;
             memset( & service, 0, sizeof( service ) );
-            int clientSocket = accept(acceptingSocket, (struct sockaddr *)&service, &sLen );
+//            int clientSocket = accept(acceptingSocket, (struct sockaddr *)&service, &sLen );
+            int clientSocket = accept(acceptingSocket, nullptr, nullptr );
             prepareSocket(clientSocket, IS_SERVER);
 
             if (clientSocket == -1)

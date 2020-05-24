@@ -1,4 +1,4 @@
-package tin.administrator.model;
+package tin.monitoring.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,5 +10,5 @@ public class Sensor {
     private String name;
     private String ip;
     private Integer port;
-    private Boolean connected;
+    private Integer currentMeasurement;
 }

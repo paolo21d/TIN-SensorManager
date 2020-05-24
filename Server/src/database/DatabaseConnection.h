@@ -6,7 +6,7 @@
 #define SERVER_DATABASECONNECTION_H
 
 #include "IDatabaseConnection.h"
-#include "Sensor.h"
+#include "src/Sensor.h"
 
 class DatabaseConnection : public IDatabaseConnection {
     oracle::occi::Environment *environment;

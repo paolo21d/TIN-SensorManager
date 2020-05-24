@@ -1,5 +1,4 @@
-package tin.administrator.communication;
-
+package tin.monitoring.communication;
 import com.google.common.primitives.Bytes;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;

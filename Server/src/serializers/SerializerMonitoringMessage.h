@@ -1,0 +1,14 @@
+//
+// Created by paolo on 15.05.2020.
+//
+
+#ifndef SERVER_SERIALIZERMONITORINGMESSAGE_H
+#define SERVER_SERIALIZERMONITORINGMESSAGE_H
+
+
+class SerializerMonitoringMessage {
+
+};
+
+
+#endif //SERVER_SERIALIZERMONITORINGMESSAGE_H

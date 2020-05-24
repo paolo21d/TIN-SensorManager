@@ -5,12 +5,12 @@
 #ifndef SERVER_IDATABASECONNECTION_H
 #define SERVER_IDATABASECONNECTION_H
 
-#include "Sensor.h"
-#include "../Common/IMeasurement.h"
-#include "SensorMeasurement.h"
+#include "src/Sensor.h"
+#include "IMeasurement.h"
+#include "src/SensorMeasurement.h"
 #include <string>
 #include <vector>
-#include <occi.h>
+//#include <occi.h>
 
 class IDatabaseConnection {
 public:
