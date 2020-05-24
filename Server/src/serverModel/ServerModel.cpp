@@ -4,6 +4,7 @@
 
 #include <src/serializers/SerializerAdministratorMessage.h>
 #include <src/serializers/SerializerMonitoringMessage.h>
+#include <src/database/DatabaseManager.h>
 #include "ServerModel.h"
 
 using namespace std;
@@ -151,6 +152,8 @@ void ServerModel::sendAdministratorResponse() {
 
 void ServerModel::executeMonitoringRequests() {
 
+    DatabaseManager db = DatabaseManager("ADMIN","Seikonnoqwaser1!","tin_high");
+    IDatabaseConnection* connection = db.getNewConnection();
     while (1 == 1) {
 
 
@@ -159,29 +162,39 @@ void ServerModel::executeMonitoringRequests() {
         cout << "MonitoringRequest\tCommandType: " << request.commandType << endl;
         //Tutaj ma być wykokane zapytanie do bazy/cacheu
         //stworzenie MonitoringResponse i wrzucenie go do monitoringResponsesQueue
-        vector<Measurement> measurements;
-        for(int i = 0 ; i < 60; i++) {
-            measurements.push_back(Measurement(i,to_string(i)));
-        }
-        vector<Sensor> sensors;
-        for(int i = 0 ; i < 5; i++) {
-            sensors.push_back(Sensor(i,"sensor","1.2.3.4",1,measurements[i]));
-        }
+//        vector<Measurement> measurements;
+//        for(int i = 0 ; i < 60; i++) {
+//            measurements.push_back(Measurement(i,to_string(i)));
+//        }
+//        vector<Sensor> sensors;
+//        for(int i = 0 ; i < 5; i++) {
+//            sensors.push_back(Sensor(i,"sensor","1.2.3.4",1,measurements[i]));
+//        }
         if(request.commandType == GET_ALL_SENSORS_MONITORING) {
             auto response = new MonitoringResponse(request.clientId, request.commandType);
-            response->sensors=sensors;
-
+            //response->sensors=sensors;
+            vector<Sensor *> sensors = connection->getAllSensorsWithMeasurements();
+            for(int i =0; i<sensors.size(); i++) {
+                response->sensors.push_back(*sensors[i]);
+            }
             addMonitoringResponseToSend(*response);
         }
         if(request.commandType == GET_SET_OF_MEASUREMENTS) {
             auto response = new MonitoringResponse(request.clientId, request.commandType);
+            SensorMeasurement* sensorMeasurement;
+            if(request.type == 0)
+                sensorMeasurement = connection->getLastHour(request.sensorId);
+            if(request.type == 1)
+                sensorMeasurement = connection->getLastDay(request.sensorId);
+            if(request.type == 2)
+                sensorMeasurement = connection->getLastMonth(request.sensorId);
+            vector<Measurement *> measurements = sensorMeasurement->measurements;
             response->sensorId = request.sensorId;
-            response->measurements = measurements;
+            for(int i = 0; i < measurements.size(); i++) {
+                response->measurements.push_back(*measurements[i]);
+            }
             addMonitoringResponseToSend(*response);
         }
-
-
-
         //std::chrono::milliseconds timespan(1000); // or whatever
         //std::this_thread::sleep_for(timespan);
     }
