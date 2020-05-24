@@ -42,9 +42,9 @@ void ServerModel::sensorCommandAddMeasurement(int clientId, int64_t timestamp, d
     SensorRequest request(clientId, ADD_MEASUREMENT);
     request.measurementValue = value;
     request.measurementTimestamp = timestamp;
-    sensorRequestsQueueMutex.lock();
+
     sensorRequestsQueue.push(request);
-    sensorRequestsQueueMutex.unlock();
+
 }
 
 void
@@ -53,29 +53,29 @@ ServerModel::sensorCommandConnectedSensor(int clientId, std::string sensorIp, in
     request.sensorIp = sensorIp;
     request.sensorPort = sensorPort;
     request.sensorToken = sensorToken;
-    sensorRequestsQueueMutex.lock();
+
     sensorRequestsQueue.push(request);
-    sensorRequestsQueueMutex.unlock();
+
 }
 
 void ServerModel::sensorCommandDisconnectedSensor(int clientId) {
     SensorRequest request(clientId, DISCONNECTED_SENSOR);
-    sensorRequestsQueueMutex.lock();
+
     sensorRequestsQueue.push(request);
-    sensorRequestsQueueMutex.unlock();
+
 }
 
 ///ADMINISTRATOR INTERFACE
 void ServerModel::addAdministratorRequestToExecute(AdministratorRequest request) {
-    administratorRequestsQueueMutex.lock();
+
     administratorRequestsQueue.push(request);
-    administratorRequestsQueueMutex.unlock();
+
 }
 
 void ServerModel::addAdministratorResponseToSend(AdministratorResponse response) {
-    administratorResponsesQueueMutex.lock();
+
     administratorResponsesQueue.push(response);
-    administratorResponsesQueueMutex.unlock();
+
 }
 
 
@@ -93,24 +93,18 @@ void ServerModel::executeAdministratorRequests() {
     SerializerAdministratorMessage serializer;
 
     while (1 == 1) {
-        administratorRequestsQueueMutex.lock();
-        int queueSize = administratorRequestsQueue.size();
 
 
-        if (queueSize > 0) {
-            AdministratorRequest request = administratorRequestsQueue.front();
-            administratorRequestsQueue.pop();
+            AdministratorRequest request = administratorRequestsQueue.pop();
 
             cout << "AdministratorRequest\tCommandType: " << request.commandType << endl;
             //Tutaj ma być wykokane zapytanie do bazy/cacheu
             //stworzenie AdministratorResponse i wrzucenie go do administratorResponsesQueue (korzystając z mutexa administratorResponsesQueueMutex
 
-        } else {
 
-        }
-        administratorRequestsQueueMutex.unlock();
-        std::chrono::milliseconds timespan(1000); // or whatever
-        std::this_thread::sleep_for(timespan);
+
+        //std::chrono::milliseconds timespan(1000); // or whatever
+        //std::this_thread::sleep_for(timespan);
     }
 }
 
@@ -122,13 +116,12 @@ void ServerModel::sendAdministratorResponse() {
     while (true) {
         byteMessage.clear();
         response = AdministratorResponse(-1, -1);
-        administratorResponsesQueueMutex.lock();
-        int queueSize = administratorResponsesQueue.size();
-        if (queueSize > 0) {
-            response = administratorResponsesQueue.front();
-            administratorResponsesQueue.pop();
-        }
-        administratorResponsesQueueMutex.unlock();
+
+
+            response = administratorResponsesQueue.pop();
+
+
+
 
         if(response.clientId != -1) {
             vector<char> byteMessage = serializer.serializeResponseMessage(response);

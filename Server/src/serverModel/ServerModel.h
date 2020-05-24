@@ -19,23 +19,24 @@
 #include "IModelForMonitoring.h"
 #include "IModelForAdministrator.h"
 #include "IModelForSensor.h"
+#include "Queue.h"
 
 class ServerModel : public IModelForSensor, public IModelForMonitoring, public IModelForAdministrator {
     IRequestListener *sensorConnectionListener;
     IRequestListener *administratorConnectionListener;
     IRequestListener *monitoringConnectionListener;
 
-    std::queue<AdministratorRequest> administratorRequestsQueue;
-    std::queue<MonitoringRequest> monitoringRequestsQueue;
-    std::queue<SensorRequest> sensorRequestsQueue;
+    Queue<AdministratorRequest> administratorRequestsQueue;
+    Queue<MonitoringRequest> monitoringRequestsQueue;
+    Queue<SensorRequest> sensorRequestsQueue;
 
-    std::mutex administratorRequestsQueueMutex;
-    std::mutex monitoringRequestsQueueMutex;
-    std::mutex sensorRequestsQueueMutex;
+//    std::mutex administratorRequestsQueueMutex;
+//    std::mutex monitoringRequestsQueueMutex;
+//    std::mutex sensorRequestsQueueMutex;
 
-    std::queue<AdministratorResponse> administratorResponsesQueue;
+    Queue<AdministratorResponse> administratorResponsesQueue;
 
-    std::mutex administratorResponsesQueueMutex;
+//    std::mutex administratorResponsesQueueMutex;
 
 public:
     ServerModel(IRequestListener *sensor, IRequestListener *administrator, IRequestListener *monitoring);

@@ -33,7 +33,7 @@ add_executable(
         src/serializers/SerializerSensorMessage.h
         src/serializers/SerializerAdministratorMessage.h src/serializers/SerializerAdministratorMessage.cpp
         src/serializers/SerializerMonitoringMessage.h
-        src/commandTypes/AdministratorCommandTypes.h src/commandTypes/MonitoringCommandTypes.h src/requests/AdministratorRequest.h src/requests/MonitoringRequest.h src/requests/SensorRequest.h src/requests/Request.h src/commandTypes/SensorCommandTypes.h src/listeners/SensorListener.cpp src/listeners/SensorListener.h src/listeners/MonitoringListener.cpp src/listeners/MonitoringListener.h src/responses/AdministratorResponse.h src/responses/Response.h)
+        src/commandTypes/AdministratorCommandTypes.h src/commandTypes/MonitoringCommandTypes.h src/requests/AdministratorRequest.h src/requests/MonitoringRequest.h src/requests/SensorRequest.h src/requests/Request.h src/commandTypes/SensorCommandTypes.h src/listeners/SensorListener.cpp src/listeners/SensorListener.h src/listeners/MonitoringListener.cpp src/listeners/MonitoringListener.h src/responses/AdministratorResponse.h src/responses/Response.h src/serverModel/Queue.h)
 target_include_directories(server PRIVATE ../Common ../Server)
 if (WIN32)
     target_link_libraries(server wsock32 ws2_32)
