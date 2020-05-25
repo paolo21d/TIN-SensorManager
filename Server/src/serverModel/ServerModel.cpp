@@ -13,10 +13,11 @@ ServerModel::ServerModel(IRequestListener *sensor, IRequestListener *administrat
     sensorConnectionListener = sensor;
     administratorConnectionListener = administrator;
     monitoringConnectionListener = monitoring;
+    databaseConnector = new DatabaseManager("ADMIN", "Seikonnoqwaser1!", "tin_high");
 }
 
 ServerModel::ServerModel() {
-
+    databaseConnector = new DatabaseManager("ADMIN", "Seikonnoqwaser1!", "tin_high");
 }
 
 void ServerModel::setSensorConnectionListener(IRequestListener *listener) {
@@ -104,20 +105,25 @@ void ServerModel::addMonitoringResponseToSend(MonitoringResponse response) {
 void ServerModel::executeAdministratorRequests() {
     SerializerAdministratorMessage serializer;
 
+    IDatabaseConnection *connection = databaseConnector->getNewConnection();
+
     while (1 == 1) {
 
 
-            AdministratorRequest request = administratorRequestsQueue.pop();
+        AdministratorRequest request = administratorRequestsQueue.pop();
 
-            cout << "AdministratorRequest\tCommandType: " << request.commandType << endl;
-            //Tutaj ma być wykokane zapytanie do bazy/cacheu
-            //stworzenie AdministratorResponse i wrzucenie go do administratorResponsesQueue
+        cout << "AdministratorRequest\tCommandType: " << request.commandType << endl;
+        //Tutaj ma być wykokane zapytanie do bazy/cacheu
+        //stworzenie AdministratorResponse i wrzucenie go do administratorResponsesQueue
 
 
 
         //std::chrono::milliseconds timespan(1000); // or whatever
         //std::this_thread::sleep_for(timespan);
     }
+
+    //Kasowanie connection
+    //delete connection;
 }
 
 void ServerModel::sendAdministratorResponse() {
@@ -130,12 +136,10 @@ void ServerModel::sendAdministratorResponse() {
         response = AdministratorResponse(-1, -1);
 
 
-            response = administratorResponsesQueue.pop();
+        response = administratorResponsesQueue.pop();
 
 
-
-
-        if(response.clientId != -1) {
+        if (response.clientId != -1) {
             vector<char> byteMessage = serializer.serializeResponseMessage(response);
 
             vector<unsigned char> toSend; //TODO ogarnac to unsinged char
@@ -152,10 +156,9 @@ void ServerModel::sendAdministratorResponse() {
 
 void ServerModel::executeMonitoringRequests() {
 
-    DatabaseManager db = DatabaseManager("ADMIN","Seikonnoqwaser1!","tin_high");
-    IDatabaseConnection* connection = db.getNewConnection();
-    while (1 == 1) {
+    IDatabaseConnection *connection = databaseConnector->getNewConnection();
 
+    while (1 == 1) {
 
         MonitoringRequest request = monitoringRequestsQueue.pop();
 
@@ -170,35 +173,36 @@ void ServerModel::executeMonitoringRequests() {
 //        for(int i = 0 ; i < 5; i++) {
 //            sensors.push_back(Sensor(i,"sensor","1.2.3.4",1,measurements[i]));
 //        }
-        if(request.commandType == GET_ALL_SENSORS_MONITORING) {
+        if (request.commandType == GET_ALL_SENSORS_MONITORING) {
             auto response = new MonitoringResponse(request.clientId, request.commandType);
             //response->sensors=sensors;
-            vector<Sensor *> sensors = connection->getAllSensorsWithMeasurements();
-            for(int i =0; i<sensors.size(); i++) {
-                response->sensors.push_back(*sensors[i]);
+            vector<Sensor> sensors = connection->getAllSensorsWithMeasurements();
+            for (int i = 0; i < sensors.size(); i++) {
+                response->sensors.push_back(sensors[i]);
             }
             addMonitoringResponseToSend(*response);
         }
-        if(request.commandType == GET_SET_OF_MEASUREMENTS) {
+        if (request.commandType == GET_SET_OF_MEASUREMENTS) {
             auto response = new MonitoringResponse(request.clientId, request.commandType);
-            SensorMeasurement* sensorMeasurement;
-            if(request.type == 0)
+            SensorMeasurement sensorMeasurement = SensorMeasurement();
+            if (request.type == 0)
                 sensorMeasurement = connection->getLastHour(request.sensorId);
-            if(request.type == 1)
+            if (request.type == 1)
                 sensorMeasurement = connection->getLastDay(request.sensorId);
-            if(request.type == 2)
+            if (request.type == 2)
                 sensorMeasurement = connection->getLastMonth(request.sensorId);
-            vector<Measurement *> measurements = sensorMeasurement->measurements;
+            vector<Measurement> measurements = sensorMeasurement.measurements;
             response->sensorId = request.sensorId;
-            for(int i = 0; i < measurements.size(); i++) {
-                response->measurements.push_back(*measurements[i]);
+            for (int i = 0; i < measurements.size(); i++) {
+                response->measurements.push_back(measurements[i]);
             }
             addMonitoringResponseToSend(*response);
         }
         //std::chrono::milliseconds timespan(1000); // or whatever
         //std::this_thread::sleep_for(timespan);
     }
-
+    //Przy ładnym wyłączaniu przydałoby się kasować connection
+    //delete connection;
 }
 
 void ServerModel::sendMonitoringResponse() {
@@ -213,7 +217,7 @@ void ServerModel::sendMonitoringResponse() {
         response = monitoringResponsesQueue.pop();
 
 
-        if(response.clientId != -1) {
+        if (response.clientId != -1) {
             vector<char> byteMessage = serializer.serializeResponseMessage(response);
 
             vector<unsigned char> toSend; //TODO ogarnac to unsinged char

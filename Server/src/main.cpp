@@ -7,7 +7,9 @@
 #include <src/listeners/MonitoringListener.h>
 #include <src/listeners/SensorListener.h>
 #include "ClientsHandler.h"
+#include "src/database/IDatabaseManager.h"
 #include "src/database/DatabaseManager.h"
+#include "src/database/IDatabaseConnection.h"
 #include "src/listeners/AdministratorListener.h"
 
 using namespace std;
@@ -61,8 +63,7 @@ void sensorThread() {
     }
 }
 
-void monitoringThread()
-{
+void monitoringThread() {
     initNetwork();
     cout << "START MONITORING CONNECTION" << endl;
 
@@ -86,8 +87,8 @@ void adminThread() {
 }
 
 int main(int argc, char *argv[]) {
-    serverModel = new ServerModel();
 
+    serverModel = new ServerModel();
 
     thread t1(sensorThread);
     thread t2(monitoringThread);
@@ -98,7 +99,6 @@ int main(int argc, char *argv[]) {
     t1.join();
     t2.join();
     t3.join();
-
 
     return 0;
 }

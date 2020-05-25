@@ -21,6 +21,7 @@
 #include "IModelForAdministrator.h"
 #include "IModelForSensor.h"
 #include "Queue.h"
+#include "src/database/IDatabaseManager.h"
 
 class ServerModel : public IModelForSensor, public IModelForMonitoring, public IModelForAdministrator {
     IRequestListener *sensorConnectionListener;
@@ -30,6 +31,8 @@ class ServerModel : public IModelForSensor, public IModelForMonitoring, public I
     Queue<AdministratorRequest> administratorRequestsQueue;
     Queue<MonitoringRequest> monitoringRequestsQueue;
     Queue<SensorRequest> sensorRequestsQueue;
+
+    IDatabaseManager *databaseConnector;
 
 //    std::mutex administratorRequestsQueueMutex;
 //    std::mutex monitoringRequestsQueueMutex;
@@ -56,7 +59,8 @@ public:
     //SENSOR INTERFACE
     virtual void sensorCommandAddMeasurement(int clientId, int64_t timestamp, double value);
 
-    virtual void sensorCommandConnectedSensor(int clientId, std::string sensorIp, int sensorPort, std::string sensorToken);
+    virtual void
+    sensorCommandConnectedSensor(int clientId, std::string sensorIp, int sensorPort, std::string sensorToken);
 
     virtual void sensorCommandDisconnectedSensor(int clientId);
 

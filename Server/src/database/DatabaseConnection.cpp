@@ -17,7 +17,7 @@ DatabaseConnection::~DatabaseConnection() {
     environment->terminateConnection(connection);
 }
 
-Sensor *DatabaseConnection::addSensor(std::string IP, int port, std::string token) {
+Sensor DatabaseConnection::addSensor(std::string IP, int port, std::string token) {
 
 
     Statement *statement = createStatement(
@@ -37,26 +37,26 @@ Sensor *DatabaseConnection::addSensor(std::string IP, int port, std::string toke
     ResultSet *resultSet = statement->executeQuery();
     resultSet->next();
 
-    return new Sensor(resultSet->getInt(1),
-                      resultSet->getString(2),
-                      resultSet->getString(3),
-                      resultSet->getInt(4));
+    return Sensor(resultSet->getInt(1),
+                  resultSet->getString(2),
+                  resultSet->getString(3),
+                  resultSet->getInt(4));
 
 }
 
 
-std::vector<Sensor *> DatabaseConnection::getAllSensors() {
+std::vector<Sensor> DatabaseConnection::getAllSensors() {
     Statement *statement = createStatement(
             "SELECT * \n"
             "FROM SENSORS \n"
             "WHERE status NOT LIKE 'REVOKED'");
     ResultSet *resultSet = statement->executeQuery();
-    std::vector<Sensor *> sensors;
+    std::vector<Sensor> sensors;
     while (resultSet->next()) {
-        auto *sensor = new Sensor(resultSet->getInt(1),
-                                  resultSet->getString(2),
-                                  resultSet->getString(3),
-                                  resultSet->getInt(4));
+        auto sensor = Sensor(resultSet->getInt(1),
+                             resultSet->getString(2),
+                             resultSet->getString(3),
+                             resultSet->getInt(4));
         sensors.push_back(sensor);
     }
 
@@ -101,7 +101,7 @@ void DatabaseConnection::editSensor(int id, std::string name) {
     connection->terminateStatement(statement);
 }
 
-Sensor *DatabaseConnection::getSensor(int id) {
+Sensor DatabaseConnection::getSensor(int id) {
     Statement *statement = createStatement(
             "SELECT * \n"
             "FROM SENSORS \n"
@@ -111,18 +111,18 @@ Sensor *DatabaseConnection::getSensor(int id) {
 
     Number num = resultSet->getNumber(1);
 
-    auto *sensor = new Sensor(resultSet->getInt(1),
-                              resultSet->getString(2),
-                              resultSet->getString(3),
-                              resultSet->getInt(4));
+    auto sensor = Sensor(resultSet->getInt(1),
+                         resultSet->getString(2),
+                         resultSet->getString(3),
+                         resultSet->getInt(4));
 
 
     connection->terminateStatement(statement);
     return sensor;
 }
 
-std::vector<Sensor *> DatabaseConnection::getAllSensorsWithMeasurements() {
-    std::vector<Sensor *> response;
+std::vector<Sensor> DatabaseConnection::getAllSensorsWithMeasurements() {
+    std::vector<Sensor> response;
 
     Statement *statement = createStatement(
             "SELECT s.id, s.name, s.ip, s.port, m.measure, to_char(m.timestamp, 'DD/MM/YYYY HH24:MI:SS')\n"
@@ -134,12 +134,12 @@ std::vector<Sensor *> DatabaseConnection::getAllSensorsWithMeasurements() {
     ResultSet *resultSet = statement->executeQuery();
 
     while (resultSet->next()) {
-        auto *sensor = new Sensor(
+        auto sensor = Sensor(
                 resultSet->getInt(1),
                 resultSet->getString(2),
                 resultSet->getString(3),
                 resultSet->getInt(4),
-                new Measurement(
+                Measurement(
                         resultSet->getInt(5),
                         resultSet->getString(6)
                 ));
@@ -150,8 +150,8 @@ std::vector<Sensor *> DatabaseConnection::getAllSensorsWithMeasurements() {
     return response;
 }
 
-SensorMeasurement *DatabaseConnection::getLastHour(int id) {
-    auto *response = new SensorMeasurement(id);
+SensorMeasurement DatabaseConnection::getLastHour(int id) {
+    auto response = SensorMeasurement(id);
 
     Statement *statement = createStatement(
             "SELECT FLOOR(AVG(measure)), to_char(timestamp, 'DD/MM/YYYY HH24:MI'), sensor_id \n"
@@ -162,18 +162,18 @@ SensorMeasurement *DatabaseConnection::getLastHour(int id) {
     ResultSet *resultSet = statement->executeQuery();
 
     while (resultSet->next()) {
-        auto *measurement = new Measurement(
+        auto measurement = Measurement(
                 resultSet->getInt(1),
                 resultSet->getString(2)
         );
-        response->addMeasurement(measurement);
+        response.addMeasurement(measurement);
     }
 
     return response;
 }
 
-SensorMeasurement *DatabaseConnection::getLastDay(int id) {
-    auto *response = new SensorMeasurement(id);
+SensorMeasurement DatabaseConnection::getLastDay(int id) {
+    auto response = SensorMeasurement(id);
 
     Statement *statement = createStatement(
             "SELECT FLOOR(AVG(measure)), to_char(timestamp, 'DD/MM/YYYY HH24'), sensor_id \n"
@@ -184,18 +184,18 @@ SensorMeasurement *DatabaseConnection::getLastDay(int id) {
     ResultSet *resultSet = statement->executeQuery();
 
     while (resultSet->next()) {
-        auto *measurement = new Measurement(
+        auto measurement = Measurement(
                 resultSet->getInt(1),
                 resultSet->getString(2)
         );
-        response->addMeasurement(measurement);
+        response.addMeasurement(measurement);
     }
 
     return response;
 }
 
-SensorMeasurement *DatabaseConnection::getLastMonth(int id) {
-    auto *response = new SensorMeasurement(id);
+SensorMeasurement DatabaseConnection::getLastMonth(int id) {
+    auto response = SensorMeasurement(id);
 
     Statement *statement = createStatement(
             "SELECT FLOOR(AVG(measure)), to_char(timestamp, 'DD/MM/YYYY'), sensor_id \n"
@@ -206,11 +206,11 @@ SensorMeasurement *DatabaseConnection::getLastMonth(int id) {
     ResultSet *resultSet = statement->executeQuery();
 
     while (resultSet->next()) {
-        auto *measurement = new Measurement(
+        auto measurement = Measurement(
                 resultSet->getInt(1),
                 resultSet->getString(2)
         );
-        response->addMeasurement(measurement);
+        response.addMeasurement(measurement);
     }
 
     return response;
