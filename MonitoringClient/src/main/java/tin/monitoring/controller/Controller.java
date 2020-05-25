@@ -58,6 +58,15 @@ public class Controller implements ResponseExecutor {
         //lineChart.setAnimated(false);
         lineChart.getXAxis().setAnimated(false);
 
+        ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+
+        scheduledExecutorService.scheduleAtFixedRate(() -> {
+            Platform.runLater(() -> {
+                sendRequestGetAllSensors();
+            });
+        }, 0, 5, TimeUnit.SECONDS);
+
+        loadDataButton.setDisable(true);
         communicationManager.run();
 
         ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
