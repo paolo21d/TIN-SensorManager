@@ -120,28 +120,26 @@ void ServerModel::executeAdministratorRequests() {
 
         switch (request.commandType) {
             case GET_ALL_SENSORS: {
-                vector<Sensor> sensors = connection->getAllSensors();
-                for (Sensor s : sensors) {
-                    response->sensors.push_back(s);
-                }
+                response->sensors =
+                        connection->getAllSensors();
                 break;
             }
             case UPDATE_SENSOR_NAME:
-                response->sensors.push_back(
-                        connection->editSensor(request.sensorId, request.sensorName));
+                response->sensorId =
+                        connection->editSensor(request.sensorId, request.sensorName).id;
                 break;
             case REVOKE_SENSOR:
-                response->sensors.push_back(
-                        connection->revokeSensor(request.sensorId));
+                response->sensorId =
+                        connection->revokeSensor(request.sensorId).id;
                 //Terminate sensor connection
                 break;
             case DISCONNECT_SENSOR:
-                response->sensors.push_back(
-                        connection->disconnectSensor(request.sensorId));
+                response->sensorId =
+                        connection->disconnectSensor(request.sensorId).id;
                 //Terminate sensor connection
                 break;
             case GENERATE_TOKEN:
-                //Do smth
+                response->token = "TOKENTOKEN";
                 break;
         }
 
@@ -203,11 +201,8 @@ void ServerModel::executeMonitoringRequests() {
 //        }
         if (request.commandType == GET_ALL_SENSORS_MONITORING) {
             auto response = new MonitoringResponse(request.clientId, request.commandType);
-            //response->sensors=sensors;
-            vector<Sensor> sensors = connection->getAllSensorsWithMeasurements();
-            for (int i = 0; i < sensors.size(); i++) {
-                response->sensors.push_back(sensors[i]);
-            }
+            response->sensors = connection->getAllSensorsWithMeasurements();
+
             addMonitoringResponseToSend(*response);
         }
         if (request.commandType == GET_SET_OF_MEASUREMENTS) {
@@ -219,11 +214,9 @@ void ServerModel::executeMonitoringRequests() {
                 sensorMeasurement = connection->getLastDay(request.sensorId);
             if (request.type == 2)
                 sensorMeasurement = connection->getLastMonth(request.sensorId);
-            vector<Measurement> measurements = sensorMeasurement.measurements;
+            response->measurements = sensorMeasurement.measurements;
             response->sensorId = request.sensorId;
-            for (int i = 0; i < measurements.size(); i++) {
-                response->measurements.push_back(measurements[i]);
-            }
+
             addMonitoringResponseToSend(*response);
         }
         //std::chrono::milliseconds timespan(1000); // or whatever

@@ -26,7 +26,6 @@ public class Controller implements ResponseExecutor {
     public List<Measurement> measurements = new ArrayList<>();
     public Button loadDataButton;
     public Label selectedSensorName;
-    public MenuItem menuCloseApp;
     @FXML
     LineChart<String,Number> lineChart ;
     public TableView<SensorTable> sensorsTable;
