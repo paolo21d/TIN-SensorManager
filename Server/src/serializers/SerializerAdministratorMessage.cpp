@@ -6,9 +6,9 @@
 
 using namespace std;
 
-int SerializerAdministratorMessage::analyzeMessage(int clientId, vector<char> message, IModelForAdministrator* model) {
+AdministratorRequest *SerializerAdministratorMessage::analyzeMessage(int clientId, vector<char> message) {
     if (message.empty()) {
-        return -1;
+        return nullptr;
     }
     int readingBegin = 0;
 //    int paramQuantity = ByteToInt(message, readingBegin);
@@ -24,8 +24,7 @@ int SerializerAdministratorMessage::analyzeMessage(int clientId, vector<char> me
 
     if (commandType == GET_ALL_SENSORS) { //GET_ALL_SENSORS
         printf("Command: GetAllSensors\n");
-        model->administratorCommandGetAllSensors(clientId);
-        return GET_ALL_SENSORS;
+        return new AdministratorRequest(clientId, GET_ALL_SENSORS);
     } else if (commandType == UPDATE_SENSOR_NAME) { //UPDATE_SENSOR_NAME
         printf("Command: UpdateSensorName\n");
         int sizeOfId = ByteToInt(message, readingBegin);
@@ -43,8 +42,10 @@ int SerializerAdministratorMessage::analyzeMessage(int clientId, vector<char> me
         }
 
         printf("SizeOfId: %d; Id: %d; SizeOfName: %d; Name: %s\n", sizeOfId, id, sizeOfName, name.c_str());
-        model->administratorCommandUpdateSensorName(clientId, id, name);
-        return UPDATE_SENSOR_NAME;
+        AdministratorRequest *request = new AdministratorRequest(clientId, UPDATE_SENSOR_NAME);
+        request->sensorId = id;
+        request->sensorName = name;
+        return request;
     } else if (commandType == REVOKE_SENSOR) { //REVOKE_SENSOR
         printf("Command: RevokeSensor\n");
 
@@ -55,8 +56,9 @@ int SerializerAdministratorMessage::analyzeMessage(int clientId, vector<char> me
         readingBegin += 4;
 
         printf("SizeOfId: %d; Id: %d\n", sizeOfId, id);
-        model->administratorCommandRevokeSensor(clientId, id);
-        return REVOKE_SENSOR;
+        AdministratorRequest *request = new AdministratorRequest(clientId, REVOKE_SENSOR);
+        request->sensorId = id;
+        return request;
     } else if (commandType == DISCONNECT_SENSOR) { //DISCONNECT_SENSOR
         printf("Command: DisconnectSensor\n");
 
@@ -67,8 +69,9 @@ int SerializerAdministratorMessage::analyzeMessage(int clientId, vector<char> me
         readingBegin += 4;
 
         printf("SizeOfId: %d; Id: %d\n", sizeOfId, id);
-        model->administratorCommandDisconnectSensor(clientId, id);
-        return DISCONNECT_SENSOR;
+        AdministratorRequest *request = new AdministratorRequest(clientId, DISCONNECT_SENSOR);
+        request->sensorId = id;
+        return request;
     } else if (commandType == GENERATE_TOKEN) { //GENERATE_TOKEN
         printf("Command: GenerateToken\n");
 
@@ -82,12 +85,27 @@ int SerializerAdministratorMessage::analyzeMessage(int clientId, vector<char> me
         }
 
         printf("SizeOfName: %d; Name: %s\n", sizeOfName, name.c_str());
-        model->administratorCommandGenerateToken(clientId, name);
-        return GENERATE_TOKEN;
+        AdministratorRequest *request = new AdministratorRequest(clientId, GENERATE_TOKEN);
+        request->tokenName = name;
+        return request;
     } else {
         printf("Error command type unrecogized");
     }
-    return -1;
+    return nullptr;
+}
+
+vector<char> SerializerAdministratorMessage::serializeResponseMessage(AdministratorResponse response) {
+    if(response.commandType == GET_ALL_SENSORS) {
+        return constructGetAllSensorsMessage(response.sensors);
+    } else if(response.commandType == UPDATE_SENSOR_NAME) {
+        return constructUpdateSensorNameMessage(response.sensorId);
+    } else if(response.commandType == REVOKE_SENSOR) {
+        return constructRevokeSensorMessage(response.sensorId);
+    } else if(response.commandType == DISCONNECT_SENSOR) {
+        return constructDisconnectSensorMessage(response.sensorId);
+    }else if(response.commandType == GENERATE_TOKEN) {
+        return constructGenerateTokenMessage(response.token);
+    }
 }
 
 vector<char> SerializerAdministratorMessage::constructGetAllSensorsMessage(vector<Sensor> sensors) {
