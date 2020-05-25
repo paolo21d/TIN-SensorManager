@@ -18,13 +18,14 @@ public class ClientHandler extends SimpleChannelInboundHandler<byte[]> {
     List<Byte> buffer = new ArrayList<>();
     @NonNull
     private CommunicationManager communication;
-    /*
+
     @Override
     public void exceptionCaught(ChannelHandlerContext channelHandlerContext, Throwable cause){
-        cause.printStackTrace();
+        System.out.println(cause.getMessage());
+        communication.setConnectionReady(false);
         channelHandlerContext.close();
     }
-*/
+
     private ChannelHandlerContext ctx;
 
     @Override
