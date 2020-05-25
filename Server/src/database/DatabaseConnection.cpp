@@ -248,5 +248,3 @@ SensorMeasurement DatabaseConnection::getLastMonth(int id) {
 
     return response;
 }
-
-

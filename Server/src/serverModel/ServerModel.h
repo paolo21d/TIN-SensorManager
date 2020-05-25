@@ -22,6 +22,9 @@
 #include "IModelForSensor.h"
 #include "Queue.h"
 #include "src/database/IDatabaseManager.h"
+#include "IModelForMonitoring.h"
+#include "IModelForAdministrator.h"
+#include "IModelForSensor.h"
 
 class ServerModel : public IModelForSensor, public IModelForMonitoring, public IModelForAdministrator {
     IRequestListener *sensorConnectionListener;
@@ -34,14 +37,8 @@ class ServerModel : public IModelForSensor, public IModelForMonitoring, public I
 
     IDatabaseManager *databaseConnector;
 
-//    std::mutex administratorRequestsQueueMutex;
-//    std::mutex monitoringRequestsQueueMutex;
-//    std::mutex sensorRequestsQueueMutex;
-
     Queue<AdministratorResponse> administratorResponsesQueue;
     Queue<MonitoringResponse> monitoringResponsesQueue;
-
-//    std::mutex administratorResponsesQueueMutex;
 
 public:
     ServerModel(IRequestListener *sensor, IRequestListener *administrator, IRequestListener *monitoring);
