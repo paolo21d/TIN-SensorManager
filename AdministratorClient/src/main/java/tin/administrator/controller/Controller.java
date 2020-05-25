@@ -75,7 +75,7 @@ public class Controller implements ResponseExecutor {
             Platform.runLater(() -> {
                 sendRequestGetAllSensors();
             });
-        }, 15, 5, TimeUnit.SECONDS);
+        }, 5, 5, TimeUnit.SECONDS);
 
         //timer.scheduleAtFixedRate(sensorTableRefreshTask, 5000, 3000);
         clearSensorDetails();

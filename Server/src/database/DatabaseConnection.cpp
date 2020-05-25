@@ -26,7 +26,6 @@ Sensor DatabaseConnection::addSensor(std::string IP, int port, std::string token
     statement->executeUpdate();
     connection->commit();
 
-    std::cout << "Inserted" << std::endl;
     connection->terminateStatement(statement);
 
     statement = createStatement(
@@ -49,14 +48,16 @@ std::vector<Sensor> DatabaseConnection::getAllSensors() {
     Statement *statement = createStatement(
             "SELECT * \n"
             "FROM SENSORS \n"
-            "WHERE status LIKE 'ACTIVE'");
+            "WHERE status LIKE 'ACTIVE' OR status LIKE 'DISCONNECTED'");
     ResultSet *resultSet = statement->executeQuery();
     std::vector<Sensor> sensors;
     while (resultSet->next()) {
         auto sensor = Sensor(resultSet->getInt(1),
                              resultSet->getString(2),
                              resultSet->getString(3),
-                             resultSet->getInt(4));
+                             resultSet->getInt(4),
+                             resultSet->getString(5) == "ACTIVE");
+
         sensors.push_back(sensor);
     }
 
