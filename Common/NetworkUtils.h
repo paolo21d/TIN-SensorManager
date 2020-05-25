@@ -9,10 +9,6 @@
 #include <arpa/inet.h>
 #endif
 
-#include <openssl/bio.h>
-#include <openssl/ssl.h>
-#include <openssl/err.h>
-
 int initNetwork();
 int closeSocket(int socketDescriptor);
 void prepareSocket(int &socket, bool server);

@@ -3,6 +3,7 @@ project(sensor)
 set(CMAKE_CXX_STANDARD 20)
 add_executable(
         sensor src/main.cpp
+        ../Common/SslClientsHandler.cpp
         ../Common/DoubleMeasurement.cpp
         ../Common/SystemUtils.cpp
         ../Common/NetworkUtils.cpp

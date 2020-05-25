@@ -2,34 +2,18 @@
 
 using namespace std;
 
-SSL_CTX *sslctx;
-SSL *cSSL;
-
-void DestroySSL()
-{
-    ERR_free_strings();
-    EVP_cleanup();
-}
-
-void ShutdownSSL()
-{
-    SSL_shutdown(cSSL);
-    SSL_free(cSSL);
-}
-
-
 //namespace sc
 //{
-    const int Client::MAX_MSG = 512;
+    const int ClientsHandler::Client::MAX_MSG = 512;
 
-    Client::Client(bool server) : IS_SERVER(server)
+    ClientsHandler::Client::Client(ClientsHandler *handler, bool server) : handler(handler), IS_SERVER(server)
     {
         reset();
         remainingIn = 0;
         remainingInLen = 0;
     }
 
-    void Client::reset()
+    void ClientsHandler::Client::reset()
     {
         socket = -1;
 
@@ -46,29 +30,29 @@ void ShutdownSSL()
         }
     }
 
-    void Client::setListener(IRequestListener *listener)
+    void ClientsHandler::Client::setListener(IRequestListener *listener)
     {
         this->listener = listener;
     }
 
-    bool Client::isConnected()
+    bool ClientsHandler::Client::isConnected()
     {
         return socket > -1;
     }
 
-    void Client::connected(int socket, int clientId, sockaddr_in service)
+    void ClientsHandler::Client::connected(int socket, int clientId, sockaddr_in service)
     {
         this->socket = socket;
         this->clientId = clientId;
         this->service = service;
     }
 
-    void Client::disconnected()
+    void ClientsHandler::Client::disconnected()
     {
         reset();
     }
 
-    bool Client::isSomethingToSend()
+    bool ClientsHandler::Client::isSomethingToSend()
     {
         if (socket < 0)
             return false;
@@ -81,13 +65,13 @@ void ShutdownSSL()
         return result;
     }
 
-    bool Client::isSomethingToRecv()
+    bool ClientsHandler::Client::isSomethingToRecv()
     {
         bool result = socket >= 0;
         return result;
     }
 
-    int Client::addOutMsg(std::vector<unsigned char> msg)
+    int ClientsHandler::Client::addOutMsg(std::vector<unsigned char> msg)
     {
         if (!isConnected() || msg.size() <= 0)
             return -1;
@@ -104,7 +88,7 @@ void ShutdownSSL()
         return 0;
     }
 
-    void Client::gotMsg(std::vector<unsigned char> &msg)
+    void ClientsHandler::Client::gotMsg(std::vector<unsigned char> &msg)
     {
         if (listener == nullptr)
             return;
@@ -112,17 +96,17 @@ void ShutdownSSL()
         listener->onGotRequest(clientId, msg);
     }
 
-    int Client::sendData()
+    int ClientsHandler::Client::sendData()
     {
         sendLock.lock();
-        int sent = send(socket, reinterpret_cast<const char *>(outBuffer.data()), outBuffer.size(), 0);
+        int sent = handler->socket_send(socket, reinterpret_cast<const char *>(outBuffer.data()), outBuffer.size(), 0);
         outBuffer.erase(outBuffer.begin(), outBuffer.begin() + sent);
         sendLock.unlock();
 
         return sent;
     }
 
-    int Client::recvData()
+    int ClientsHandler::Client::recvData()
     {
         if (remainingIn == 0 && remainingInLen == 0)
         {
@@ -133,7 +117,7 @@ void ShutdownSSL()
         int toReceive = max(remainingIn, remainingInLen);
 
         char *data = new char[toReceive];
-        int received = recv(socket, data, toReceive, 0);
+        int received = handler->socket_recv(socket, data, toReceive, 0);
 
         if (received <= 0)
             return received;
@@ -166,23 +150,23 @@ void ShutdownSSL()
         return received;
     }
 
-    int Client::getSocket()
+    int ClientsHandler::Client::getSocket()
     {
         return socket;
     }
 
-    int Client::getClientId()
+    int ClientsHandler::Client::getClientId()
     {
         return clientId;
     }
 
-    std::string Client::getIp()
+    std::string ClientsHandler::Client::getIp()
     {
 //        return "127.0.0.1";
         return inet_ntoa(service.sin_addr);
     }
 
-    int Client::getPort()
+    int ClientsHandler::Client::getPort()
     {
         return (int) ntohs(service.sin_port);
     }
@@ -193,7 +177,7 @@ void ShutdownSSL()
     {
         for (int i = 0; i < CLIENTS; ++i)
         {
-            clientHandlers.push_back(shared_ptr<Client>(new Client(IS_SERVER)));
+            clientHandlers.push_back(shared_ptr<Client>(new Client(this, IS_SERVER)));
         }
     }
 
@@ -297,7 +281,7 @@ void ShutdownSSL()
         struct timeval to;
         to.tv_sec = DELAY_SELECT_SEC;
         to.tv_usec = DELAY_SELECT_MICROS;
-        if ( (nactive = select(nfds, &readyIn, &readyOut, (fd_set *)0, &to) ) == -1)
+        if ( (nactive = socket_select(nfds, &readyIn, &readyOut, (fd_set *)0, &to) ) == -1)
         {
             throw ConnectionException(ConnectionException::SELECT);
         }
@@ -311,29 +295,13 @@ void ShutdownSSL()
         {
             sockaddr_in clientAddr;
             int sizeAddrClient = sizeof(sockaddr);
-            int clientSocket = accept(acceptingSocket, (sockaddr*)&clientAddr, reinterpret_cast<socklen_t *>(&sizeAddrClient));
+            int clientSocket = socket_accept(acceptingSocket, (sockaddr*)&clientAddr, reinterpret_cast<socklen_t *>(&sizeAddrClient));
 //            int clientSocket = accept(acceptingSocket, nullptr, nullptr );
             prepareSocket(clientSocket, IS_SERVER);
 
             if (clientSocket == -1)
                 throw ConnectionException(ConnectionException::ACCEPT);
             nfds = max(clientSocket + 1, nfds);
-
-//            sslctx = SSL_CTX_new( SSLv23_server_method());
-//            SSL_CTX_set_options(sslctx, SSL_OP_SINGLE_DH_USE);
-//            int use_cert = SSL_CTX_use_certificate_file(sslctx, "serverCertificate.pem" , SSL_FILETYPE_PEM);
-//
-//            int use_prv = SSL_CTX_use_PrivateKey_file(sslctx, "serverCertificate.pem", SSL_FILETYPE_PEM);
-//
-//            cSSL = SSL_new(sslctx);
-//            SSL_set_fd(cSSL, clientSocket );
-//            //Here is the SSL Accept portion.  Now all reads and writes must use SSL
-//            int ssl_err = SSL_accept(cSSL);
-//            if(ssl_err <= 0)
-//            {
-//                //Error occurred, log and close down ssl
-//                ShutdownSSL();
-//            }
 
             bindHandler(clientSocket, clientAddr);
         }
@@ -385,7 +353,8 @@ void ShutdownSSL()
         connected = false;
         
         int clientId = client->getClientId();
-        closeSocket(client->getSocket());
+        socket_close(client->getSocket());
+
         client->disconnected();
         listener->onClientDisconnected(clientId);
     }

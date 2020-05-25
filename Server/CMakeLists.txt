@@ -11,6 +11,7 @@ endif ()
 add_executable(
         server
         src/main.cpp
+        ../Common/SslClientsHandler.cpp
         ../Common/ClientsHandler.cpp
         ../Common/IClientsHandler.cpp
         ../Common/ConnectionException.cpp

@@ -6,7 +6,7 @@
 #include <src/serverModel/ServerModel.h>
 #include <src/listeners/MonitoringListener.h>
 #include <src/listeners/SensorListener.h>
-#include "ClientsHandler.h"
+#include "SslClientsHandler.h"
 #include "src/listeners/AdministratorListener.h"
 
 using namespace std;
@@ -21,9 +21,9 @@ void sensorThread()
 
         IRequestListener *listener = new SensorListener(serverModel);
         serverModel->setSensorConnectionListener(listener);
-        IClientsHandler *connectionHandler = new ClientsHandler();
+        IClientsHandler *connectionHandler = new SslClientsHandler();
         connectionHandler->addListener(listener);
-        connectionHandler->startHandling("127.0.0.1", 33333);
+        connectionHandler->startHandling("127.0.0.1", 33336);
 
         cout << "END" << endl;
     }
@@ -66,13 +66,13 @@ int main(int argc, char *argv[])
 
     thread t1(sensorThread);
     //thread t2(monitoringThread);
-    thread t3(adminThread);
+    //thread t3(adminThread);
 
     serverModel->init();
 
     t1.join();
     //t2.join();
-    t3.join();
+    //t3.join();
 
 
     return 0;

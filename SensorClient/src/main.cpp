@@ -3,7 +3,7 @@
 #include <vector>
 #include <thread>
 #include "IRequestListener.h"
-#include "ClientsHandler.h"
+#include "SslClientsHandler.h"
 
 using namespace std;
 
@@ -63,12 +63,12 @@ int main(int argc, char *argv[])
 
         listener = new MockListener();
 
-        connectionHandler = new ClientsHandler(1, false);
+        connectionHandler = new SslClientsHandler(1, false);
         connectionHandler->addListener(listener);
 
         thread t(sensorThread);
 
-        connectionHandler->startHandling("127.0.0.1", 33333);
+        connectionHandler->startHandling("127.0.0.1", 33336);
 
         t.join();
 
