@@ -47,7 +47,7 @@ Sensor DatabaseConnection::addSensor(std::string IP, int port, std::string token
 
 std::vector<Sensor> DatabaseConnection::getAllSensors() {
     Statement *statement = createStatement(
-            "SELECT * \n"
+            "SELECT /*+ result_cache */ * \n"
             "FROM SENSORS \n"
             "WHERE status LIKE 'ACTIVE' OR status LIKE 'DISCONNECTED'");
     ResultSet *resultSet = statement->executeQuery();
