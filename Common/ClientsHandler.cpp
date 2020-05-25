@@ -162,13 +162,8 @@ using namespace std;
 
     std::string Client::getIp()
     {
-/*        struct sockaddr_in* pV4Addr = (struct sockaddr_in*)&service;
-        struct in_addr ipAddr = pV4Addr->sin_addr;
-        char str[INET_ADDRSTRLEN];
-        inet_ntop( AF_INET, &ipAddr, str, INET_ADDRSTRLEN );
-
-        return string(str);*/
-        return "127.0.0.1";
+//        return "127.0.0.1";
+        return inet_ntoa(service.sin_addr);
     }
 
     int Client::getPort()
@@ -298,17 +293,16 @@ using namespace std;
     {
         if ( FD_ISSET(acceptingSocket, &readyIn))
         {
-            sockaddr_in service;
-            int sLen;
-            memset( & service, 0, sizeof( service ) );
-//            int clientSocket = accept(acceptingSocket, (struct sockaddr *)&service, &sLen );
-            int clientSocket = accept(acceptingSocket, nullptr, nullptr );
+            sockaddr_in clientAddr;
+            int sizeAddrClient = sizeof(sockaddr);
+            int clientSocket = accept(acceptingSocket, (sockaddr*)&clientAddr, reinterpret_cast<socklen_t *>(&sizeAddrClient));
+//            int clientSocket = accept(acceptingSocket, nullptr, nullptr );
             prepareSocket(clientSocket, IS_SERVER);
 
             if (clientSocket == -1)
                 throw ConnectionException(ConnectionException::ACCEPT);
             nfds = max(clientSocket + 1, nfds);
-            bindHandler(clientSocket, service);
+            bindHandler(clientSocket, clientAddr);
         }
     }
 

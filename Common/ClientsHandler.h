@@ -6,6 +6,8 @@
 #include <deque>
 #include <mutex>
 #include <unordered_map>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 #include "IClientsHandler.h"
 
 //namespace sc

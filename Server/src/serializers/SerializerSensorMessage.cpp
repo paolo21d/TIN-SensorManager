@@ -1,0 +1,1 @@
+#include "SerializerSensorMessage.h"
