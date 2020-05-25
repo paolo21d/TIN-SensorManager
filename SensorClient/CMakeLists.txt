@@ -19,3 +19,5 @@ endif()
 set(I "/usr/local/Cellar/openssl/1.0.2q/include")
 set(L "/usr/local/Cellar/openssl/1.0.2q/lib")
 include_directories(${I})
+
+set(CMAKE_CXX_STANDARD_LIBRARIES "-lssl -lcrypto")

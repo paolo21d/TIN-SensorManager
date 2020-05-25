@@ -31,3 +31,10 @@ void prepareSocket(int &socket, bool server)
     }
 #endif
 }
+
+void InitializeSSL()
+{
+    SSL_load_error_strings();
+    SSL_library_init();
+    OpenSSL_add_all_algorithms();
+}

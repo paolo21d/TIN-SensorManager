@@ -2,6 +2,22 @@
 
 using namespace std;
 
+SSL_CTX *sslctx;
+SSL *cSSL;
+
+void DestroySSL()
+{
+    ERR_free_strings();
+    EVP_cleanup();
+}
+
+void ShutdownSSL()
+{
+    SSL_shutdown(cSSL);
+    SSL_free(cSSL);
+}
+
+
 //namespace sc
 //{
     const int Client::MAX_MSG = 512;
@@ -302,6 +318,23 @@ using namespace std;
             if (clientSocket == -1)
                 throw ConnectionException(ConnectionException::ACCEPT);
             nfds = max(clientSocket + 1, nfds);
+
+//            sslctx = SSL_CTX_new( SSLv23_server_method());
+//            SSL_CTX_set_options(sslctx, SSL_OP_SINGLE_DH_USE);
+//            int use_cert = SSL_CTX_use_certificate_file(sslctx, "serverCertificate.pem" , SSL_FILETYPE_PEM);
+//
+//            int use_prv = SSL_CTX_use_PrivateKey_file(sslctx, "serverCertificate.pem", SSL_FILETYPE_PEM);
+//
+//            cSSL = SSL_new(sslctx);
+//            SSL_set_fd(cSSL, clientSocket );
+//            //Here is the SSL Accept portion.  Now all reads and writes must use SSL
+//            int ssl_err = SSL_accept(cSSL);
+//            if(ssl_err <= 0)
+//            {
+//                //Error occurred, log and close down ssl
+//                ShutdownSSL();
+//            }
+
             bindHandler(clientSocket, clientAddr);
         }
     }
