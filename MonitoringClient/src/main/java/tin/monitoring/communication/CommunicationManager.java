@@ -61,9 +61,10 @@ public class CommunicationManager extends Thread {
         });
         try {
             clientBootstrap.connect().sync();
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             connectionReady = false;
-            e.printStackTrace();
+            return;
+            //e.printStackTrace();
         }
         connectionReady = true;
     }
@@ -83,7 +84,16 @@ public class CommunicationManager extends Thread {
         handler = new ClientHandler(this);
         System.out.println("---------------- CONNECTING");
         connect("127.0.0.1", 28001);
-        System.out.println("---------------- CONNECTED");
+        if(isConnectionReady())
+            System.out.println("---------------- CONNECTED");
+    }
+
+    public Boolean isConnectionReady() {
+        return connectionReady;
+    }
+
+    public void setConnectionReady(Boolean connectionReady) {
+        this.connectionReady = connectionReady;
     }
 
     public void sendMessage(String message) throws InterruptedException {

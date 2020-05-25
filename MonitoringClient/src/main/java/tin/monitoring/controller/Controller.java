@@ -37,6 +37,7 @@ public class Controller implements ResponseExecutor {
     public TableColumn<SensorTable, Integer> tableSensorCurrentMeasurement;
 
     private CommunicationManager communicationManager;
+    private boolean alertOccurred = false;
 
     public Controller() {
         communicationManager = new CommunicationManager(this);
@@ -57,16 +58,26 @@ public class Controller implements ResponseExecutor {
         //lineChart.setAnimated(false);
         lineChart.getXAxis().setAnimated(false);
 
+        communicationManager.run();
+
         ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
 
         scheduledExecutorService.scheduleAtFixedRate(() -> {
-            Platform.runLater(() -> {
-                sendRequestGetAllSensors();
-            });
+            if(communicationManager.isConnectionReady()) {
+                Platform.runLater(() -> {
+                    sendRequestGetAllSensors();
+                });
+            }
+            else {
+                Platform.runLater(() -> {
+                    isConnectionEstablished();
+                });
+            }
+
         }, 0, 5, TimeUnit.SECONDS);
 
         loadDataButton.setDisable(true);
-        communicationManager.run();
+
     }
 
     public void tableClicked(MouseEvent mouseEvent) {
@@ -197,6 +208,20 @@ public class Controller implements ResponseExecutor {
         Platform.runLater(() -> {showData();});
     }
 
+    private void isConnectionEstablished() {
+        if(!communicationManager.isConnectionReady()) {
+            if(!alertOccurred) {
+                alertOccurred = true;
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Connection Error");
+                alert.setHeaderText("Server is unreachable");
+                alert.setContentText("Connection with server cannot be established");
+
+                alert.showAndWait();
+                closeApp(new ActionEvent());
+            }
+        }
+    }
 
     public void closeApp(ActionEvent actionEvent) {
         Platform.exit();

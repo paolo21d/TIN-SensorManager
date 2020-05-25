@@ -15,15 +15,15 @@ public class AdministratorModel {
 
 
     public AdministratorModel() {
-        Sensor sensor1 = new Sensor(1, "Sensor1", "192.168.1.1", 9000, true);
-        Sensor sensor2 = new Sensor(2, "Sensor2", "192.168.1.2", 9000, true);
-        Sensor sensor3 = new Sensor(3, "Sensor3", "192.168.1.3", 9000, true);
-        Sensor sensor4 = new Sensor(4, "Sensor4", "192.168.111.111", 9000, false);
-
-        sensors.add(sensor1);
-        sensors.add(sensor2);
-        sensors.add(sensor3);
-        sensors.add(sensor4);
+//        Sensor sensor1 = new Sensor(1, "Sensor1", "192.168.1.1", 9000, true);
+//        Sensor sensor2 = new Sensor(2, "Sensor2", "192.168.1.2", 9000, true);
+//        Sensor sensor3 = new Sensor(3, "Sensor3", "192.168.1.3", 9000, true);
+//        Sensor sensor4 = new Sensor(4, "Sensor4", "192.168.111.111", 9000, false);
+//
+//        sensors.add(sensor1);
+//        sensors.add(sensor2);
+//        sensors.add(sensor3);
+//        sensors.add(sensor4);
     }
 
     public Sensor findSensorById(Integer id) {
