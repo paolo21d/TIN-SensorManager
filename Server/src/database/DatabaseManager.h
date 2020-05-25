@@ -19,6 +19,8 @@ class DatabaseManager : public IDatabaseManager {
 public:
     DatabaseManager(std::string name, std::string password, std::string connection);
 
+    ~DatabaseManager() override;
+
     IDatabaseConnection *getNewConnection() override;
 };
 

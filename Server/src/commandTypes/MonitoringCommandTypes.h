@@ -6,7 +6,8 @@
 #define SERVER_MONITORINGCOMMANDTYPES_H
 
 enum MonitoringCommandTypes {
-
+    GET_ALL_SENSORS_MONITORING = 0, //1 param (commandType)
+    GET_SET_OF_MEASUREMENTS = 1 //3 params (commandType, sensorId, sensorName)
 };
 
 extern MonitoringCommandTypes MonitoringCommandTypes;

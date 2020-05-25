@@ -11,17 +11,20 @@
 class SensorMeasurement {
 public:
     int sensorId;
-    std::vector<Measurement *> measurements;
+    std::vector<Measurement> measurements;
 
     explicit SensorMeasurement(int id) {
         this->sensorId = id;
     }
 
-    void addMeasurement(Measurement *measurement) {
+    SensorMeasurement() {
+        this->sensorId = -1;
+    }
+
+    void addMeasurement(Measurement measurement) {
         measurements.push_back(measurement);
     }
 };
-
 
 
 #endif //SERVER_SENSORMEASUREMENT_H

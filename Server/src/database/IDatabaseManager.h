@@ -8,6 +8,9 @@
 #include "IDatabaseConnection.h"
 
 class IDatabaseManager {
+public:
+    virtual ~IDatabaseManager() = default;
+
     virtual IDatabaseConnection *getNewConnection() = 0;
 };
 

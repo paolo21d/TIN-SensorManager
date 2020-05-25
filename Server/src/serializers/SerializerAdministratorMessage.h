@@ -12,11 +12,15 @@
 #include <vector>
 #include <string>
 #include <src/serverModel/IModelForAdministrator.h>
+#include <src/requests/AdministratorRequest.h>
+#include <src/responses/AdministratorResponse.h>
 
 
 class SerializerAdministratorMessage : public SerializerMessage {
 public:
-    int analyzeMessage(int clientId, std::vector<char> message, IModelForAdministrator* model);
+    AdministratorRequest* analyzeMessage(int clientId, std::vector<char> message);
+
+    std::vector<char> serializeResponseMessage(AdministratorResponse response);
 
     std::vector<char> constructGetAllSensorsMessage(std::vector<Sensor> sensors);
 

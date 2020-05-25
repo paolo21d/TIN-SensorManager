@@ -15,10 +15,16 @@ DatabaseManager::DatabaseManager(std::string name, std::string password, std::st
     this->environment = Environment::createEnvironment(Environment::THREADED_MUTEXED);
 }
 
+DatabaseManager::~DatabaseManager() {
+    Environment::terminateEnvironment(environment);
+}
+
+
 IDatabaseConnection *DatabaseManager::getNewConnection() {
     oracle::occi::Connection *conn = environment->createConnection(name, password, connection);
 
     return new DatabaseConnection(environment, conn);
 }
+
 
 
