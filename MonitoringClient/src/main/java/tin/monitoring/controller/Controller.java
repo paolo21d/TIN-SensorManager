@@ -15,7 +15,6 @@ import tin.monitoring.model.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Timer;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -27,6 +26,7 @@ public class Controller implements ResponseExecutor {
     public List<Measurement> measurements = new ArrayList<>();
     public Button loadDataButton;
     public Label selectedSensorName;
+    public MenuItem menuCloseApp;
     @FXML
     LineChart<String,Number> lineChart ;
     public TableView<SensorTable> sensorsTable;
@@ -37,12 +37,9 @@ public class Controller implements ResponseExecutor {
     public TableColumn<SensorTable, Integer> tableSensorCurrentMeasurement;
 
     private CommunicationManager communicationManager;
-    private SensorTableRefreshTask sensorTableRefreshTask;
-    Timer timer = new Timer();
 
     public Controller() {
         communicationManager = new CommunicationManager(this);
-        sensorTableRefreshTask = new SensorTableRefreshTask(this);
     }
 
     @FXML
@@ -57,17 +54,17 @@ public class Controller implements ResponseExecutor {
             sensorsTable.getItems().add(new SensorTable(sensor));
         }
 
-        timer.scheduleAtFixedRate(sensorTableRefreshTask, 5000, 3000);
         //lineChart.setAnimated(false);
         lineChart.getXAxis().setAnimated(false);
-        /*ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+
+        ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
 
         scheduledExecutorService.scheduleAtFixedRate(() -> {
             Platform.runLater(() -> {
-                showData();
+                sendRequestGetAllSensors();
             });
-        }, 0, 1, TimeUnit.SECONDS);
-*/
+        }, 5, 5, TimeUnit.SECONDS);
+
         loadDataButton.setDisable(true);
         communicationManager.run();
     }
@@ -90,7 +87,7 @@ public class Controller implements ResponseExecutor {
         Sensor current = MonitoringModel.getInstance().getCurrentDisplayedSensor();
         if(current == null) {
             loadDataButton.setDisable(true);
-            selectedSensorName.setText("");
+            selectedSensorName.setText("Double click on sensor to select it");
             return;
         }
         System.out.println(current);
@@ -155,10 +152,14 @@ public class Controller implements ResponseExecutor {
 //    }
 
     public void refreshSensorTable() {
-        System.out.println("Refresh Sensor Table");
         sensorsTable.getItems().clear();
         for (Sensor sensor : MonitoringModel.getInstance().getSensors()) {
             sensorsTable.getItems().add(new SensorTable(sensor));
+        }
+        if(!MonitoringModel.getInstance().getSensors().contains(MonitoringModel.getInstance().getCurrentDisplayedSensor())) {
+            MonitoringModel.getInstance().changeCurrentSensor(null);
+            loadDataButton.setDisable(true);
+            Platform.runLater(() -> {selectedSensorName.setText("Double click on sensor to select it");});
         }
     }
 
@@ -168,7 +169,11 @@ public class Controller implements ResponseExecutor {
         for(Measurement measurement : measurements) {
             series.getData().add(new XYChart.Data<>(measurement.getLabel(),measurement.getValue()));
         }
-        series.setName("Data");
+        if(measurements.size() > 0)
+            series.setName("Data from sensorID: " + measurements.get(0).getId());
+        else
+            series.setName("No data found");
+
         lineChart.getData().add(series);
     }
 
@@ -192,4 +197,17 @@ public class Controller implements ResponseExecutor {
     }
 
 
+    public void closeApp(ActionEvent actionEvent) {
+        Platform.exit();
+        System.exit(0);
+    }
+
+    public void showCredits(ActionEvent actionEvent) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("About");
+        alert.setHeaderText("TIN PROJECT");
+        alert.setContentText("Grzegorz Aleksiuk\nRobert Dudzinski\nPawel Swiatkowski\nMichal Zadrozny");
+
+        alert.showAndWait();
+    }
 }

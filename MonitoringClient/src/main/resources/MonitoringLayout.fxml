@@ -22,17 +22,12 @@
         <menus>
           <Menu mnemonicParsing="false" text="File">
             <items>
-              <MenuItem mnemonicParsing="false" text="Close" />
-            </items>
-          </Menu>
-          <Menu mnemonicParsing="false" text="Edit">
-            <items>
-              <MenuItem mnemonicParsing="false" text="Delete" />
+              <MenuItem fx:id="menuCloseApp" onAction="#closeApp" mnemonicParsing="false" text="Close" />
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Help">
             <items>
-              <MenuItem mnemonicParsing="false" text="About" />
+              <MenuItem fx:id="menuAbout" onAction="#showCredits" mnemonicParsing="false" text="About" />
             </items>
           </Menu>
         </menus>
@@ -46,8 +41,8 @@
                  <columns>
                      <TableColumn fx:id="tableSensorId" prefWidth="30.0" sortable="true" text="ID" />
                      <TableColumn fx:id="tableSensorName" prefWidth="70.0" text="Name" />
-                     <TableColumn fx:id="tableSensorIp" prefWidth="102.39999389648438" text="IP" />
-                     <TableColumn fx:id="tableSensorPort" prefWidth="35.20001220703125" text="Port" />
+                     <TableColumn fx:id="tableSensorIp" prefWidth="90.4000244140625" text="IP" />
+                     <TableColumn fx:id="tableSensorPort" prefWidth="48.0" text="Port" />
                      <TableColumn fx:id="tableSensorCurrentMeasurement" minWidth="9.0" prefWidth="55.20001220703125" text="Current" />
                  </columns>
              </TableView>
@@ -66,7 +61,7 @@
               </yAxis>
             </LineChart>
             <Button fx:id="loadDataButton" alignment="CENTER" layoutY="427.0" mnemonicParsing="false" onAction="#loadData" prefHeight="26.0" prefWidth="505.0" text="Load Data" />
-            <Label fx:id="selectedSensorName" layoutX="289.0" layoutY="-1.0" prefHeight="34.0" prefWidth="203.0" text="Double click on sesnor to select it">
+            <Label fx:id="selectedSensorName" layoutX="289.0" layoutY="-1.0" prefHeight="34.0" prefWidth="203.0" text="Double click on sensor to select it">
                <font>
                   <Font size="13.0" />
                </font>
