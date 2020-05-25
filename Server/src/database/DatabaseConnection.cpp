@@ -11,6 +11,7 @@ using namespace oracle::occi;
 DatabaseConnection::DatabaseConnection(oracle::occi::Environment *environment, oracle::occi::Connection *connection) {
     this->environment = environment;
     this->connection = connection;
+    this->connection->setStmtCacheSize(20);
 }
 
 DatabaseConnection::~DatabaseConnection() {
