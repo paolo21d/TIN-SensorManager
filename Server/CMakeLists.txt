@@ -19,8 +19,8 @@ add_executable(
         src/listeners/AdministratorListener.h
         src/Sensor.h
         ../Common/IRequestListener.cpp
-#        src/database/DatabaseManager.cpp
-#        src/database/DatabaseConnection.cpp
+        src/database/DatabaseManager.cpp
+        src/database/DatabaseConnection.cpp
         src/SensorMeasurement.h
         src/Measurement.h
         src/listeners/MonitoringListener.cpp src/listeners/MonitoringListener.h
@@ -48,11 +48,12 @@ if (WIN32)
     if (CMAKE_BUILD_TYPE STREQUAL "Release")
         target_link_libraries(server $ENV{INSTANT_CLIENT}/sdk/lib/msvc/vc14/oraocci12.lib)
     endif ()
+else ()
+    set(I "/usr/local/Cellar/openssl/1.0.2q/include")
+    set(L "/usr/local/Cellar/openssl/1.0.2q/lib")
+    include_directories(${I})
 endif ()
 
-set(I "/usr/local/Cellar/openssl/1.0.2q/include")
-set(L "/usr/local/Cellar/openssl/1.0.2q/lib")
-include_directories(${I})
 
 #
 #src/DatabaseConnection.h
