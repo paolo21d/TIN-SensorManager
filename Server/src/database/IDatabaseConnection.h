@@ -28,9 +28,13 @@ public:
 
     virtual Sensor addSensor(std::string IP, int port, std::string token) = 0;
 
-    virtual void revokeSensor(int id) = 0;
+    virtual Sensor revokeSensor(int id) = 0;
 
-    virtual void editSensor(int id, std::string name) = 0;
+    virtual Sensor connectSensor(int id) = 0;
+
+    virtual Sensor disconnectSensor(int id) = 0;
+
+    virtual Sensor editSensor(int id, std::string name) = 0;
 
     virtual Sensor getSensor(int id) = 0;
 

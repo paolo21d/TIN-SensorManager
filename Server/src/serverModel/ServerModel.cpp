@@ -116,8 +116,36 @@ void ServerModel::executeAdministratorRequests() {
         //Tutaj ma być wykokane zapytanie do bazy/cacheu
         //stworzenie AdministratorResponse i wrzucenie go do administratorResponsesQueue
 
+        auto response = new AdministratorResponse(request.clientId, request.commandType);
 
+        switch (request.commandType) {
+            case GET_ALL_SENSORS: {
+                vector<Sensor> sensors = connection->getAllSensors();
+                for (Sensor s : sensors) {
+                    response->sensors.push_back(s);
+                }
+                break;
+            }
+            case UPDATE_SENSOR_NAME:
+                response->sensors.push_back(
+                        connection->editSensor(request.sensorId, request.sensorName));
+                break;
+            case REVOKE_SENSOR:
+                response->sensors.push_back(
+                        connection->revokeSensor(request.sensorId));
+                //Terminate sensor connection
+                break;
+            case DISCONNECT_SENSOR:
+                response->sensors.push_back(
+                        connection->disconnectSensor(request.sensorId));
+                //Terminate sensor connection
+                break;
+            case GENERATE_TOKEN:
+                //Do smth
+                break;
+        }
 
+        addAdministratorResponseToSend(*response);
         //std::chrono::milliseconds timespan(1000); // or whatever
         //std::this_thread::sleep_for(timespan);
     }
@@ -230,6 +258,36 @@ void ServerModel::sendMonitoringResponse() {
         std::this_thread::sleep_for(timespan);
     }
 
+}
+
+void ServerModel::executeSensorRequests() {
+    IDatabaseConnection *connection = databaseConnector->getNewConnection();
+
+    while (1 == 1) {
+
+        SensorRequest request = sensorRequestsQueue.pop();
+
+        cout << "SensorRequest\tCommandType: " << request.commandType << endl;
+
+        switch (request.commandType) {
+            case ADD_MEASUREMENT:
+                connection->addMeasurement(request.clientId, request.measurementValue, request.measurementTimestamp);
+                break;
+            case CONNECTED_SENSOR:
+                //Do smth
+                connection->connectSensor(request.clientId);
+                break;
+            case DISCONNECT_SENSOR:
+                //Do smth
+                connection->disconnectSensor(request.clientId);
+                break;
+        }
+
+        //std::chrono::milliseconds timespan(1000); // or whatever
+        //std::this_thread::sleep_for(timespan);
+    }
+    //Przy ładnym wyłączaniu przydałoby się kasować connection
+    //delete connection;
 }
 
 

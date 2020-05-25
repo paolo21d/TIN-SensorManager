@@ -49,7 +49,7 @@ std::vector<Sensor> DatabaseConnection::getAllSensors() {
     Statement *statement = createStatement(
             "SELECT * \n"
             "FROM SENSORS \n"
-            "WHERE status NOT LIKE 'REVOKED'");
+            "WHERE status LIKE 'ACTIVE'");
     ResultSet *resultSet = statement->executeQuery();
     std::vector<Sensor> sensors;
     while (resultSet->next()) {
@@ -81,7 +81,7 @@ oracle::occi::Statement *DatabaseConnection::createStatement(std::string sql) {
     return connection->createStatement(sql);
 }
 
-void DatabaseConnection::revokeSensor(int id) {
+Sensor DatabaseConnection::revokeSensor(int id) {
     Statement *statement = createStatement(
             "UPDATE SENSORS\n"
             "SET status = 'REVOKED'\n"
@@ -89,9 +89,35 @@ void DatabaseConnection::revokeSensor(int id) {
     statement->executeUpdate();
     connection->commit();
     connection->terminateStatement(statement);
+
+    return getSensor(id);
 }
 
-void DatabaseConnection::editSensor(int id, std::string name) {
+Sensor DatabaseConnection::disconnectSensor(int id) {
+    Statement *statement = createStatement(
+            "UPDATE SENSORS\n"
+            "SET status = 'DISCONNECTED'\n"
+            "WHERE id=" + std::to_string(id));
+    statement->executeUpdate();
+    connection->commit();
+    connection->terminateStatement(statement);
+
+    return getSensor(id);
+}
+
+Sensor DatabaseConnection::connectSensor(int id) {
+    Statement *statement = createStatement(
+            "UPDATE SENSORS\n"
+            "SET status = 'ACTIVE'\n"
+            "WHERE id=" + std::to_string(id));
+    statement->executeUpdate();
+    connection->commit();
+    connection->terminateStatement(statement);
+
+    return getSensor(id);
+}
+
+Sensor DatabaseConnection::editSensor(int id, std::string name) {
     Statement *statement = createStatement(
             "UPDATE SENSORS\n"
             "SET name = '" + name +
@@ -99,6 +125,8 @@ void DatabaseConnection::editSensor(int id, std::string name) {
     statement->executeUpdate();
     connection->commit();
     connection->terminateStatement(statement);
+
+    return getSensor(id);
 }
 
 Sensor DatabaseConnection::getSensor(int id) {
