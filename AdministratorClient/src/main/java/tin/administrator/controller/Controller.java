@@ -110,6 +110,7 @@ public class Controller implements ResponseExecutor {
     public void disconnectClicked(ActionEvent actionEvent) {
         if (model.getCurrentDisplayedSensorId() != null) {
             communicationManager.sendCommandDisconnectSensor(model.getCurrentDisplayedSensorId());
+            communicationManager.sendCommandGetAllSensors();
         }
         System.out.println("DISCONNECT");
     }
@@ -117,6 +118,7 @@ public class Controller implements ResponseExecutor {
     public void revokeClicked(ActionEvent actionEvent) {
         if (model.getCurrentDisplayedSensorId() != null) {
             communicationManager.sendCommandRevokeSensor(model.getCurrentDisplayedSensorId());
+            communicationManager.sendCommandGetAllSensors();
         }
         System.out.println("REVOKE");
     }

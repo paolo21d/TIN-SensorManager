@@ -28,6 +28,7 @@ public class Controller implements ResponseExecutor {
     public Label selectedSensorName;
     @FXML
     LineChart<String,Number> lineChart ;
+    private String measurementsType;
     public TableView<SensorTable> sensorsTable;
     public TableColumn<SensorTable, Integer> tableSensorId;
     public TableColumn<SensorTable, String> tableSensorName;
@@ -62,7 +63,7 @@ public class Controller implements ResponseExecutor {
             Platform.runLater(() -> {
                 sendRequestGetAllSensors();
             });
-        }, 5, 5, TimeUnit.SECONDS);
+        }, 0, 5, TimeUnit.SECONDS);
 
         loadDataButton.setDisable(true);
         communicationManager.run();
@@ -114,6 +115,7 @@ public class Controller implements ResponseExecutor {
                 //loadDataFromLastMonth();
                 communicationManager.sendCommandGetSetOfMeasurements(current.getId(),2);
             }
+            measurementsType = result.get();
         }
     }
 
@@ -169,7 +171,7 @@ public class Controller implements ResponseExecutor {
             series.getData().add(new XYChart.Data<>(measurement.getLabel(),measurement.getValue()));
         }
         if(measurements.size() > 0)
-            series.setName("Data from sensorID: " + measurements.get(0).getId());
+            series.setName("Data from " + measurementsType + " from sensorID: " + measurements.get(0).getId());
         else
             series.setName("No data found");
 

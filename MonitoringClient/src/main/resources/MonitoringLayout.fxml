@@ -22,12 +22,12 @@
         <menus>
           <Menu mnemonicParsing="false" text="File">
             <items>
-              <MenuItem fx:id="menuCloseApp" onAction="#closeApp" mnemonicParsing="false" text="Close" />
+              <MenuItem fx:id="menuCloseApp" mnemonicParsing="false" onAction="#closeApp" text="Close" />
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Help">
             <items>
-              <MenuItem fx:id="menuAbout" onAction="#showCredits" mnemonicParsing="false" text="About" />
+              <MenuItem fx:id="menuAbout" mnemonicParsing="false" onAction="#showCredits" text="About" />
             </items>
           </Menu>
         </menus>
@@ -52,12 +52,12 @@
    <center>
       <AnchorPane prefHeight="441.0" prefWidth="567.0" BorderPane.alignment="CENTER">
          <children>
-            <LineChart fx:id="lineChart" layoutX="3.0" layoutY="30.0" prefHeight="395.0" prefWidth="499.0" title="Measurements">
+            <LineChart fx:id="lineChart" layoutX="3.0" layoutY="30.0" prefHeight="396.0" prefWidth="499.0" title="Measurements">
               <xAxis>
-                <CategoryAxis label="timestamps" prefHeight="44.0" prefWidth="447.0" side="BOTTOM" />
+                <CategoryAxis label="" prefHeight="86.0" prefWidth="420.0" side="BOTTOM" />
               </xAxis>
               <yAxis>
-                <NumberAxis label="CPU usage" prefHeight="313.0" prefWidth="43.0" side="LEFT" />
+                <NumberAxis label="CPU usage" prefHeight="271.0" prefWidth="51.0" side="LEFT" />
               </yAxis>
             </LineChart>
             <Button fx:id="loadDataButton" alignment="CENTER" layoutY="427.0" mnemonicParsing="false" onAction="#loadData" prefHeight="26.0" prefWidth="505.0" text="Load Data" />

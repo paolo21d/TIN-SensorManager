@@ -183,11 +183,12 @@ SensorMeasurement DatabaseConnection::getLastHour(int id) {
     auto response = SensorMeasurement(id);
 
     Statement *statement = createStatement(
-            "SELECT FLOOR(AVG(measure)), to_char(timestamp, 'DD/MM/YYYY HH24:MI'), sensor_id \n"
+            "SELECT FLOOR(AVG(measure)), to_char(timestamp, 'YYYY/MM/DD HH24:MI') t, sensor_id \n"
             "FROM MEASUREMENTS\n"
             "WHERE sensor_id = " + std::to_string(id) +
             "AND timestamp >= (sysdate - 1/24)\n"
-            "GROUP BY to_char(timestamp, 'DD/MM/YYYY HH24:MI'), sensor_id");
+            "GROUP BY to_char(timestamp, 'YYYY/MM/DD HH24:MI'), sensor_id \n"
+            "ORDER BY t");
     ResultSet *resultSet = statement->executeQuery();
 
     while (resultSet->next()) {
@@ -205,11 +206,12 @@ SensorMeasurement DatabaseConnection::getLastDay(int id) {
     auto response = SensorMeasurement(id);
 
     Statement *statement = createStatement(
-            "SELECT FLOOR(AVG(measure)), to_char(timestamp, 'DD/MM/YYYY HH24'), sensor_id \n"
+            "SELECT FLOOR(AVG(measure)), to_char(timestamp, 'YYYY/MM/DD HH24') t, sensor_id \n"
             "FROM MEASUREMENTS\n"
             "WHERE sensor_id = " + std::to_string(id) +
             "AND timestamp >= (sysdate - 1)\n"
-            "GROUP BY to_char(timestamp, 'DD/MM/YYYY HH24'), sensor_id");
+            "GROUP BY to_char(timestamp, 'YYYY/MM/DD HH24'), sensor_id \n"
+            "ORDER BY t");
     ResultSet *resultSet = statement->executeQuery();
 
     while (resultSet->next()) {
@@ -227,11 +229,12 @@ SensorMeasurement DatabaseConnection::getLastMonth(int id) {
     auto response = SensorMeasurement(id);
 
     Statement *statement = createStatement(
-            "SELECT FLOOR(AVG(measure)), to_char(timestamp, 'DD/MM/YYYY'), sensor_id \n"
+            "SELECT FLOOR(AVG(measure)), to_char(timestamp, 'YYYY/MM/DD') t, sensor_id \n"
             "FROM MEASUREMENTS\n"
             "WHERE sensor_id = " + std::to_string(id) +
             "AND timestamp >= (sysdate - 31)\n"
-            "GROUP BY to_char(timestamp, 'DD/MM/YYYY'), sensor_id");
+            "GROUP BY to_char(timestamp, 'YYYY/MM/DD'), sensor_id \n"
+            "ORDER BY t");
     ResultSet *resultSet = statement->executeQuery();
 
     while (resultSet->next()) {
