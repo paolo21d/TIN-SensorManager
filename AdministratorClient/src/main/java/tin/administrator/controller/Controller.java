@@ -34,6 +34,7 @@ public class Controller implements ResponseExecutor {
     public TextField textFieldEditedName;
     public Button buttonEditName;
     private boolean isNameEditing = false;
+    private boolean alertOccurred = false;
     //model
 //    private List<Sensor> sensors = new ArrayList<>();
 //    private Sensor nowDisplayedSensor = null;
@@ -69,18 +70,27 @@ public class Controller implements ResponseExecutor {
             sensorsTable.getItems().add(new SensorTable(sensor));
         }
 
+        communicationManager.run();
+
         ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
 
         scheduledExecutorService.scheduleAtFixedRate(() -> {
-            Platform.runLater(() -> {
-                sendRequestGetAllSensors();
-            });
-        }, 5, 5, TimeUnit.SECONDS);
+            if(communicationManager.isConnectionReady()) {
+                Platform.runLater(() -> {
+                    sendRequestGetAllSensors();
+                });
+            }
+            else {
+                Platform.runLater(() -> {
+                    isConnectionEstablished();
+                });
+            }
+
+        }, 0, 5, TimeUnit.SECONDS);
 
         //timer.scheduleAtFixedRate(sensorTableRefreshTask, 5000, 3000);
         clearSensorDetails();
 
-        communicationManager.run();
     }
 
     //UI Events
@@ -238,11 +248,25 @@ public class Controller implements ResponseExecutor {
         labelNameRefresher.refresh(sensor.getName());
         labelStateRefresher.refresh(sensor.getConnected() ? "ONLINE" : "OFFLINE");
 
-        buttonDisconnect.setDisable(false);
+        buttonDisconnect.setDisable(!sensor.getConnected());
         buttonRevoke.setDisable(false);
         buttonEditName.setDisable(false);
     }
 
+    private void isConnectionEstablished() {
+        if(!communicationManager.isConnectionReady()) {
+            if(!alertOccurred) {
+                alertOccurred = true;
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Connection Error");
+                alert.setHeaderText("Server is unreachable");
+                alert.setContentText("Connection with server cannot be established");
+
+                alert.showAndWait();
+                closeApp(new ActionEvent());
+            }
+        }
+    }
 
     public void closeApp(ActionEvent actionEvent) {
         Platform.exit();
