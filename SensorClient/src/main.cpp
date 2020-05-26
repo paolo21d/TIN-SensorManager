@@ -44,7 +44,7 @@ void sensorThread()
     {
         int64_t timestamp = getPosixTime();
         int measure = getMeasure();
-        sleepMillis(50);
+        sleepMillis(2000);
 
         vector<unsigned char> response;
         BytesParser::appendBytes<int64_t>(response, timestamp);

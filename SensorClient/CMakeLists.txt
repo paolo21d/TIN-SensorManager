@@ -11,7 +11,8 @@ add_executable(
         ../Common/IClientsHandler.cpp
         ../Common/ClientsHandler.cpp
         ../Common/IRequestListener.cpp
-        src/MeasureReader.cpp src/MeasureReader.h)
+        src/MeasureReader.cpp
+        src/MeasureReader.h)
 target_include_directories(sensor PRIVATE ../Common)
 if(WIN32)
     target_link_libraries(sensor wsock32 ws2_32)

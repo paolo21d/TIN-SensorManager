@@ -1,6 +1,9 @@
 #ifndef SENSOR_MEASUREREADER_H
 #define SENSOR_MEASUREREADER_H
 
+
+
+
 int getMeasure();
 
 #endif //SENSOR_MEASUREREADER_H

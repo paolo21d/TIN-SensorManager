@@ -40,6 +40,8 @@ void ServerModel::init() {
     thread monitoringRequestsExecutor(&ServerModel::executeMonitoringRequests, this);
     thread monitoringResponsesSender(&ServerModel::sendMonitoringResponse, this);
 
+    thread sensorRequestsExecutor(&ServerModel::executeSensorRequests, this);
+
     monitoringRequestsExecutor.join();
     monitoringResponsesSender.join();
 
@@ -268,6 +270,7 @@ void ServerModel::executeSensorRequests() {
 
         switch (request.commandType) {
             case ADD_MEASUREMENT:
+                //zmienić clientId na id sensora
                 connection->addMeasurement(request.clientId, request.measurementValue, request.measurementTimestamp);
                 break;
             case CONNECTED_SENSOR:
