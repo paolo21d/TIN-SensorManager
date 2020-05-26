@@ -294,7 +294,7 @@ using namespace std;
         if ( FD_ISSET(acceptingSocket, &readyIn))
         {
             sockaddr_in clientAddr;
-            socklen_t sizeAddrClient = sizeof(sockaddr);
+            int sizeAddrClient = sizeof(sockaddr);
             int clientSocket = socket_accept(acceptingSocket, (sockaddr*)&clientAddr, &sizeAddrClient);
 //            int clientSocket = accept(acceptingSocket, nullptr, nullptr );
             prepareSocket(clientSocket, IS_SERVER);

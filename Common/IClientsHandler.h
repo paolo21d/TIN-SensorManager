@@ -33,8 +33,8 @@
         virtual int socket_bind(int socket, std::string ip, int port);
         virtual int socket_listen(int socket, int backlog);
         virtual int socket_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *errorfds, timeval *timeout);
-        virtual int socket_accept(int socket, sockaddr *address,socklen_t *address_len);
-        virtual int socket_connect(int socket, const sockaddr *address, socklen_t address_len);
+        virtual int socket_accept(int socket, sockaddr *address,int *address_len);
+        virtual int socket_connect(int socket, const sockaddr *address, int address_len);
         virtual int socket_send(int socket, const void *buffer, size_t length, int flags);
         virtual int socket_recv(int socket, void *buffer, size_t length, int flags);
         virtual int socket_close(int socket);

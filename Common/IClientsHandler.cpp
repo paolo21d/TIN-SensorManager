@@ -83,24 +83,24 @@ int IClientsHandler::socket_select(int nfds, fd_set *readfds, fd_set *writefds, 
     return select(nfds, readfds, writefds, errorfds, timeout);
 }
 
-int IClientsHandler::socket_accept(int socket, sockaddr *address,socklen_t *address_len)
+int IClientsHandler::socket_accept(int socket, sockaddr *address,int *address_len)
 {
     return accept(socket, address, address_len);
 }
 
-int IClientsHandler::socket_connect(int socket, const sockaddr *address, socklen_t address_len)
+int IClientsHandler::socket_connect(int socket, const sockaddr *address, int address_len)
 {
     return connect(socket, address, address_len);
 }
 
 int IClientsHandler::socket_send(int socket, const void *buffer, size_t length, int flags)
 {
-    return ::send(socket, buffer, length, flags);
+    return ::send(socket, (char*) buffer, length, flags);
 }
 
 int IClientsHandler::socket_recv(int socket, void *buffer, size_t length, int flags)
 {
-    return ::recv(socket, buffer, length, flags);
+    return ::recv(socket, (char*) buffer, length, flags);
 }
 
 int IClientsHandler::socket_close(int socket)
