@@ -23,6 +23,10 @@ public:
 
     Sensor addSensor(std::string IP, int port, std::string token) override;
 
+    int initializeSensor(std::string token) override;
+
+    bool checkIfTokenExists(std::string token) override ;
+
     Sensor revokeSensor(int id) override;
 
     Sensor connectSensor(int id) override;

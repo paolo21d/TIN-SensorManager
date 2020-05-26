@@ -13,6 +13,7 @@ MockDatabaseConnection::~MockDatabaseConnection() {
 }
 
 Sensor MockDatabaseConnection::addSensor(std::string IP, int port, std::string token) {
+    return Sensor(0, "", IP, port);
 }
 
 
@@ -70,4 +71,12 @@ SensorMeasurement MockDatabaseConnection::getLastDay(int id) {
 SensorMeasurement MockDatabaseConnection::getLastMonth(int id) {
     auto response = SensorMeasurement(id);
     return response;
+}
+
+int MockDatabaseConnection::initializeSensor(std::string token) {
+    return 0;
+}
+
+bool MockDatabaseConnection::checkIfTokenExists(std::string token) {
+    return false;
 }

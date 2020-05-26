@@ -4,8 +4,8 @@
 
 #include <src/serializers/SerializerAdministratorMessage.h>
 #include <src/serializers/SerializerMonitoringMessage.h>
-//#include <src/database/DatabaseManager.h>
-#include <src/database/MockDatabaseManager.h>
+#include <src/database/DatabaseManager.h>
+//#include <src/database/MockDatabaseManager.h>
 #include "ServerModel.h"
 
 using namespace std;
@@ -141,6 +141,9 @@ void ServerModel::executeAdministratorRequests() {
                 break;
             case GENERATE_TOKEN:
                 response->token = "TOKENTOKEN";
+                //connection->checkIfTokenExists(token);
+
+                //connection->initializeSensor(token);
                 break;
         }
 
@@ -269,7 +272,7 @@ void ServerModel::executeSensorRequests() {
                 break;
             case CONNECTED_SENSOR:
                 //Do smth
-                connection->connectSensor(request.clientId);
+                //connection->addSensor();
                 break;
             case DISCONNECT_SENSOR:
                 //Do smth

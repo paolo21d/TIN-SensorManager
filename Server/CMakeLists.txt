@@ -22,10 +22,10 @@ add_executable(
         src/listeners/AdministratorListener.h
         src/Sensor.h
         ../Common/IRequestListener.cpp
-#        src/database/DatabaseManager.cpp
-#        src/database/DatabaseConnection.cpp
-        src/database/MockDatabaseManager.cpp
-        src/database/MockDatabaseConnection.cpp
+        src/database/DatabaseManager.cpp
+        src/database/DatabaseConnection.cpp
+#        src/database/MockDatabaseManager.cpp
+#        src/database/MockDatabaseConnection.cpp
         src/SensorMeasurement.h
         src/Measurement.h
         src/listeners/MonitoringListener.cpp src/listeners/MonitoringListener.h
