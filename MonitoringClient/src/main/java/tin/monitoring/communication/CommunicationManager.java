@@ -82,7 +82,7 @@ public class CommunicationManager extends Thread {
     public void run() {
         handler = new ClientHandler(this);
         System.out.println("---------------- CONNECTING");
-        connect("127.0.0.1", 28000);
+        connect("127.0.0.1", 28001);
         System.out.println("---------------- CONNECTED");
     }
 
@@ -208,6 +208,7 @@ public class CommunicationManager extends Thread {
             readingBegin += sensorLength;
             sensors.add(sensor);
         }
+        System.out.println(sensors.size());
         return sensors;
     }
 

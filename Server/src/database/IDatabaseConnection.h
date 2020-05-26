@@ -10,27 +10,33 @@
 #include "src/SensorMeasurement.h"
 #include <string>
 #include <vector>
-//#include <occi.h>
+#include <occi.h>
 
 class IDatabaseConnection {
 public:
-    virtual std::vector<Sensor*> getAllSensors() = 0;
+    virtual ~IDatabaseConnection() = default;
 
-    virtual std::vector<Sensor *> getAllSensorsWithMeasurements() = 0;
+    virtual std::vector<Sensor> getAllSensors() = 0;
 
-    virtual SensorMeasurement *getLastHour(int id) = 0;
+    virtual std::vector<Sensor> getAllSensorsWithMeasurements() = 0;
 
-    virtual SensorMeasurement *getLastDay(int id) = 0;
+    virtual SensorMeasurement getLastHour(int id) = 0;
 
-    virtual SensorMeasurement *getLastMonth(int id) = 0;
+    virtual SensorMeasurement getLastDay(int id) = 0;
 
-    virtual Sensor *addSensor(std::string IP, int port, std::string token) = 0;
+    virtual SensorMeasurement getLastMonth(int id) = 0;
 
-    virtual void revokeSensor(int id) = 0;
+    virtual Sensor addSensor(std::string IP, int port, std::string token) = 0;
 
-    virtual void editSensor(int id, std::string name) = 0;
+    virtual Sensor revokeSensor(int id) = 0;
 
-    virtual Sensor *getSensor(int id) = 0;
+    virtual Sensor connectSensor(int id) = 0;
+
+    virtual Sensor disconnectSensor(int id) = 0;
+
+    virtual Sensor editSensor(int id, std::string name) = 0;
+
+    virtual Sensor getSensor(int id) = 0;
 
     virtual void addMeasurement(int sensorId, int measure, int timestamp) = 0;
 };

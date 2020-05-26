@@ -16,6 +16,13 @@
 #include <src/commandTypes/SensorCommandTypes.h>
 #include <mutex>
 #include <thread>
+#include <src/responses/AdministratorResponse.h>
+#include <src/responses/MonitoringResponse.h>
+#include "IModelForMonitoring.h"
+#include "IModelForAdministrator.h"
+#include "IModelForSensor.h"
+#include "Queue.h"
+#include "src/database/IDatabaseManager.h"
 #include "IModelForMonitoring.h"
 #include "IModelForAdministrator.h"
 #include "IModelForSensor.h"
@@ -25,13 +32,14 @@ class ServerModel : public IModelForSensor, public IModelForMonitoring, public I
     IRequestListener *administratorConnectionListener;
     IRequestListener *monitoringConnectionListener;
 
-    std::queue<AdministratorRequest> administratorRequestsQueue;
-    std::queue<MonitoringRequest> monitoringRequestsQueue;
-    std::queue<SensorRequest> sensorRequestsQueue;
+    Queue<AdministratorRequest> administratorRequestsQueue;
+    Queue<MonitoringRequest> monitoringRequestsQueue;
+    Queue<SensorRequest> sensorRequestsQueue;
 
-    std::mutex administratorRequestsQueueMutex;
-    std::mutex monitoringRequestsQueueMutex;
-    std::mutex sensorRequestsQueueMutex;
+    IDatabaseManager *databaseConnector;
+
+    Queue<AdministratorResponse> administratorResponsesQueue;
+    Queue<MonitoringResponse> monitoringResponsesQueue;
 
 public:
     ServerModel(IRequestListener *sensor, IRequestListener *administrator, IRequestListener *monitoring);
@@ -55,27 +63,25 @@ public:
     virtual void sensorCommandDisconnectedSensor(int clientId);
 
     //ADMINISTRATOR INTERFACE
-    virtual void administratorCommandGetAllSensors(int clientId);
+    virtual void addAdministratorRequestToExecute(AdministratorRequest request);
 
-    virtual void administratorCommandUpdateSensorName(int clientId, int sensorId, std::string sensorName);
-
-    virtual void administratorCommandRevokeSensor(int clientId, int sensorId);
-
-    virtual void administratorCommandDisconnectSensor(int clientId, int sensorId);
-
-    virtual void administratorCommandGenerateToken(int clientId, std::string tokenName);
+    void addAdministratorResponseToSend(AdministratorResponse response);
 
     //MONITORING INTERFACE
-    virtual void monitoringCommandGetAllSensors(int clientId);
+    virtual void addMonitoringRequestToExecute(MonitoringRequest request);
 
-    virtual void monitoringCommandGetSetOfMeasurements(int clientId, int sensorId, int type);
+    void addMonitoringResponseToSend(MonitoringResponse response);
 
 private:
     void executeAdministratorRequests();
 
+    void sendAdministratorResponse();
+
     void executeMonitoringRequests();
 
     void executeSensorRequests();
+
+    void sendMonitoringResponse();
 };
 
 

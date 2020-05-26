@@ -1,5 +1,6 @@
 package tin.administrator.controller;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -13,6 +14,9 @@ import tin.administrator.model.SensorTable;
 
 import java.util.List;
 import java.util.Timer;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class Controller implements ResponseExecutor {
 
@@ -29,14 +33,12 @@ public class Controller implements ResponseExecutor {
     public Button buttonNewSensor;
     public TextField textFieldEditedName;
     public Button buttonEditName;
-    Timer timer = new Timer();
     private boolean isNameEditing = false;
     //model
 //    private List<Sensor> sensors = new ArrayList<>();
 //    private Sensor nowDisplayedSensor = null;
     private AdministratorModel model;
     private CommunicationManager communicationManager;
-    private SensorTableRefreshTask sensorTableRefreshTask;
     //label refreshers
     private LabelRefresher labelNameRefresher = new LabelRefresher();
     private LabelRefresher labelStateRefresher = new LabelRefresher();
@@ -46,7 +48,6 @@ public class Controller implements ResponseExecutor {
     public Controller() {
         model = new AdministratorModel();
         communicationManager = new CommunicationManager(this);
-        sensorTableRefreshTask = new SensorTableRefreshTask(this);
     }
 
     @FXML
@@ -68,7 +69,15 @@ public class Controller implements ResponseExecutor {
             sensorsTable.getItems().add(new SensorTable(sensor));
         }
 
-        timer.scheduleAtFixedRate(sensorTableRefreshTask, 5000, 3000);
+        ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+
+        scheduledExecutorService.scheduleAtFixedRate(() -> {
+            Platform.runLater(() -> {
+                sendRequestGetAllSensors();
+            });
+        }, 5, 5, TimeUnit.SECONDS);
+
+        //timer.scheduleAtFixedRate(sensorTableRefreshTask, 5000, 3000);
         clearSensorDetails();
 
         communicationManager.run();
@@ -78,13 +87,17 @@ public class Controller implements ResponseExecutor {
     public void tableClicked(MouseEvent mouseEvent) {
         isNameEditing = false;
         if (mouseEvent.getClickCount() == 2) {
-            Integer selectedSensorId = sensorsTable.getSelectionModel().getSelectedItem().getSensorId();
-            String selectedSensorName = sensorsTable.getSelectionModel().getSelectedItem().getSensorName();
-            String selectedSensorIp = sensorsTable.getSelectionModel().getSelectedItem().getSensorIp();
-            model.changeCurrentSensor(selectedSensorId);
+            SensorTable selectedSensor = sensorsTable.getSelectionModel().getSelectedItem();
+            if(selectedSensor != null) {
+                Integer selectedSensorId = sensorsTable.getSelectionModel().getSelectedItem().getSensorId();
+                String selectedSensorName = sensorsTable.getSelectionModel().getSelectedItem().getSensorName();
+                String selectedSensorIp = sensorsTable.getSelectionModel().getSelectedItem().getSensorIp();
+                model.changeCurrentSensor(selectedSensorId);
 
-            displaySensorDetails(model.getCurrentDisplayedSensor());
-            System.out.println("Selected Sensor ID: " + selectedSensorId);
+                clearSensorDetails();
+                displaySensorDetails(model.getCurrentDisplayedSensor());
+                System.out.println("Selected Sensor ID: " + selectedSensorId);
+            }
         }
     }
 
@@ -97,6 +110,7 @@ public class Controller implements ResponseExecutor {
     public void disconnectClicked(ActionEvent actionEvent) {
         if (model.getCurrentDisplayedSensorId() != null) {
             communicationManager.sendCommandDisconnectSensor(model.getCurrentDisplayedSensorId());
+            communicationManager.sendCommandGetAllSensors();
         }
         System.out.println("DISCONNECT");
     }
@@ -104,6 +118,7 @@ public class Controller implements ResponseExecutor {
     public void revokeClicked(ActionEvent actionEvent) {
         if (model.getCurrentDisplayedSensorId() != null) {
             communicationManager.sendCommandRevokeSensor(model.getCurrentDisplayedSensorId());
+            communicationManager.sendCommandGetAllSensors();
         }
         System.out.println("REVOKE");
     }
@@ -132,14 +147,14 @@ public class Controller implements ResponseExecutor {
     @Override
     public void executeResponseGetAllSensors(List<Sensor> sensors) {
         System.out.println("EXECUTOR getAllSensors");
-        /*model.setSensors(sensors);
-        refreshAllViews();*/
+        model.setSensors(sensors);
+        Platform.runLater(()->{refreshAllViews();});
     }
 
     @Override
     public void executeResponseUpdateSensorName(int sensorId) {
         System.out.println("EXECUTOR updateSensorName");
-        /*refreshAllViews();*/
+        Platform.runLater(()->{refreshAllViews();});
     }
 
     @Override
@@ -161,7 +176,7 @@ public class Controller implements ResponseExecutor {
     @Override
     public void executeResponseGenerateToken(String tokenContent) {
         System.out.println("EXECUTOR generateToken");
-        /*displayToken(tokenContent);*/
+        Platform.runLater(()->{displayToken(tokenContent);});
     }
 
     ///
@@ -202,29 +217,44 @@ public class Controller implements ResponseExecutor {
     }
 
     private void clearSensorDetails() {
-//        labelName.setText("-");
+        //Platform.runLater(()->{labelName.setText("-");});
         labelNameRefresher.refresh("-");
-//        labelState.setText("-");
+        //Platform.runLater(()->{labelState.setText("-");});
         labelStateRefresher.refresh("-");
         buttonEditName.setText("Edit");
-        isNameEditing = false;
+        //isNameEditing = false;
         textFieldEditedName.setVisible(false);
         textFieldEditedName.setText("-");
 
         buttonDisconnect.setDisable(true);
         buttonRevoke.setDisable(true);
+        buttonEditName.setDisable(true);
     }
 
     private void displaySensorDetails(Sensor sensor) {
-        clearSensorDetails();
-//        labelName.setText(sensor.getName());
-//        labelState.setText(sensor.getConnected() ? "ONLINE" : "OFFLINE");
+        //clearSensorDetails();
+        //Platform.runLater(()->{labelName.setText(sensor.getName());});
+        //Platform.runLater(()->{labelState.setText(sensor.getConnected() ? "ONLINE" : "OFFLINE");});
         labelNameRefresher.refresh(sensor.getName());
         labelStateRefresher.refresh(sensor.getConnected() ? "ONLINE" : "OFFLINE");
 
         buttonDisconnect.setDisable(false);
         buttonRevoke.setDisable(false);
+        buttonEditName.setDisable(false);
     }
 
 
+    public void closeApp(ActionEvent actionEvent) {
+        Platform.exit();
+        System.exit(0);
+    }
+
+    public void showCredits(ActionEvent actionEvent) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("About");
+        alert.setHeaderText("TIN PROJECT");
+        alert.setContentText("Grzegorz Aleksiuk\nRobert Dudzinski\nPawel Swiatkowski\nMichal Zadrozny");
+
+        alert.showAndWait();
+    }
 }

@@ -8,7 +8,7 @@
 
 #include "Request.h"
 
-class SensorRequest : Request {
+class SensorRequest : public Request {
 public:
     SensorRequest(int clientId, int commandType) {
         this->clientId = clientId;
