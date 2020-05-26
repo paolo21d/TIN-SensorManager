@@ -4,6 +4,7 @@
 #include <thread>
 #include "IRequestListener.h"
 #include "SslClientsHandler.h"
+#include "MeasureReader.h"
 
 using namespace std;
 
@@ -42,7 +43,7 @@ void sensorThread()
     for (int i = 2; ; ++i)
     {
         int64_t timestamp = getPosixTime();
-        int measure = timestamp % 1000 * (timestamp % 100000 / 1000);
+        int measure = getMeasure();
         sleepMillis(50);
 
         vector<unsigned char> response;

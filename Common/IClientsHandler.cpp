@@ -85,7 +85,7 @@ int IClientsHandler::socket_select(int nfds, fd_set *readfds, fd_set *writefds, 
 
 int IClientsHandler::socket_accept(int socket, sockaddr *address,int *address_len)
 {
-    return accept(socket, address, address_len);
+    return acceptSocket(socket, address, address_len);
 }
 
 int IClientsHandler::socket_connect(int socket, const sockaddr *address, int address_len)
