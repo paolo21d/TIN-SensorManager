@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
 
         thread t(sensorThread);
 
-        connectionHandler->startHandling("127.0.0.1", 33336);
+        connectionHandler->startHandling("127.0.0.1", 33333);
 
         t.join();
 

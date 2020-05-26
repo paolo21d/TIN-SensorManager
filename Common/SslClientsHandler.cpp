@@ -4,6 +4,20 @@ using namespace std;
 
 //namespace sc
 //{
+
+SslClientsHandler::SslClientsHandler(int maxClients, bool server) : ClientsHandler(maxClients, server)
+{
+#ifndef DISABLE_SSL
+    if (!sslInitialized)
+        sslInit();
+
+    ctx = create_context();
+    configure_context(ctx);
+#endif
+}
+
+#ifndef DISABLE_SSL
+
 bool SslClientsHandler::sslInitialized = false;
 
 void SslClientsHandler::sslInit()
@@ -13,15 +27,6 @@ void SslClientsHandler::sslInit()
     SSL_library_init();
     SSL_load_error_strings();
     OpenSSL_add_ssl_algorithms();
-}
-
-SslClientsHandler::SslClientsHandler(int maxClients, bool server) : ClientsHandler(maxClients, server)
-{
-    if (!sslInitialized)
-        sslInit();
-
-    ctx = create_context();
-    configure_context(ctx);
 }
 
 SSL_CTX *SslClientsHandler::create_context()
@@ -63,59 +68,6 @@ void SslClientsHandler::configure_context(SSL_CTX *ctx)
         ERR_print_errors_fp(stderr);
         exit(EXIT_FAILURE);
     }
-}
-
-int SslClientsHandler::getAcceptingSocket(std::string ipAddress, int port, int listeningQueue)
-{
-
-
-    int acceptingSocket = socket_create();
-
-    if (acceptingSocket == -1)
-    {
-        throw ConnectionException(ConnectionException::CREATE_SOCKET, "Cannot create socket");
-    }
-
-    if( socket_bind( acceptingSocket,ipAddress, port ) == -1 )
-    {
-        socket_close( acceptingSocket );
-        throw ConnectionException(ConnectionException::BIND, "Cannot bind socket");
-    }
-
-    if( socket_listen( acceptingSocket, listeningQueue) == -1)
-    {
-        socket_close(acceptingSocket);
-        throw ConnectionException(ConnectionException::LISTEN, "Cannot listen socket");
-    }
-
-    return acceptingSocket;
-}
-
-int SslClientsHandler::tryConnect(std::string ipAddress, int port)
-{
-    sockaddr_in service;
-
-    memset( & service, 0, sizeof( service ) );
-    service.sin_family = AF_INET;
-    service.sin_addr.s_addr = inet_addr( ipAddress.c_str() );
-    service.sin_port = htons( port );
-
-    int mainSocket = socket_create();
-
-    int result = -1;
-    while (result == -1)
-    {
-        mainSocket = socket_create();
-        result = socket_connect(mainSocket, (sockaddr * ) & service, sizeof(service));
-
-        std::cout << "Trying connect to " << ipAddress << ":" << port << std::endl;
-    }
-
-    std::cout << "Connected" << std::endl;
-
-    nfds = mainSocket + 1;
-
-    return mainSocket;
 }
 
 int SslClientsHandler::socket_create()
@@ -160,6 +112,8 @@ int SslClientsHandler::socket_accept(int socket, sockaddr *address,socklen_t *ad
         return -1;
     }
 
+    cout << "SSL using " << SSL_get_cipher(ssl) << endl;
+
     return client;
 }
 
@@ -182,6 +136,9 @@ int SslClientsHandler::socket_connect(int socket, const sockaddr *address, sockl
     if (result >= 0)
         sslSockets[socket] = ssl;
 
+    cout << "SSL using " << SSL_get_cipher(ssl) << endl;
+    ShowCerts(ssl);
+
     return result;
 }
 
@@ -197,7 +154,6 @@ int SslClientsHandler::socket_recv(int socket, void *buffer, size_t length, int 
 
 int SslClientsHandler::socket_close(int socket)
 {
-    //SSL_shutdown(sslSockets[socket]);
     SSL_free(sslSockets[socket]);
     return closeSocket(socket);
 }
@@ -215,4 +171,27 @@ void SslClientsHandler::log_ssl()
         fflush(stdout);
     }
 }
+
+void SslClientsHandler::ShowCerts( SSL * ssl )
+{ X509 * cert;
+    char * line;
+
+    cert = SSL_get_peer_certificate( ssl ); /* Get certificates (if available) */
+    if( cert != NULL )
+    {
+        printf( "Server certificates:\n" );
+        line = X509_NAME_oneline( X509_get_subject_name( cert ), 0, 0 );
+        printf( "Subject: %s\n", line );
+        free( line );
+        line = X509_NAME_oneline( X509_get_issuer_name( cert ), 0, 0 );
+        printf( "Issuer: %s\n", line );
+        free( line );
+        X509_free( cert );
+    }
+    else
+         printf( "No certificates.\n" );
+
+}
+
+#endif
 //}
