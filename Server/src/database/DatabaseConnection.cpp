@@ -284,4 +284,16 @@ SensorMeasurement DatabaseConnection::getLastMonth(int id) {
     return response;
 }
 
+int DatabaseConnection::getSensorId(std::string token) {
+    Statement *statement = createStatement(
+            "SELECT id \n"
+            "FROM sensors \n"
+            "WHERE token='" + token +"'");
+    ResultSet *resultSet = statement->executeQuery();
+    resultSet->next();
+    connection->terminateStatement(statement);
+
+    return resultSet->getInt(1);
+}
+
 

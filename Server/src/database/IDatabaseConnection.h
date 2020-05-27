@@ -30,6 +30,8 @@ public:
 
     virtual int initializeSensor(std::string token) = 0;
 
+    virtual int getSensorId(std::string token) = 0;
+
     virtual bool checkIfTokenExists(std::string token) = 0;
 
     virtual Sensor revokeSensor(int id) = 0;

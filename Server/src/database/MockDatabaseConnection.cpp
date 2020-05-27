@@ -77,6 +77,10 @@ int MockDatabaseConnection::initializeSensor(std::string token) {
     return 0;
 }
 
+int MockDatabaseConnection::getSensorId(std::string token) {
+    return 0;
+}
+
 bool MockDatabaseConnection::checkIfTokenExists(std::string token) {
     return false;
 }

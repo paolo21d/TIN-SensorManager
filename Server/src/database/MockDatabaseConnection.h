@@ -38,6 +38,8 @@ public:
 
     int initializeSensor(std::string token) override;
 
+    int getSensorId(std::string token) override;
+
     bool checkIfTokenExists(std::string token) override;
 
     void addMeasurement(int sensorId, int measure, int timestamp) override;

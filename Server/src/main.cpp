@@ -8,8 +8,6 @@
 #include <src/listeners/SensorListener.h>
 #include "SslClientsHandler.h"
 #include "src/listeners/AdministratorListener.h"
-#include "src/database/DatabaseManager.h"
-#include "src/database/DatabaseConnection.h"
 
 using namespace std;
 
@@ -62,7 +60,6 @@ void adminThread() {
 
 int main(int argc, char *argv[])
 {
-
     initNetwork();
 
     serverModel = new ServerModel();
