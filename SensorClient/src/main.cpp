@@ -5,6 +5,7 @@
 #include "IRequestListener.h"
 #include "SslClientsHandler.h"
 #include "MeasureReader.h"
+#include <UserPrefs.h>
 
 using namespace std;
 
@@ -56,6 +57,13 @@ void sensorThread()
 
 int main(int argc, char *argv[])
 {
+    string ip = UserPrefs::getInstance().getString("ip");
+    int port  = UserPrefs::getInstance().getInt("port");
+    string token = UserPrefs::getInstance().getString("token");
+
+    cout << "loaded '" << ip << ":" << port << endl;
+    cout << "token: " << token << endl;
+
     try
     {
         initNetwork();
@@ -69,7 +77,7 @@ int main(int argc, char *argv[])
 
         thread t(sensorThread);
 
-        connectionHandler->startHandling("127.0.0.1", 33333);
+        connectionHandler->startHandling("127.0.0.1", 33335);
 
         t.join();
 

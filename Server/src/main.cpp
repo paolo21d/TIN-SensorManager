@@ -23,7 +23,7 @@ void sensorThread()
         serverModel->setSensorConnectionListener(listener);
         IClientsHandler *connectionHandler = new SslClientsHandler();
         connectionHandler->addListener(listener);
-        connectionHandler->startHandling("127.0.0.1", 33333);
+        connectionHandler->startHandling("127.0.0.1", 33335);
 
         cout << "END" << endl;
     }
@@ -66,14 +66,14 @@ int main(int argc, char *argv[])
 
 
     thread t1(sensorThread);
-    thread t2(monitoringThread);
-    thread t3(adminThread);
+    //thread t2(monitoringThread);
+    //thread t3(adminThread);
 
     serverModel->init();
 
     t1.join();
-    t2.join();
-    t3.join();
+    //t2.join();
+    //t3.join();
 
     return 0;
 }

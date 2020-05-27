@@ -7,6 +7,7 @@ add_executable(
         ../Common/DoubleMeasurement.cpp
         ../Common/SystemUtils.cpp
         ../Common/NetworkUtils.cpp
+        ../Common/UserPrefs.cpp
         ../Common/ConnectionException.cpp
         ../Common/IClientsHandler.cpp
         ../Common/ClientsHandler.cpp
