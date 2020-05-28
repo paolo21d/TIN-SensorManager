@@ -18,6 +18,7 @@ add_executable(
         ../Common/ConnectionException.cpp
         ../Common/NetworkUtils.cpp
         ../Common/SslClientsHandler.cpp
+        ../Common/UserPrefs.cpp
         src/listeners/AdministratorListener.cpp
         src/listeners/AdministratorListener.h
         src/Sensor.h

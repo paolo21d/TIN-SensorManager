@@ -1,5 +1,6 @@
 #include <iostream>
 #include <NetworkUtils.h>
+#include <UserPrefs.h>
 #include <vector>
 #include <thread>
 #include <IRequestListener.h>
@@ -19,11 +20,14 @@ void sensorThread()
     {
         cout << "START SENSOR CONNECTION" << endl;
 
+        string ip = UserPrefs::getInstance().getString("sensor_ip");
+        int port  = UserPrefs::getInstance().getInt("sensor_port");
+
         IRequestListener *listener = new SensorListener(serverModel);
         serverModel->setSensorConnectionListener(listener);
         IClientsHandler *connectionHandler = new SslClientsHandler();
         connectionHandler->addListener(listener);
-        connectionHandler->startHandling("127.0.0.1", 33335);
+        connectionHandler->startHandling(ip, port);
 
         cout << "END" << endl;
     }
@@ -40,22 +44,28 @@ void sensorThread()
 void monitoringThread() {
     cout << "START MONITORING CONNECTION" << endl;
 
+    string ip = UserPrefs::getInstance().getString("monitoring_ip");
+    int port  = UserPrefs::getInstance().getInt("monitoring_port");
+
     IRequestListener *listener = new MonitoringListener(serverModel);
     serverModel->setMonitoringConnectionListener(listener);
     IClientsHandler *connectionHandler = new ClientsHandler();
     connectionHandler->addListener(listener);
-    connectionHandler->startHandling("127.0.0.1", 28001);
+    connectionHandler->startHandling(ip, port);
 
 }
 
 void adminThread() {
     cout << "START ADMIN CONNECTION" << endl;
 
+    string ip = UserPrefs::getInstance().getString("admin_ip");
+    int port  = UserPrefs::getInstance().getInt("admin_port");
+
     IRequestListener *listener = new AdministratorListener(serverModel);
     serverModel->setAdministratorConnectionListener(listener);
     IClientsHandler *connectionHandler = new ClientsHandler();
     connectionHandler->addListener(listener);
-    connectionHandler->startHandling("127.0.0.1", 28000);
+    connectionHandler->startHandling(ip, port);
 }
 
 int main(int argc, char *argv[])
@@ -67,13 +77,13 @@ int main(int argc, char *argv[])
 
     thread t1(sensorThread);
     //thread t2(monitoringThread);
-    //thread t3(adminThread);
+    thread t3(adminThread);
 
     serverModel->init();
 
     t1.join();
     //t2.join();
-    //t3.join();
+    t3.join();
 
     return 0;
 }

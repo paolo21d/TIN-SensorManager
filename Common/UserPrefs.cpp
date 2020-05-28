@@ -97,7 +97,7 @@ bool UserPrefs::checkKey(std::string key)
         return false;
 
     for (const auto c : key)
-        if (!isalpha(c) && !isdigit(c) && c != '_')
+        if (!isalpha(c) && !isdigit(c) && c != '_' && c != '-')
             return false;
 
     return true;

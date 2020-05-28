@@ -96,7 +96,7 @@ int SslClientsHandler::socket_select(int nfds, fd_set *readfds, fd_set *writefds
     return ::select(nfds, readfds, writefds, errorfds, timeout);
 }
 
-int SslClientsHandler::socket_accept(int socket, sockaddr *address,socklen_t *address_len)
+int SslClientsHandler::socket_accept(int socket, sockaddr *address,int *address_len)
 {
     int client = ClientsHandler::socket_accept(socket, address, address_len);
     SSL *ssl = SSL_new(ctx);
