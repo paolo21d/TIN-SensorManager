@@ -73,7 +73,10 @@ using namespace std;
 
     int ClientsHandler::Client::addOutMsg(std::vector<unsigned char> msg)
     {
-        if (!isConnected() || msg.size() <= 0)
+        if (msg.size() <= 0)
+            return -1;
+
+        if (!isConnected() && IS_SERVER)
             return -1;
 
         int msgLen = msg.size();
@@ -83,7 +86,8 @@ using namespace std;
         outBuffer.insert(outBuffer.end(), make_move_iterator(msg.begin()), make_move_iterator(msg.end()));
         sendLock.unlock();
 
-        sendData();
+        if (!isConnected() && !IS_SERVER)
+            sendData();
 
         return 0;
     }
@@ -100,7 +104,8 @@ using namespace std;
     {
         sendLock.lock();
         int sent = handler->socket_send(socket, reinterpret_cast<const char *>(outBuffer.data()), outBuffer.size(), 0);
-        outBuffer.erase(outBuffer.begin(), outBuffer.begin() + sent);
+        if (sent > 0)
+            outBuffer.erase(outBuffer.begin(), outBuffer.begin() + sent);
         sendLock.unlock();
 
         return sent;

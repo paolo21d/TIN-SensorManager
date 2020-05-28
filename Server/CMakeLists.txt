@@ -17,6 +17,7 @@ add_executable(
         ../Common/IClientsHandler.cpp
         ../Common/ConnectionException.cpp
         ../Common/NetworkUtils.cpp
+        ../Common/SystemUtils.cpp
         ../Common/SslClientsHandler.cpp
         ../Common/UserPrefs.cpp
         src/listeners/AdministratorListener.cpp

@@ -19,16 +19,6 @@ public:
         int64_t lastTimestamp = getData<int64_t>(msg, cursorPos);
         cout << "response: " << status << "   " << lastTimestamp << endl;
     }
-
-    void onClientConnected(int clientId, string ip, int port) override
-    {
-        cout << "Client " << clientId << " connected [" << ip << ":" << "]" << endl;
-    }
-
-    void onClientDisconnected(int clientId) override
-    {
-        cout << "Client " << clientId << " disconnected" << endl;
-    }
 };
 
 IClientsHandler *connectionHandler;
