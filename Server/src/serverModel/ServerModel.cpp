@@ -52,31 +52,9 @@ void ServerModel::init() {
 }
 
 ///SENSOR INTERFACE
-void ServerModel::sensorCommandAddMeasurement(int clientId, int64_t timestamp, double value) {
-    SensorRequest request(clientId, ADD_MEASUREMENT);
-    request.measurementValue = value;
-    request.measurementTimestamp = timestamp;
-
+void ServerModel::addSensorRequestToExecute(SensorRequest *request)
+{
     sensorRequestsQueue.push(request);
-
-}
-
-void
-ServerModel::sensorCommandConnectedSensor(int clientId, std::string sensorIp, int sensorPort, std::string sensorToken) {
-    SensorRequest request(clientId, CONNECTED_SENSOR);
-    request.sensorIp = sensorIp;
-    request.sensorPort = sensorPort;
-    request.sensorToken = sensorToken;
-
-    sensorRequestsQueue.push(request);
-
-}
-
-void ServerModel::sensorCommandDisconnectedSensor(int clientId) {
-    SensorRequest request(clientId, DISCONNECTED_SENSOR);
-
-    sensorRequestsQueue.push(request);
-
 }
 
 ///ADMINISTRATOR INTERFACE
@@ -266,24 +244,34 @@ void ServerModel::executeSensorRequests() {
 
     while (1 == 1) {
 
-        SensorRequest request = sensorRequestsQueue.pop();
+        SensorRequest *request = sensorRequestsQueue.pop();
 
-        cout << "SensorRequest\tCommandType: " << request.commandType << endl;
+//        executeSensorRequest(*request, connection);
+        if (auto req = dynamic_cast<SensorMeasurementRequest*>(request))
+            executeSensorRequest(req, connection);
+        else if (auto req = dynamic_cast<SensorOnConnectedRequest*>(request))
+            executeSensorRequest(req, connection);
+        else if (auto req = dynamic_cast<SensorOnDisconnectedRequest*>(request))
+            executeSensorRequest(req, connection);
 
-        switch (request.commandType) {
-            case ADD_MEASUREMENT:
-                //zmienić clientId na id sensora
-                connection->addMeasurement(request.clientId, request.measurementValue, request.measurementTimestamp);
-                break;
-            case CONNECTED_SENSOR:
-                //Do smth
-                //connection->addSensor();
-                break;
-            case DISCONNECT_SENSOR:
-                //Do smth
-                connection->disconnectSensor(request.clientId);
-                break;
-        }
+        delete request;
+
+//        cout << "SensorRequest\tCommandType: " << request.commandType << endl;
+//
+//        switch (request.commandType) {
+//            case ADD_MEASUREMENT:
+//                //zmienić clientId na id sensora
+//                connection->addMeasurement(request.clientId, request.measurementValue, request.measurementTimestamp);
+//                break;
+//            case CONNECTED_SENSOR:
+//                //Do smth
+//                //connection->addSensor();
+//                break;
+//            case DISCONNECT_SENSOR:
+//                //Do smth
+//                connection->disconnectSensor(request.clientId);
+//                break;
+//        }
 
         //std::chrono::milliseconds timespan(1000); // or whatever
         //std::this_thread::sleep_for(timespan);
@@ -292,4 +280,17 @@ void ServerModel::executeSensorRequests() {
     //delete connection;
 }
 
+void ServerModel::executeSensorRequest(SensorMeasurementRequest *request, IDatabaseConnection *connection)
+{
+    connection->addMeasurement(request->clientId, request->value, request->timestamp);
+}
 
+void ServerModel::executeSensorRequest(SensorOnConnectedRequest *request, IDatabaseConnection *connection)
+{
+
+}
+
+void ServerModel::executeSensorRequest(SensorOnDisconnectedRequest *request, IDatabaseConnection *connection)
+{
+
+}

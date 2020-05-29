@@ -9,27 +9,46 @@
 #include "Request.h"
 
 class SensorRequest : public Request {
-public:
-    SensorRequest(int clientId, int commandType) {
+protected:
+    SensorRequest(int clientId)
+    {
         this->clientId = clientId;
-        this->commandType = commandType;
     }
 
-    double measurementValue;
-    int64_t measurementTimestamp;
-    std::string sensorIp;
-    int sensorPort;
-    std::string sensorToken;
+public:
+    virtual ~SensorRequest()
+    {}
 };
 
 class SensorMeasurementRequest : public SensorRequest
 {
+public:
+    SensorMeasurementRequest(int clientId, int value, long timestamp)
+        : SensorRequest(clientId), value(value), timestamp(timestamp)
+    {}
 
+    int value;
+    long timestamp;
 };
 
-//class Sensor
-//{
-//
-//};
+class SensorOnConnectedRequest : public SensorRequest
+{
+public:
+    SensorOnConnectedRequest(int clientId, std::string ip, int port, std::string token)
+        : SensorRequest(clientId), ip(ip), port(port), token(token)
+    {}
+
+    std::string ip;
+    int port;
+    std::string token;
+};
+
+class SensorOnDisconnectedRequest : public SensorRequest
+{
+public:
+    SensorOnDisconnectedRequest(int clientId)
+        : SensorRequest(clientId)
+    {}
+};
 
 #endif //SERVER_SENSORREQUEST_H

@@ -36,26 +36,28 @@ void SensorListener::onGotRequest(int clientId, vector<unsigned char> msg)
 void SensorListener::onClientConnected(int clientId, string ip, int port)
 {
     cout << "Client " << clientId << " connected [" << ip << ":" << port << "]" << endl;
-
-    //model->sensorCommandConnectedSensor(clientId, ip, port);
 }
 
 void SensorListener::onClientDisconnected(int clientId)
 {
     cout << "Client " << clientId << " disconnected" << endl;
+
+    model->addSensorRequestToExecute(new SensorOnDisconnectedRequest(clientId));
 }
 
 void SensorListener::handleInitMsg(int clientId, std::vector<unsigned char> &msg, int cursorPos)
 {
     string token(msg.begin() + cursorPos, msg.end());
     cout << "received token from sensor: " << token << endl;
+
+    model->addSensorRequestToExecute(new SensorOnConnectedRequest(clientId, getIp(clientId), getPort(clientId), token));
 }
 
 void SensorListener::handleMeasureMsg(int clientId, std::vector<unsigned char> &msg, int cursorPos)
 {
     int64_t timestamp64 = getData<int64_t>(msg, cursorPos);
     int value = getData<int32_t>(msg, cursorPos);
-    int timestamp = timestamp64 / 1000;
+    long timestamp = timestamp64 / 1000;
 
     cout << "client " << clientId << "     timestamp: " << timestamp << "     value: " << value << endl;
 
@@ -64,5 +66,5 @@ void SensorListener::handleMeasureMsg(int clientId, std::vector<unsigned char> &
     BytesParser::appendBytes<int64_t>(response, timestamp64);
     send(clientId, response);
 
-    model->sensorCommandAddMeasurement(clientId, timestamp, value);
+    model->addSensorRequestToExecute(new SensorMeasurementRequest(clientId, value, timestamp));
 }

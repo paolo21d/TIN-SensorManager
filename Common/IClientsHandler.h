@@ -22,6 +22,8 @@
 
         virtual void disconnectClient(int clientId) = 0;
         virtual int send(int clientId, std::vector<unsigned char> msg) = 0;
+        virtual std::string getIp(int clientId) = 0;
+        virtual int getPort(int clientId) = 0;
 
     protected:
         int nfds;

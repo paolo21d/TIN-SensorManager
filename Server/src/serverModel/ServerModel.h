@@ -34,7 +34,7 @@ class ServerModel : public IModelForSensor, public IModelForMonitoring, public I
 
     Queue<AdministratorRequest> administratorRequestsQueue;
     Queue<MonitoringRequest> monitoringRequestsQueue;
-    Queue<SensorRequest> sensorRequestsQueue;
+    Queue<SensorRequest*> sensorRequestsQueue;
 
     IDatabaseManager *databaseConnector;
 
@@ -55,12 +55,7 @@ public:
     void init();
 
     //SENSOR INTERFACE
-    virtual void sensorCommandAddMeasurement(int clientId, int64_t timestamp, double value);
-
-    virtual void
-    sensorCommandConnectedSensor(int clientId, std::string sensorIp, int sensorPort, std::string sensorToken);
-
-    virtual void sensorCommandDisconnectedSensor(int clientId);
+    virtual void addSensorRequestToExecute(SensorRequest *request);
 
     //ADMINISTRATOR INTERFACE
     virtual void addAdministratorRequestToExecute(AdministratorRequest request);
@@ -80,6 +75,9 @@ private:
     void executeMonitoringRequests();
 
     void executeSensorRequests();
+    void executeSensorRequest(SensorMeasurementRequest *request, IDatabaseConnection *connection);
+    void executeSensorRequest(SensorOnConnectedRequest *request, IDatabaseConnection *connection);
+    void executeSensorRequest(SensorOnDisconnectedRequest *request, IDatabaseConnection *connection);
 
     void sendMonitoringResponse();
 };

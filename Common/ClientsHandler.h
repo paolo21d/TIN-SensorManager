@@ -70,6 +70,8 @@
 
         void disconnectClient(int clientId) override;
         int send(int clientId, std::vector<unsigned char> msg) override;
+        std::string getIp(int clientId) override;
+        int getPort(int clientId) override;
 
     protected:
 

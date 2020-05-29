@@ -259,6 +259,22 @@ using namespace std;
         return clientHandlers[clientId]->addOutMsg(msg);
     }
 
+    std::string ClientsHandler::getIp(int clientId)
+    {
+        if (clientId < 0 || clientId >= CLIENTS)
+            return "";
+
+        return clientHandlers[clientId]->getIp();
+    }
+
+    int ClientsHandler::getPort(int clientId)
+    {
+        if (clientId < 0 || clientId >= CLIENTS)
+            return -1;
+
+        return clientHandlers[clientId]->getPort();
+    }
+
     int ClientsHandler::getFreeHandler()
     {
         for (int i = 0; i < clientHandlers.size(); ++i)

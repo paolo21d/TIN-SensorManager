@@ -18,10 +18,12 @@ public:
 
     void send(int clientId, std::vector<unsigned char> msg);
     void disconnectClient(int clientId);
+    std::string getIp(int clientId);
+    int getPort(int clientId);
 
     virtual void onClientConnected(int clientId, std::string ip, int port);
     virtual void onClientDisconnected(int clientId);
-    virtual std::vector<unsigned char> beforeFirstSend(int clientId);
+    virtual std::vector<unsigned char> beforeFirstSend(int clientId); //rename to onSendInitMsg(int)
 
     void setupListener(IClientsHandler *clientsHandler);
 
