@@ -13,7 +13,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane fx:id="MainBox" maxHeight="500" maxWidth="700" minHeight="400" minWidth="600" prefHeight="400.0" prefWidth="600.0" styleClass="mainPane" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tin.administrator.controller.Controller">
+<BorderPane fx:id="MainBox" maxHeight="500" maxWidth="700" minHeight="400" minWidth="600" prefHeight="400.0" prefWidth="600.0" styleClass="mainPane" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tin.administrator.controller.Controller" >
     <top>
         <MenuBar BorderPane.alignment="CENTER">
             <menus>
