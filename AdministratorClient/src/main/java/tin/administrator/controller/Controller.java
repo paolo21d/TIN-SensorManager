@@ -6,6 +6,8 @@ import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -327,5 +329,11 @@ public class Controller implements ResponseExecutor {
         alert.setContentText("Grzegorz Aleksiuk\nRobert Dudzinski\nPawel Swiatkowski\nMichal Zadrozny");
 
         alert.showAndWait();
+    }
+
+    public void saveSensorName(KeyEvent keyEvent) {
+        if(keyEvent.getCode() == KeyCode.ENTER){
+            editNameClicked(new ActionEvent());
+        }
     }
 }
