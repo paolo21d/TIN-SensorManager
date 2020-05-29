@@ -40,11 +40,22 @@ using namespace std;
         return socket > -1;
     }
 
-    void ClientsHandler::Client::connected(int socket, int clientId, sockaddr_in service)
+    void ClientsHandler::Client::connected(int socket, int clientId, sockaddr_in service, IRequestListener *listener)
     {
         this->socket = socket;
         this->clientId = clientId;
         this->service = service;
+        this->listener = listener;
+
+        vector<unsigned char> initMsg = listener->beforeFirstSend(clientId);
+        if (initMsg.size() > 0)
+        {
+            sendLock.lock();
+            int msgLen = initMsg.size();
+            BytesParser::appendFrontBytes<int32_t>(initMsg, (int32_t) msgLen);
+            outBuffer.insert(outBuffer.begin(), make_move_iterator(initMsg.begin()), make_move_iterator(initMsg.end()));
+            sendLock.unlock();
+        }
     }
 
     void ClientsHandler::Client::disconnected()
@@ -207,8 +218,8 @@ using namespace std;
                 Client *handler = clientHandlers[0].get();
                 sockaddr_in s;
                 memset(&s, 0, sizeof(sockaddr_in));
-                handler->connected(mainSocket, freeHandler, s);
-                handler->setListener(listener);
+                handler->connected(mainSocket, freeHandler, s, listener);
+                listener->onClientConnected(handler->getClientId(), handler->getIp(), handler->getPort());
             }
 
             connected = true;
@@ -348,8 +359,7 @@ using namespace std;
     void ClientsHandler::bindHandler(int socket, sockaddr_in service)
     {
         Client *handler = clientHandlers[freeHandler].get();
-        handler->connected(socket, freeHandler, service);
-        handler->setListener(listener);
+        handler->connected(socket, freeHandler, service, listener);
         listener->onClientConnected(handler->getClientId(), handler->getIp(), handler->getPort());
     }
 

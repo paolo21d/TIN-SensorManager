@@ -1,19 +1,14 @@
 #include <iostream>
 #include <utility>
-#include "DatabaseManager.h"
-
+#include "MockDatabaseManager.h"
+#include "MockDatabaseConnection.h"
 
 DatabaseManager::DatabaseManager(std::string name, std::string password, std::string connection) {
 
 }
 
-DatabaseManager::~DatabaseManager() {
-
-}
-
-
 IDatabaseConnection *DatabaseManager::getNewConnection() {
-    return nullptr;
+    return new MockDatabaseConnection(nullptr, nullptr);
 }
 
 

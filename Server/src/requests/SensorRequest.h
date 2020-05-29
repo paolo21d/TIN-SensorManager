@@ -22,4 +22,14 @@ public:
     std::string sensorToken;
 };
 
+class SensorMeasurementRequest : public SensorRequest
+{
+
+};
+
+//class Sensor
+//{
+//
+//};
+
 #endif //SERVER_SENSORREQUEST_H

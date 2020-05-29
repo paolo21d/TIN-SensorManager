@@ -22,6 +22,9 @@ public:
 private:
     SerializerSensorMessage serializer;
     IModelForSensor *model;
+
+    void handleInitMsg(int clientId, std::vector<unsigned char> &msg, int cursorPos = 0);
+    void handleMeasureMsg(int clientId, std::vector<unsigned char> &msg, int cursorPos = 0);
 };
 
 

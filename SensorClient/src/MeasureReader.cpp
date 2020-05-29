@@ -11,7 +11,13 @@ MEMORYSTATUSEX memInfo;
 //struct sysinfo memInfo;
 #endif
 
-int getMeasure()
+MeasureReader &MeasureReader::getInstance()
+{
+    static MeasureReader instance;
+    return instance;
+}
+
+int MeasureReader::getMeasure()
 {
 #ifdef WIN32
     memInfo.dwLength = sizeof(MEMORYSTATUSEX);
@@ -26,4 +32,9 @@ int getMeasure()
 //    return ceil(physMemUsed * 100 / totalPhysMem);
     return 0;
 #endif
+}
+
+MeasureReader::MeasureReader()
+{
+
 }

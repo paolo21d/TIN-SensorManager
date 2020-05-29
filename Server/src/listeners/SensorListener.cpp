@@ -15,18 +15,22 @@ SensorListener::SensorListener(IModelForSensor *model) : model(model)
 void SensorListener::onGotRequest(int clientId, vector<unsigned char> msg)
 {
     int cursorPos = 0;
-    int64_t timestamp64 = getData<int64_t>(msg, cursorPos);
-    int value = getData<int32_t>(msg, cursorPos);
-    int timestamp = timestamp64 / 1000;
+    char type = getData<int8_t>(msg, cursorPos);
+    switch (type)
+    {
+        case 'm':
+            handleMeasureMsg(clientId, msg, cursorPos);
+            break;
 
-    cout << "client " << clientId << "     timestamp: " << timestamp << "     value: " << value << endl;
+        case 'i':
+            handleInitMsg(clientId, msg, cursorPos);
+            break;
 
-    vector<unsigned char> response;
-    BytesParser::appendBytes<char>(response, '1');
-    BytesParser::appendBytes<int64_t>(response, timestamp64);
-    send(clientId, response);
+        default:
+            cout << "Could not recognize msg type -> disconnecting " << clientId << endl;
+            disconnectClient(clientId);
+    }
 
-    model->sensorCommandAddMeasurement(clientId, timestamp, value);
 }
 
 void SensorListener::onClientConnected(int clientId, string ip, int port)
@@ -39,4 +43,26 @@ void SensorListener::onClientConnected(int clientId, string ip, int port)
 void SensorListener::onClientDisconnected(int clientId)
 {
     cout << "Client " << clientId << " disconnected" << endl;
+}
+
+void SensorListener::handleInitMsg(int clientId, std::vector<unsigned char> &msg, int cursorPos)
+{
+    string token(msg.begin() + cursorPos, msg.end());
+    cout << "received token from sensor: " << token << endl;
+}
+
+void SensorListener::handleMeasureMsg(int clientId, std::vector<unsigned char> &msg, int cursorPos)
+{
+    int64_t timestamp64 = getData<int64_t>(msg, cursorPos);
+    int value = getData<int32_t>(msg, cursorPos);
+    int timestamp = timestamp64 / 1000;
+
+    cout << "client " << clientId << "     timestamp: " << timestamp << "     value: " << value << endl;
+
+    vector<unsigned char> response;
+    BytesParser::appendBytes<char>(response, '1');
+    BytesParser::appendBytes<int64_t>(response, timestamp64);
+    send(clientId, response);
+
+    model->sensorCommandAddMeasurement(clientId, timestamp, value);
 }

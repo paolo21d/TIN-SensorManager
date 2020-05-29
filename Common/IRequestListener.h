@@ -21,6 +21,7 @@ public:
 
     virtual void onClientConnected(int clientId, std::string ip, int port);
     virtual void onClientDisconnected(int clientId);
+    virtual std::vector<unsigned char> beforeFirstSend(int clientId);
 
     void setupListener(IClientsHandler *clientsHandler);
 

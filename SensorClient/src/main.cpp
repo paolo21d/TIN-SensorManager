@@ -9,6 +9,10 @@
 
 using namespace std;
 
+const static string USER_PREFS_IP = "ip";
+const static string USER_PREFS_PORT = "port";
+const static string USER_PREFS_TOKEN = "token";
+
 class MockListener : public IRequestListener
 {
 public:
@@ -18,6 +22,17 @@ public:
         char status = getData<char>(msg, cursorPos);
         int64_t lastTimestamp = getData<int64_t>(msg, cursorPos);
         cout << "response: " << status << "   " << lastTimestamp << endl;
+    }
+
+    void onClientConnected(int clientId, std::string ip, int port) override
+    {
+        cout << "Connected to the server" << endl;
+    }
+
+    vector<unsigned char> beforeFirstSend(int clientId) override
+    {
+        string initMsg = "i" + UserPrefs::getInstance().getString(USER_PREFS_TOKEN);
+        return vector<unsigned char>(initMsg.begin(), initMsg.end());
     }
 };
 
@@ -34,10 +49,11 @@ void sensorThread()
     for (int i = 2; ; ++i)
     {
         int64_t timestamp = getPosixTime();
-        int measure = getMeasure();
+        int measure = MeasureReader::getInstance().getMeasure();
         sleepMillis(2000);
 
         vector<unsigned char> response;
+        BytesParser::appendBytes<int8_t>(response, 'm');
         BytesParser::appendBytes<int64_t>(response, timestamp);
         BytesParser::appendBytes<int32_t>(response, measure);
 
@@ -47,9 +63,9 @@ void sensorThread()
 
 int main(int argc, char *argv[])
 {
-    string ip = UserPrefs::getInstance().getString("ip");
-    int port  = UserPrefs::getInstance().getInt("port");
-    string token = UserPrefs::getInstance().getString("token");
+    string ip = UserPrefs::getInstance().getString(USER_PREFS_IP);
+    int port  = UserPrefs::getInstance().getInt(USER_PREFS_PORT);
+    string token = UserPrefs::getInstance().getString(USER_PREFS_TOKEN);
 
     cout << "loaded '" << ip << ":" << port << endl;
     cout << "token: " << token << endl;

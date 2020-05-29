@@ -44,7 +44,7 @@
             void setListener(IRequestListener *listener);
 
             bool isConnected();
-            void connected(int socket, int clientId, sockaddr_in service);
+            void connected(int socket, int clientId, sockaddr_in service, IRequestListener *listener);
             void disconnected();
 
             bool isSomethingToSend();

@@ -21,6 +21,10 @@ void IRequestListener::onClientDisconnected(int clientId)
 {
 
 }
+std::vector<unsigned char> IRequestListener::beforeFirstSend(int clientId)
+{
+    return vector<unsigned char>();
+}
 
 void IRequestListener::disconnectClient(int clientId)
 {
