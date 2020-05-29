@@ -74,7 +74,11 @@ public class Controller implements ResponseExecutor {
             }
             else {
                 Platform.runLater(() -> {
-                    isConnectionEstablished();
+                    try {
+                        isConnectionEstablished();
+                    } catch (InterruptedException e) {
+                        System.out.println(e.getMessage());
+                    }
                 });
             }
 
@@ -113,7 +117,11 @@ public class Controller implements ResponseExecutor {
                 return new Pair<String,String>(serverIp.getText(), serverPort.getText());
             }
             if(dialogButton == ButtonType.CANCEL) {
-                closeApp(new ActionEvent());
+                try {
+                    closeApp(new ActionEvent());
+                } catch (InterruptedException e) {
+                    System.out.println(e.getMessage());
+                }
             }
             return null;
         });
@@ -254,7 +262,7 @@ public class Controller implements ResponseExecutor {
         Platform.runLater(() -> {showData();});
     }
 
-    private void isConnectionEstablished() {
+    private void isConnectionEstablished() throws InterruptedException {
         if(!communicationManager.isConnectionReady()) {
             if(!alertOccurred) {
                 alertOccurred = true;
@@ -269,7 +277,8 @@ public class Controller implements ResponseExecutor {
         }
     }
 
-    public void closeApp(ActionEvent actionEvent) {
+    public void closeApp(ActionEvent actionEvent) throws InterruptedException {
+        communicationManager.closeConnection();
         Platform.exit();
         System.exit(0);
     }
