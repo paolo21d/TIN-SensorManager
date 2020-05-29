@@ -83,7 +83,7 @@ public class CommunicationManager extends Thread {
     public void run() {
         handler = new ClientHandler(this);
         System.out.println("---------------- CONNECTING");
-        connect("127.0.0.1", 28001);
+        connect(serverIp, serverPort);
         if(isConnectionReady())
             System.out.println("---------------- CONNECTED");
     }

@@ -3,12 +3,15 @@ package tin.monitoring.controller;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
+import javafx.util.Pair;
 import tin.monitoring.communication.CommunicationManager;
 import tin.monitoring.model.*;
 
@@ -58,6 +61,7 @@ public class Controller implements ResponseExecutor {
         //lineChart.setAnimated(false);
         lineChart.getXAxis().setAnimated(false);
 
+        setServerAddress();
         communicationManager.run();
 
         ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
@@ -78,6 +82,48 @@ public class Controller implements ResponseExecutor {
 
         loadDataButton.setDisable(true);
 
+    }
+
+    private void setServerAddress() {
+
+        Dialog<Pair<String, String>> dialog = new Dialog<>();
+        dialog.setTitle("Server Address");
+        dialog.setHeaderText("Specify Server Address");
+
+        ButtonType connectButton = new ButtonType("Connect", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(connectButton, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
+
+        TextField serverIp = new TextField("127.0.0.1");
+        TextField serverPort = new TextField("28001");
+
+        grid.add(new Label("Server IP:"), 0, 0);
+        grid.add(serverIp, 1, 0);
+        grid.add(new Label("Server Port:"), 0, 1);
+        grid.add(serverPort, 1, 1);
+
+        dialog.getDialogPane().setContent(grid);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == connectButton) {
+                return new Pair<String,String>(serverIp.getText(), serverPort.getText());
+            }
+            if(dialogButton == ButtonType.CANCEL) {
+                closeApp(new ActionEvent());
+            }
+            return null;
+        });
+
+        Optional<Pair<String, String>> result = dialog.showAndWait();
+
+        result.ifPresent(serverAddress -> {
+            communicationManager.setServerIp(serverAddress.getKey());
+            communicationManager.setServerPort(Integer.parseInt(serverAddress.getValue()));
+        });
     }
 
     public void tableClicked(MouseEvent mouseEvent) {
