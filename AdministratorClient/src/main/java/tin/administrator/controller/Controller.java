@@ -3,16 +3,20 @@ package tin.administrator.controller;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
+import javafx.util.Pair;
 import tin.administrator.communication.CommunicationManager;
 import tin.administrator.model.AdministratorModel;
 import tin.administrator.model.Sensor;
 import tin.administrator.model.SensorTable;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Timer;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -70,6 +74,7 @@ public class Controller implements ResponseExecutor {
             sensorsTable.getItems().add(new SensorTable(sensor));
         }
 
+        setServerAddress();
         communicationManager.run();
 
         ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
@@ -91,6 +96,48 @@ public class Controller implements ResponseExecutor {
         //timer.scheduleAtFixedRate(sensorTableRefreshTask, 5000, 3000);
         clearSensorDetails();
 
+    }
+
+    private void setServerAddress() {
+
+        Dialog<Pair<String, String>> dialog = new Dialog<>();
+        dialog.setTitle("Server Address");
+        dialog.setHeaderText("Specify Server Address");
+
+        ButtonType connectButton = new ButtonType("Connect", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(connectButton, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
+
+        TextField serverIp = new TextField("127.0.0.1");
+        TextField serverPort = new TextField("28000");
+
+        grid.add(new Label("Server IP:"), 0, 0);
+        grid.add(serverIp, 1, 0);
+        grid.add(new Label("Server Port:"), 0, 1);
+        grid.add(serverPort, 1, 1);
+
+        dialog.getDialogPane().setContent(grid);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == connectButton) {
+                return new Pair<String,String>(serverIp.getText(), serverPort.getText());
+            }
+            if(dialogButton == ButtonType.CANCEL) {
+                closeApp(new ActionEvent());
+            }
+            return null;
+        });
+
+        Optional<Pair<String, String>> result = dialog.showAndWait();
+
+        result.ifPresent(serverAddress -> {
+            communicationManager.setServerIp(serverAddress.getKey());
+            communicationManager.setServerPort(Integer.parseInt(serverAddress.getValue()));
+        });
     }
 
     //UI Events
