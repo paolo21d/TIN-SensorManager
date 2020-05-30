@@ -76,6 +76,18 @@ bool DatabaseConnection::checkIfTokenExists(std::string token) {
     return  resultSet->getInt(1) != 0;
 }
 
+bool DatabaseConnection::checkIfTokenIsWhitelisted(std::string token) {
+    Statement *statement = createStatement(
+            "SELECT status \n"
+            "FROM SENSORS \n"
+            "WHERE token='" + token + "'");
+    ResultSet *resultSet = statement->executeQuery();
+    resultSet->next();
+    connection->terminateStatement(statement);
+    return  resultSet->getString(1) == "ACTIVE";
+}
+
+
 
 std::vector<Sensor> DatabaseConnection::getAllSensors() {
     Statement *statement = createStatement(

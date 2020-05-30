@@ -84,3 +84,7 @@ int MockDatabaseConnection::getSensorId(std::string token) {
 bool MockDatabaseConnection::checkIfTokenExists(std::string token) {
     return false;
 }
+
+bool MockDatabaseConnection::checkIfTokenIsWhitelisted(std::string token) {
+    return false;
+}

@@ -29,6 +29,8 @@ public:
 
     bool checkIfTokenExists(std::string token) override ;
 
+    bool checkIfTokenIsWhitelisted(std::string token) override ;
+
     Sensor revokeSensor(int id) override;
 
     Sensor connectSensor(int id) override;

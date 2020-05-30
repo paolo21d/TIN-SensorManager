@@ -4,9 +4,10 @@
 
 #include <src/serializers/SerializerAdministratorMessage.h>
 #include <src/serializers/SerializerMonitoringMessage.h>
-//#include <src/database/DatabaseManager.h>
-#include <src/database/MockDatabaseManager.h>
+#include <src/database/DatabaseManager.h>
+//#include <src/database/MockDatabaseManager.h>
 #include "ServerModel.h"
+#include <unordered_map>
 
 using namespace std;
 
@@ -242,55 +243,40 @@ void ServerModel::sendMonitoringResponse() {
 void ServerModel::executeSensorRequests() {
     IDatabaseConnection *connection = databaseConnector->getNewConnection();
 
+    unordered_map<int, int> clientToSensorId;
+
     while (1 == 1) {
 
         SensorRequest *request = sensorRequestsQueue.pop();
 
-//        executeSensorRequest(*request, connection);
         if (auto req = dynamic_cast<SensorMeasurementRequest*>(request))
-            executeSensorRequest(req, connection);
+        {
+            request->clientId = clientToSensorId[request->clientId];
+            connection->addMeasurement(req->clientId, req->value, req->timestamp);
+        }
         else if (auto req = dynamic_cast<SensorOnConnectedRequest*>(request))
-            executeSensorRequest(req, connection);
+        {
+            if (!connection->checkIfTokenIsWhitelisted(req->token))
+            {
+                sensorConnectionListener->disconnectClient(request->clientId);
+                return;
+            }
+
+            Sensor sensor = connection->addSensor(req->ip, req->port, req->token);
+            clientToSensorId[request->clientId] = sensor.id;
+        }
         else if (auto req = dynamic_cast<SensorOnDisconnectedRequest*>(request))
-            executeSensorRequest(req, connection);
+        {
+            connection->disconnectSensor(clientToSensorId[req->clientId]);
+            clientToSensorId.erase(req->clientId);
+
+        }
 
         delete request;
-
-//        cout << "SensorRequest\tCommandType: " << request.commandType << endl;
-//
-//        switch (request.commandType) {
-//            case ADD_MEASUREMENT:
-//                //zmienić clientId na id sensora
-//                connection->addMeasurement(request.clientId, request.measurementValue, request.measurementTimestamp);
-//                break;
-//            case CONNECTED_SENSOR:
-//                //Do smth
-//                //connection->addSensor();
-//                break;
-//            case DISCONNECT_SENSOR:
-//                //Do smth
-//                connection->disconnectSensor(request.clientId);
-//                break;
-//        }
 
         //std::chrono::milliseconds timespan(1000); // or whatever
         //std::this_thread::sleep_for(timespan);
     }
     //Przy ładnym wyłączaniu przydałoby się kasować connection
     //delete connection;
-}
-
-void ServerModel::executeSensorRequest(SensorMeasurementRequest *request, IDatabaseConnection *connection)
-{
-    connection->addMeasurement(request->clientId, request->value, request->timestamp);
-}
-
-void ServerModel::executeSensorRequest(SensorOnConnectedRequest *request, IDatabaseConnection *connection)
-{
-
-}
-
-void ServerModel::executeSensorRequest(SensorOnDisconnectedRequest *request, IDatabaseConnection *connection)
-{
-
 }
