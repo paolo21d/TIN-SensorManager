@@ -43,6 +43,7 @@ class ServerModel : public IModelForSensor, public IModelForMonitoring, public I
     Queue<MonitoringResponse> monitoringResponsesQueue;
 
     std::unordered_map<int, int> sensorToClientId;
+    std::string generateToken();
 
 public:
     ServerModel(IRequestListener *sensor, IRequestListener *administrator, IRequestListener *monitoring);

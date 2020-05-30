@@ -124,10 +124,13 @@ void ServerModel::executeAdministratorRequests() {
                 sensorToClientId.erase(request.sensorId);
                 break;
             case GENERATE_TOKEN:
-                response->token = "TOKENTOKEN";
-                //connection->checkIfTokenExists(token);
+                string token = generateToken();
+                while(connection->checkIfTokenExists(token)) {
+                    token = generateToken();
+                }
 
-                //connection->initializeSensor(token);
+                response->token = token;
+                connection->initializeSensor(token);
                 break;
         }
 
@@ -138,6 +141,22 @@ void ServerModel::executeAdministratorRequests() {
 
     //Kasowanie connection
     //delete connection;
+}
+
+string ServerModel::generateToken() {
+    static const int len = 15;
+    static const char alphanum[] =
+            "0123456789"
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+            "abcdefghijklmnopqrstuvwxyz";
+
+    string s;
+
+    for (int i = 0; i < len; ++i) {
+        s += alphanum[rand() % (sizeof(alphanum) - 1)];
+    }
+
+    return  s;
 }
 
 void ServerModel::sendAdministratorResponse() {
