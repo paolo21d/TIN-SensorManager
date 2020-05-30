@@ -26,6 +26,7 @@
 #include "IModelForMonitoring.h"
 #include "IModelForAdministrator.h"
 #include "IModelForSensor.h"
+#include <unordered_map>
 
 class ServerModel : public IModelForSensor, public IModelForMonitoring, public IModelForAdministrator {
     IRequestListener *sensorConnectionListener;
@@ -40,6 +41,8 @@ class ServerModel : public IModelForSensor, public IModelForMonitoring, public I
 
     Queue<AdministratorResponse> administratorResponsesQueue;
     Queue<MonitoringResponse> monitoringResponsesQueue;
+
+    std::unordered_map<int, int> sensorToClientId;
 
 public:
     ServerModel(IRequestListener *sensor, IRequestListener *administrator, IRequestListener *monitoring);

@@ -7,7 +7,6 @@
 #include <src/database/DatabaseManager.h>
 //#include <src/database/MockDatabaseManager.h>
 #include "ServerModel.h"
-#include <unordered_map>
 
 using namespace std;
 
@@ -115,12 +114,14 @@ void ServerModel::executeAdministratorRequests() {
             case REVOKE_SENSOR:
                 response->sensorId =
                         connection->revokeSensor(request.sensorId).id;
-                //Terminate sensor connection
+                sensorConnectionListener->disconnectClient(sensorToClientId[request.sensorId]);
+                sensorToClientId.erase(request.sensorId);
                 break;
             case DISCONNECT_SENSOR:
                 response->sensorId =
                         connection->disconnectSensor(request.sensorId).id;
-                //Terminate sensor connection
+                sensorConnectionListener->disconnectClient(sensorToClientId[request.sensorId]);
+                sensorToClientId.erase(request.sensorId);
                 break;
             case GENERATE_TOKEN:
                 response->token = "TOKENTOKEN";
@@ -264,12 +265,12 @@ void ServerModel::executeSensorRequests() {
 
             Sensor sensor = connection->addSensor(req->ip, req->port, req->token);
             clientToSensorId[request->clientId] = sensor.id;
+            sensorToClientId[sensor.id] = request->clientId;
         }
         else if (auto req = dynamic_cast<SensorOnDisconnectedRequest*>(request))
         {
             connection->disconnectSensor(clientToSensorId[req->clientId]);
             clientToSensorId.erase(req->clientId);
-
         }
 
         delete request;
