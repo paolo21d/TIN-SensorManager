@@ -87,61 +87,53 @@ void ServerModel::addMonitoringResponseToSend(MonitoringResponse response) {
 void ServerModel::executeAdministratorRequests() {
     SerializerAdministratorMessage serializer;
     srand(time(NULL));
-
     IDatabaseConnection *connection = databaseConnector->getNewConnection();
+    while (1 == 1) {
 
-    try {
-        while (1 == 1) {
-
-
-            AdministratorRequest request = administratorRequestsQueue.pop();
-
-            cout << "AdministratorRequest\tCommandType: " << request.commandType << endl;
-            //Tutaj ma być wykokane zapytanie do bazy/cacheu
-            //stworzenie AdministratorResponse i wrzucenie go do administratorResponsesQueue
-
-            auto response = new AdministratorResponse(request.clientId, request.commandType);
-
-
-            switch (request.commandType) {
-                case GET_ALL_SENSORS: {
-                    response->sensors =
-                            connection->getAllSensors();
-                    break;
-                }
-                case UPDATE_SENSOR_NAME:
-                    response->sensorId =
-                            connection->editSensor(request.sensorId, request.sensorName).id;
-                    break;
-                case REVOKE_SENSOR:
-                    response->sensorId =
-                            connection->revokeSensor(request.sensorId).id;
-                    sensorConnectionListener->disconnectClient(sensorToClientId[request.sensorId]);
-                    sensorToClientId.erase(request.sensorId);
-                    break;
-                case DISCONNECT_SENSOR:
-                    response->sensorId =
-                            connection->disconnectSensor(request.sensorId).id;
-                    sensorConnectionListener->disconnectClient(sensorToClientId[request.sensorId]);
-                    sensorToClientId.erase(request.sensorId);
-                    break;
-                case GENERATE_TOKEN:
-                    string token = generateToken();
-                    while (connection->checkIfTokenExists(token)) {
-                        token = generateToken();
-
-                    }
+        AdministratorRequest request = administratorRequestsQueue.pop();
+        cout << "AdministratorRequest\tCommandType: " << request.commandType << endl;
+        //Tutaj ma być wykokane zapytanie do bazy/cacheu
+        //stworzenie AdministratorResponse i wrzucenie go do administratorResponsesQueue
+        auto response = new AdministratorResponse(request.clientId, request.commandType);
+        switch (request.commandType) {
+            case GET_ALL_SENSORS: {
+                response->sensors =
+                        connection->getAllSensors();
+                break;
             }
+            case UPDATE_SENSOR_NAME:
+                response->sensorId =
+                        connection->editSensor(request.sensorId, request.sensorName).id;
+                break;
+            case REVOKE_SENSOR:
+                response->sensorId =
+                        connection->revokeSensor(request.sensorId).id;
+                sensorConnectionListener->disconnectClient(sensorToClientId[request.sensorId]);
+                sensorToClientId.erase(request.sensorId);
+                break;
+            case DISCONNECT_SENSOR:
+                response->sensorId =
+                        connection->disconnectSensor(request.sensorId).id;
+                sensorConnectionListener->disconnectClient(sensorToClientId[request.sensorId]);
+                sensorToClientId.erase(request.sensorId);
+                break;
+            case GENERATE_TOKEN:
+                string token = generateToken();
+                while (connection->checkIfTokenExists(token)) {
+                    token = generateToken();
+                }
+                response->token = token;
+                connection->initializeSensor(token);
+                break;
         }
-    } catch (oracle::occi::SQLException &e) {
-        cout << e.getMessage() << endl;
-    } catch (std::exception &e) {
-        cout << e.what() << endl;
+        addAdministratorResponseToSend(*response);
+        //std::chrono::milliseconds timespan(1000); // or whatever
+        //std::this_thread::sleep_for(timespan);
     }
-
     //Kasowanie connection
     //delete connection;
 }
+
 
 
 string ServerModel::generateToken() {
