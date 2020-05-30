@@ -90,53 +90,63 @@ void ServerModel::executeAdministratorRequests() {
 
     IDatabaseConnection *connection = databaseConnector->getNewConnection();
 
-    while (1 == 1) {
+    try {
+        while (1 == 1) {
 
 
-        AdministratorRequest request = administratorRequestsQueue.pop();
+            AdministratorRequest request = administratorRequestsQueue.pop();
 
-        cout << "AdministratorRequest\tCommandType: " << request.commandType << endl;
-        //Tutaj ma być wykokane zapytanie do bazy/cacheu
-        //stworzenie AdministratorResponse i wrzucenie go do administratorResponsesQueue
+            cout << "AdministratorRequest\tCommandType: " << request.commandType << endl;
+            //Tutaj ma być wykokane zapytanie do bazy/cacheu
+            //stworzenie AdministratorResponse i wrzucenie go do administratorResponsesQueue
 
-        auto response = new AdministratorResponse(request.clientId, request.commandType);
+            auto response = new AdministratorResponse(request.clientId, request.commandType);
 
-        switch (request.commandType) {
-            case GET_ALL_SENSORS: {
-                response->sensors =
-                        connection->getAllSensors();
-                break;
-            }
-            case UPDATE_SENSOR_NAME:
-                response->sensorId =
-                        connection->editSensor(request.sensorId, request.sensorName).id;
-                break;
-            case REVOKE_SENSOR:
-                response->sensorId =
-                        connection->revokeSensor(request.sensorId).id;
-                sensorConnectionListener->disconnectClient(sensorToClientId[request.sensorId]);
-                sensorToClientId.erase(request.sensorId);
-                break;
-            case DISCONNECT_SENSOR:
-                response->sensorId =
-                        connection->disconnectSensor(request.sensorId).id;
-                sensorConnectionListener->disconnectClient(sensorToClientId[request.sensorId]);
-                sensorToClientId.erase(request.sensorId);
-                break;
-            case GENERATE_TOKEN:
-                string token = generateToken();
-                while(connection->checkIfTokenExists(token)) {
-                    token = generateToken();
+            switch (request.commandType) {
+                case GET_ALL_SENSORS: {
+                    response->sensors =
+                            connection->getAllSensors();
+                    break;
                 }
+                case UPDATE_SENSOR_NAME:
+                    response->sensorId =
+                            connection->editSensor(request.sensorId, request.sensorName).id;
+                    break;
+                case REVOKE_SENSOR:
+                    response->sensorId =
+                            connection->revokeSensor(request.sensorId).id;
+                    sensorConnectionListener->disconnectClient(sensorToClientId[request.sensorId]);
+                    sensorToClientId.erase(request.sensorId);
+                    break;
+                case DISCONNECT_SENSOR:
+                    response->sensorId =
+                            connection->disconnectSensor(request.sensorId).id;
+                    sensorConnectionListener->disconnectClient(sensorToClientId[request.sensorId]);
+                    sensorToClientId.erase(request.sensorId);
+                    break;
+                case GENERATE_TOKEN:
+                    cout << "CHUJ111" << endl;
+                    string token = generateToken();
 
-                response->token = token;
-                connection->initializeSensor(token);
-                break;
+                    while (connection->checkIfTokenExists(token)) {
+                        token = generateToken();
+                    }
+
+                    response->token = token;
+                    cout << "CHUJ TOKEN " << token << endl;
+                    connection->initializeSensor(token);
+                    cout << "CHUJ222 TOKEN " << token << endl;
+                    break;
+            }
+
+            addAdministratorResponseToSend(*response);
+            //std::chrono::milliseconds timespan(1000); // or whatever
+            //std::this_thread::sleep_for(timespan);
         }
-
-        addAdministratorResponseToSend(*response);
-        //std::chrono::milliseconds timespan(1000); // or whatever
-        //std::this_thread::sleep_for(timespan);
+    } catch (oracle::occi::SQLException &e) {
+        cout<<e.getMessage()<<endl;
+    } catch (std::exception &e) {
+        cout<<e.what()<<endl;
     }
 
     //Kasowanie connection
@@ -264,20 +274,16 @@ void ServerModel::executeSensorRequests() {
     IDatabaseConnection *connection = databaseConnector->getNewConnection();
 
     unordered_map<int, int> clientToSensorId;
-
+try {
     while (1 == 1) {
 
         SensorRequest *request = sensorRequestsQueue.pop();
 
-        if (auto req = dynamic_cast<SensorMeasurementRequest*>(request))
-        {
+        if (auto req = dynamic_cast<SensorMeasurementRequest *>(request)) {
             request->clientId = clientToSensorId[request->clientId];
             connection->addMeasurement(req->clientId, req->value, req->timestamp);
-        }
-        else if (auto req = dynamic_cast<SensorOnConnectedRequest*>(request))
-        {
-            if (!connection->checkIfTokenIsWhitelisted(req->token))
-            {
+        } else if (auto req = dynamic_cast<SensorOnConnectedRequest *>(request)) {
+            if (!connection->checkIfTokenIsWhitelisted(req->token)) {
                 sensorConnectionListener->disconnectClient(request->clientId);
                 return;
             }
@@ -285,9 +291,7 @@ void ServerModel::executeSensorRequests() {
             Sensor sensor = connection->addSensor(req->ip, req->port, req->token);
             clientToSensorId[request->clientId] = sensor.id;
             sensorToClientId[sensor.id] = request->clientId;
-        }
-        else if (auto req = dynamic_cast<SensorOnDisconnectedRequest*>(request))
-        {
+        } else if (auto req = dynamic_cast<SensorOnDisconnectedRequest *>(request)) {
             connection->disconnectSensor(clientToSensorId[req->clientId]);
             clientToSensorId.erase(req->clientId);
         }
@@ -297,6 +301,12 @@ void ServerModel::executeSensorRequests() {
         //std::chrono::milliseconds timespan(1000); // or whatever
         //std::this_thread::sleep_for(timespan);
     }
+}
+catch (oracle::occi::SQLException &e) {
+    cout<<e.getMessage()<<endl;
+}catch (std::exception &e) {
+    cout<<e.what()<<endl;
+}
     //Przy ładnym wyłączaniu przydałoby się kasować connection
     //delete connection;
 }

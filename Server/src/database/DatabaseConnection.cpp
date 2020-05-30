@@ -84,7 +84,7 @@ bool DatabaseConnection::checkIfTokenIsWhitelisted(std::string token) {
     ResultSet *resultSet = statement->executeQuery();
     resultSet->next();
     connection->terminateStatement(statement);
-    return  resultSet->getString(1) == "ACTIVE";
+    return  resultSet->getString(1) != "REVOKED";
 }
 
 
