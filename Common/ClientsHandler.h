@@ -38,8 +38,11 @@
 
             void reset();
 
+            bool blockSend;
+            bool blockRecv;
+
         public:
-            Client(ClientsHandler *handler, bool server);
+            Client(ClientsHandler *handler, bool serverr, bool blockSend = false, bool blockRecv = false); //TODO: right now blocks params are not required, could be removed
 
             void setListener(IRequestListener *listener);
 
@@ -61,6 +64,9 @@
 
             std::string getIp();
             int getPort();
+
+            void unlockSend();
+            void unlockRecv();
         };
 
 
@@ -72,6 +78,13 @@
         int send(int clientId, std::vector<unsigned char> msg) override;
         std::string getIp(int clientId) override;
         int getPort(int clientId) override;
+        void blockRecvOnInit() override;
+        void blockSendOnInit() override;
+        void unlockRecv(int clientId) override;
+        void unlockSend(int clientId) override;
+
+        bool getBlockSend();
+        bool getBlockRecv();
 
     protected:
 
@@ -105,6 +118,9 @@
         int acceptingSocket;
 
         bool connected = false;
+
+        bool blockingSendOnInit = false;
+        bool blockingRecvOnInit = false;
     };
 //}
 

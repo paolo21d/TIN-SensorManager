@@ -24,6 +24,10 @@
         virtual int send(int clientId, std::vector<unsigned char> msg) = 0;
         virtual std::string getIp(int clientId) = 0;
         virtual int getPort(int clientId) = 0;
+        virtual void blockRecvOnInit() = 0;
+        virtual void blockSendOnInit() = 0;
+        virtual void unlockRecv(int clientId) = 0;
+        virtual void unlockSend(int clientId) = 0;
 
     protected:
         int nfds;

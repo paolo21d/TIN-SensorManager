@@ -6,7 +6,8 @@ using namespace std;
 //{
     const int ClientsHandler::Client::MAX_MSG = 512;
 
-    ClientsHandler::Client::Client(ClientsHandler *handler, bool server) : handler(handler), IS_SERVER(server)
+    ClientsHandler::Client::Client(ClientsHandler *handler, bool server, bool blockSend, bool blockRecv)
+        : handler(handler), IS_SERVER(server), blockSend(blockSend), blockRecv(blockRecv)
     {
         reset();
         remainingIn = 0;
@@ -42,6 +43,9 @@ using namespace std;
 
     void ClientsHandler::Client::connected(int socket, int clientId, sockaddr_in service, IRequestListener *listener)
     {
+        blockRecv = handler->getBlockRecv();
+        blockSend = handler->getBlockSend();
+
         this->socket = socket;
         this->clientId = clientId;
         this->service = service;
@@ -68,6 +72,9 @@ using namespace std;
         if (socket < 0)
             return false;
 
+        if (blockSend)
+            return false;
+
         bool result;
         sendLock.lock();
         result = !outBuffer.empty();
@@ -78,6 +85,9 @@ using namespace std;
 
     bool ClientsHandler::Client::isSomethingToRecv()
     {
+        if (blockRecv)
+            return false;
+
         bool result = socket >= 0;
         return result;
     }
@@ -187,13 +197,23 @@ using namespace std;
         return (int) ntohs(service.sin_port);
     }
 
+    void ClientsHandler::Client::unlockSend()
+    {
+        blockSend = false;
+    }
+
+    void ClientsHandler::Client::unlockRecv()
+    {
+        blockRecv = false;
+    }
+
     ClientsHandler::ClientsHandler(int maxClients, bool server) :
         IS_SERVER(server), CLIENTS(maxClients),
         DELAY_SELECT_SEC(5), DELAY_SELECT_MICROS(0)
     {
         for (int i = 0; i < CLIENTS; ++i)
         {
-            clientHandlers.push_back(shared_ptr<Client>(new Client(this, IS_SERVER)));
+            clientHandlers.push_back(shared_ptr<Client>(new Client(this, IS_SERVER, blockingSendOnInit, blockingRecvOnInit)));
         }
     }
 
@@ -388,5 +408,39 @@ using namespace std;
 
         client->disconnected();
         listener->onClientDisconnected(clientId);
+    }
+
+    void ClientsHandler::blockRecvOnInit()
+    {
+        blockingRecvOnInit = true;
+    }
+
+    void ClientsHandler::blockSendOnInit()
+    {
+        blockingSendOnInit = true;
+    }
+
+    void ClientsHandler::unlockRecv(int clientId)
+    {
+        if (clientId < 0 || clientId >= CLIENTS)
+            return;
+
+
+    }
+
+    void ClientsHandler::unlockSend(int clientId)
+    {
+        if (clientId < 0 || clientId >= CLIENTS)
+            return;
+    }
+
+    bool ClientsHandler::getBlockSend()
+    {
+        return blockingSendOnInit;
+    }
+
+    bool ClientsHandler::getBlockRecv()
+    {
+        return blockingRecvOnInit;
     }
 //}
