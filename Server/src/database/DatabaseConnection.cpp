@@ -23,7 +23,7 @@ Sensor DatabaseConnection::addSensor(std::string IP, int port, std::string token
             "UPDATE SENSORS \n"
             "SET ip='" + IP + "', port=" + std::to_string(port) +
             ", status='ACTIVE' \n"
-            "WHERE token='" + token + "'");
+            "WHERE token='" + token + "'" + " AND status NOT LIKE 'REVOKED'");
     statement->executeUpdate();
     connection->commit();
 
@@ -143,7 +143,7 @@ Sensor DatabaseConnection::disconnectSensor(int id) {
     Statement *statement = createStatement(
             "UPDATE SENSORS\n"
             "SET status = 'DISCONNECTED'\n"
-            "WHERE id=" + std::to_string(id));
+            "WHERE id=" + std::to_string(id) + " AND status NOT LIKE 'REVOKED'");
     statement->executeUpdate();
     connection->commit();
     connection->terminateStatement(statement);
@@ -155,7 +155,7 @@ Sensor DatabaseConnection::connectSensor(int id) {
     Statement *statement = createStatement(
             "UPDATE SENSORS\n"
             "SET status = 'ACTIVE'\n"
-            "WHERE id=" + std::to_string(id));
+            "WHERE id=" + std::to_string(id) + " AND status NOT LIKE 'REVOKED'");
     statement->executeUpdate();
     connection->commit();
     connection->terminateStatement(statement);
