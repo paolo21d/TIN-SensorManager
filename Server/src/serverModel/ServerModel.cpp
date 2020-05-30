@@ -52,8 +52,7 @@ void ServerModel::init() {
 }
 
 ///SENSOR INTERFACE
-void ServerModel::addSensorRequestToExecute(SensorRequest *request)
-{
+void ServerModel::addSensorRequestToExecute(SensorRequest *request) {
     sensorRequestsQueue.push(request);
 }
 
@@ -87,6 +86,7 @@ void ServerModel::addMonitoringResponseToSend(MonitoringResponse response) {
 ///EXECUTE
 void ServerModel::executeAdministratorRequests() {
     SerializerAdministratorMessage serializer;
+    srand(time(NULL));
 
     IDatabaseConnection *connection = databaseConnector->getNewConnection();
 
@@ -125,7 +125,7 @@ void ServerModel::executeAdministratorRequests() {
                 break;
             case GENERATE_TOKEN:
                 string token = generateToken();
-                while(connection->checkIfTokenExists(token)) {
+                while (connection->checkIfTokenExists(token)) {
                     token = generateToken();
                 }
 
@@ -156,7 +156,7 @@ string ServerModel::generateToken() {
         s += alphanum[rand() % (sizeof(alphanum) - 1)];
     }
 
-    return  s;
+    return s;
 }
 
 void ServerModel::sendAdministratorResponse() {
@@ -269,15 +269,11 @@ void ServerModel::executeSensorRequests() {
 
         SensorRequest *request = sensorRequestsQueue.pop();
 
-        if (auto req = dynamic_cast<SensorMeasurementRequest*>(request))
-        {
+        if (auto req = dynamic_cast<SensorMeasurementRequest *>(request)) {
             request->clientId = clientToSensorId[request->clientId];
             connection->addMeasurement(req->clientId, req->value, req->timestamp);
-        }
-        else if (auto req = dynamic_cast<SensorOnConnectedRequest*>(request))
-        {
-            if (!connection->checkIfTokenIsWhitelisted(req->token))
-            {
+        } else if (auto req = dynamic_cast<SensorOnConnectedRequest *>(request)) {
+            if (!connection->checkIfTokenIsWhitelisted(req->token)) {
                 sensorConnectionListener->disconnectClient(request->clientId);
                 return;
             }
@@ -285,9 +281,7 @@ void ServerModel::executeSensorRequests() {
             Sensor sensor = connection->addSensor(req->ip, req->port, req->token);
             clientToSensorId[request->clientId] = sensor.id;
             sensorToClientId[sensor.id] = request->clientId;
-        }
-        else if (auto req = dynamic_cast<SensorOnDisconnectedRequest*>(request))
-        {
+        } else if (auto req = dynamic_cast<SensorOnDisconnectedRequest *>(request)) {
             connection->disconnectSensor(clientToSensorId[req->clientId]);
             clientToSensorId.erase(req->clientId);
         }
