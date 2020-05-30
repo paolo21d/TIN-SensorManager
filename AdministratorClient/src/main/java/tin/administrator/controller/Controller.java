@@ -11,6 +11,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.text.Font;
 import javafx.util.Pair;
 import tin.administrator.communication.CommunicationManager;
 import tin.administrator.model.AdministratorModel;
@@ -259,11 +260,27 @@ public class Controller implements ResponseExecutor {
     }
 
     private void displayToken(String token) {
+//        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+//        alert.setTitle("New Token");
+//        alert.setHeaderText("Note this token!");
+//        alert.setContentText(token);
+//
+//        alert.showAndWait();
+
+        TextArea textArea = new TextArea(token);
+        textArea.setEditable(false);
+        textArea.setWrapText(true);
+        textArea.setPrefRowCount(1);
+        textArea.setPrefColumnCount(20);
+        textArea.setFont(Font.font(20));
+        GridPane gridPane = new GridPane();
+        //gridPane.setMaxWidth(Double.MAX_VALUE);
+        gridPane.add(textArea, 0, 0);
+
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("New Token");
         alert.setHeaderText("Note this token!");
-        alert.setContentText(token);
-
+        alert.getDialogPane().setContent(gridPane);
         alert.showAndWait();
     }
 
