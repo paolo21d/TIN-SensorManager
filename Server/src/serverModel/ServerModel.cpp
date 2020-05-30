@@ -35,19 +35,19 @@ void ServerModel::setMonitoringConnectionListener(IRequestListener *listener) {
 }
 
 void ServerModel::init() {
-//    thread administratorRequestsExecutor(&ServerModel::executeAdministratorRequests, this);
-//    thread administratorResponsesSender(&ServerModel::sendAdministratorResponse, this);
-//
-//    thread monitoringRequestsExecutor(&ServerModel::executeMonitoringRequests, this);
-//    thread monitoringResponsesSender(&ServerModel::sendMonitoringResponse, this);
+    thread administratorRequestsExecutor(&ServerModel::executeAdministratorRequests, this);
+    thread administratorResponsesSender(&ServerModel::sendAdministratorResponse, this);
+
+    thread monitoringRequestsExecutor(&ServerModel::executeMonitoringRequests, this);
+    thread monitoringResponsesSender(&ServerModel::sendMonitoringResponse, this);
 
     thread sensorRequestsExecutor(&ServerModel::executeSensorRequests, this);
 
-//    monitoringRequestsExecutor.join();
-//    monitoringResponsesSender.join();
-//
-//    administratorRequestsExecutor.join();
-//    administratorResponsesSender.join();
+    monitoringRequestsExecutor.join();
+    monitoringResponsesSender.join();
+
+    administratorRequestsExecutor.join();
+    administratorResponsesSender.join();
 
     sensorRequestsExecutor.join();
 }
