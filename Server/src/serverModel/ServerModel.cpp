@@ -52,8 +52,7 @@ void ServerModel::init() {
 }
 
 ///SENSOR INTERFACE
-void ServerModel::addSensorRequestToExecute(SensorRequest *request)
-{
+void ServerModel::addSensorRequestToExecute(SensorRequest *request) {
     sensorRequestsQueue.push(request);
 }
 
@@ -87,6 +86,7 @@ void ServerModel::addMonitoringResponseToSend(MonitoringResponse response) {
 ///EXECUTE
 void ServerModel::executeAdministratorRequests() {
     SerializerAdministratorMessage serializer;
+    srand(time(NULL));
 
     IDatabaseConnection *connection = databaseConnector->getNewConnection();
 
@@ -101,6 +101,7 @@ void ServerModel::executeAdministratorRequests() {
             //stworzenie AdministratorResponse i wrzucenie go do administratorResponsesQueue
 
             auto response = new AdministratorResponse(request.clientId, request.commandType);
+
 
             switch (request.commandType) {
                 case GET_ALL_SENSORS: {
@@ -125,33 +126,23 @@ void ServerModel::executeAdministratorRequests() {
                     sensorToClientId.erase(request.sensorId);
                     break;
                 case GENERATE_TOKEN:
-                    cout << "CHUJ111" << endl;
                     string token = generateToken();
-
                     while (connection->checkIfTokenExists(token)) {
                         token = generateToken();
+
                     }
-
-                    response->token = token;
-                    cout << "CHUJ TOKEN " << token << endl;
-                    connection->initializeSensor(token);
-                    cout << "CHUJ222 TOKEN " << token << endl;
-                    break;
             }
-
-            addAdministratorResponseToSend(*response);
-            //std::chrono::milliseconds timespan(1000); // or whatever
-            //std::this_thread::sleep_for(timespan);
         }
     } catch (oracle::occi::SQLException &e) {
-        cout<<e.getMessage()<<endl;
+        cout << e.getMessage() << endl;
     } catch (std::exception &e) {
-        cout<<e.what()<<endl;
+        cout << e.what() << endl;
     }
 
     //Kasowanie connection
     //delete connection;
 }
+
 
 string ServerModel::generateToken() {
     static const int len = 15;
@@ -166,7 +157,7 @@ string ServerModel::generateToken() {
         s += alphanum[rand() % (sizeof(alphanum) - 1)];
     }
 
-    return  s;
+    return s;
 }
 
 void ServerModel::sendAdministratorResponse() {
