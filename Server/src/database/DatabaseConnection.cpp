@@ -19,30 +19,74 @@ DatabaseConnection::~DatabaseConnection() {
 }
 
 Sensor DatabaseConnection::addSensor(std::string IP, int port, std::string token) {
-
-
     Statement *statement = createStatement(
-            "INSERT INTO SENSORS (ip, port)\n"
-            "VALUES ('" + IP + "'," + std::to_string(port) + ")");
+            "UPDATE SENSORS \n"
+            "SET ip='" + IP + "', port=" + std::to_string(port) +
+            ", status='ACTIVE' \n"
+            "WHERE token='" + token + "'" + " AND status NOT LIKE 'REVOKED'");
     statement->executeUpdate();
     connection->commit();
 
     connection->terminateStatement(statement);
-
     statement = createStatement(
             "SELECT id, name, ip, port \n"
             "FROM SENSORS\n"
-            "WHERE ip = '" + IP + "' AND port = " + std::to_string(port));
+            "WHERE ip = '" + IP + "' AND port = " + std::to_string(port) + "AND token='" + token + "'");
 
     ResultSet *resultSet = statement->executeQuery();
     resultSet->next();
 
+    connection->terminateStatement(statement);
     return Sensor(resultSet->getInt(1),
                   resultSet->getString(2),
                   resultSet->getString(3),
                   resultSet->getInt(4));
 
 }
+
+int DatabaseConnection::initializeSensor(std::string token) {
+    Statement *statement = createStatement(
+            "INSERT INTO SENSORS(token) \n"
+            "VALUES('" + token +"')");
+    statement->executeUpdate();
+    connection->commit();
+
+    connection->terminateStatement(statement);
+
+    statement = createStatement(
+            "SELECT id\n"
+            "FROM SENSORS\n"
+            "WHERE token='" + token + "'");
+
+    ResultSet *resultSet = statement->executeQuery();
+    resultSet->next();
+
+    connection->terminateStatement(statement);
+    return resultSet->getInt(1);
+}
+
+bool DatabaseConnection::checkIfTokenExists(std::string token) {
+    Statement *statement = createStatement(
+            "SELECT COUNT(rowid) \n"
+            "FROM SENSORS \n"
+            "WHERE token='" + token + "'");
+    ResultSet *resultSet = statement->executeQuery();
+    resultSet->next();
+    connection->terminateStatement(statement);
+    return  resultSet->getInt(1) != 0;
+}
+
+bool DatabaseConnection::checkIfTokenIsWhitelisted(std::string token) {
+    Statement *statement = createStatement(
+            "SELECT status \n"
+            "FROM SENSORS \n"
+            "WHERE token='" + token + "'");
+    ResultSet *resultSet = statement->executeQuery();
+    resultSet->next();
+    connection->terminateStatement(statement);
+    return  resultSet->getString(1) != "REVOKED";
+}
+
 
 
 std::vector<Sensor> DatabaseConnection::getAllSensors() {
@@ -99,7 +143,7 @@ Sensor DatabaseConnection::disconnectSensor(int id) {
     Statement *statement = createStatement(
             "UPDATE SENSORS\n"
             "SET status = 'DISCONNECTED'\n"
-            "WHERE id=" + std::to_string(id));
+            "WHERE id=" + std::to_string(id) + " AND status NOT LIKE 'REVOKED'");
     statement->executeUpdate();
     connection->commit();
     connection->terminateStatement(statement);
@@ -111,7 +155,7 @@ Sensor DatabaseConnection::connectSensor(int id) {
     Statement *statement = createStatement(
             "UPDATE SENSORS\n"
             "SET status = 'ACTIVE'\n"
-            "WHERE id=" + std::to_string(id));
+            "WHERE id=" + std::to_string(id) + " AND status NOT LIKE 'REVOKED'");
     statement->executeUpdate();
     connection->commit();
     connection->terminateStatement(statement);
@@ -200,6 +244,7 @@ SensorMeasurement DatabaseConnection::getLastHour(int id) {
         response.addMeasurement(measurement);
     }
 
+    connection->terminateStatement(statement);
     return response;
 }
 
@@ -223,6 +268,7 @@ SensorMeasurement DatabaseConnection::getLastDay(int id) {
         response.addMeasurement(measurement);
     }
 
+    connection->terminateStatement(statement);
     return response;
 }
 
@@ -246,5 +292,20 @@ SensorMeasurement DatabaseConnection::getLastMonth(int id) {
         response.addMeasurement(measurement);
     }
 
+    connection->terminateStatement(statement);
     return response;
 }
+
+int DatabaseConnection::getSensorId(std::string token) {
+    Statement *statement = createStatement(
+            "SELECT id \n"
+            "FROM sensors \n"
+            "WHERE token='" + token +"'");
+    ResultSet *resultSet = statement->executeQuery();
+    resultSet->next();
+    connection->terminateStatement(statement);
+
+    return resultSet->getInt(1);
+}
+
+

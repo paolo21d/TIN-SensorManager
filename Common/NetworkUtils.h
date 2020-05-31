@@ -12,5 +12,8 @@
 int initNetwork();
 int closeSocket(int socketDescriptor);
 void prepareSocket(int &socket, bool server);
+int acceptSocket(int socket, sockaddr *address,int *address_len);
+
+void InitializeSSL();
 
 #endif //SERVER_NETWORKUTILS_H

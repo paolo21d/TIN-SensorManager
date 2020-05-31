@@ -31,3 +31,12 @@ void prepareSocket(int &socket, bool server)
     }
 #endif
 }
+
+int acceptSocket(int socket, sockaddr *address,int *address_len)
+{
+#ifdef WIN32
+    return accept(socket, address, address_len);
+#else
+    return accept(socket, address, (socklen_t*)address_len);
+#endif
+}
