@@ -4,7 +4,8 @@
 
 #include <src/serializers/SerializerAdministratorMessage.h>
 #include <src/serializers/SerializerMonitoringMessage.h>
-#include <src/database/DatabaseManager.h>
+//#include <src/database/DatabaseManager.h>
+#include <src/database/MockDatabaseManager.h>
 #include "ServerModel.h"
 
 using namespace std;
@@ -39,39 +40,20 @@ void ServerModel::init() {
     thread monitoringRequestsExecutor(&ServerModel::executeMonitoringRequests, this);
     thread monitoringResponsesSender(&ServerModel::sendMonitoringResponse, this);
 
+    //thread sensorRequestsExecutor(&ServerModel::executeSensorRequests, this);
+
     monitoringRequestsExecutor.join();
     monitoringResponsesSender.join();
 
     administratorRequestsExecutor.join();
     administratorResponsesSender.join();
+
+    //sensorRequestsExecutor.join();
 }
 
 ///SENSOR INTERFACE
-void ServerModel::sensorCommandAddMeasurement(int clientId, int64_t timestamp, double value) {
-    SensorRequest request(clientId, ADD_MEASUREMENT);
-    request.measurementValue = value;
-    request.measurementTimestamp = timestamp;
-
+void ServerModel::addSensorRequestToExecute(SensorRequest *request) {
     sensorRequestsQueue.push(request);
-
-}
-
-void
-ServerModel::sensorCommandConnectedSensor(int clientId, std::string sensorIp, int sensorPort, std::string sensorToken) {
-    SensorRequest request(clientId, CONNECTED_SENSOR);
-    request.sensorIp = sensorIp;
-    request.sensorPort = sensorPort;
-    request.sensorToken = sensorToken;
-
-    sensorRequestsQueue.push(request);
-
-}
-
-void ServerModel::sensorCommandDisconnectedSensor(int clientId) {
-    SensorRequest request(clientId, DISCONNECTED_SENSOR);
-
-    sensorRequestsQueue.push(request);
-
 }
 
 ///ADMINISTRATOR INTERFACE
@@ -104,20 +86,15 @@ void ServerModel::addMonitoringResponseToSend(MonitoringResponse response) {
 ///EXECUTE
 void ServerModel::executeAdministratorRequests() {
     SerializerAdministratorMessage serializer;
-
+    srand(time(NULL));
     IDatabaseConnection *connection = databaseConnector->getNewConnection();
-
     while (1 == 1) {
 
-
         AdministratorRequest request = administratorRequestsQueue.pop();
-
         cout << "AdministratorRequest\tCommandType: " << request.commandType << endl;
         //Tutaj ma być wykokane zapytanie do bazy/cacheu
         //stworzenie AdministratorResponse i wrzucenie go do administratorResponsesQueue
-
         auto response = new AdministratorResponse(request.clientId, request.commandType);
-
         switch (request.commandType) {
             case GET_ALL_SENSORS: {
                 response->sensors =
@@ -131,25 +108,48 @@ void ServerModel::executeAdministratorRequests() {
             case REVOKE_SENSOR:
                 response->sensorId =
                         connection->revokeSensor(request.sensorId).id;
-                //Terminate sensor connection
+                sensorConnectionListener->disconnectClient(sensorToClientId[request.sensorId]);
+                sensorToClientId.erase(request.sensorId);
                 break;
             case DISCONNECT_SENSOR:
                 response->sensorId =
                         connection->disconnectSensor(request.sensorId).id;
-                //Terminate sensor connection
+                sensorConnectionListener->disconnectClient(sensorToClientId[request.sensorId]);
+                sensorToClientId.erase(request.sensorId);
                 break;
             case GENERATE_TOKEN:
-                response->token = "TOKENTOKEN";
+                string token = generateToken();
+                while (connection->checkIfTokenExists(token)) {
+                    token = generateToken();
+                }
+                response->token = token;
+                connection->initializeSensor(token);
                 break;
         }
-
         addAdministratorResponseToSend(*response);
         //std::chrono::milliseconds timespan(1000); // or whatever
         //std::this_thread::sleep_for(timespan);
     }
-
     //Kasowanie connection
     //delete connection;
+}
+
+
+
+string ServerModel::generateToken() {
+    static const int len = 15;
+    static const char alphanum[] =
+            "0123456789"
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+            "abcdefghijklmnopqrstuvwxyz";
+
+    string s;
+
+    for (int i = 0; i < len; ++i) {
+        s += alphanum[rand() % (sizeof(alphanum) - 1)];
+    }
+
+    return s;
 }
 
 void ServerModel::sendAdministratorResponse() {
@@ -258,23 +258,29 @@ void ServerModel::executeSensorRequests() {
 
     while (1 == 1) {
 
-        SensorRequest request = sensorRequestsQueue.pop();
+        SensorRequest *request = sensorRequestsQueue.pop();
 
-        cout << "SensorRequest\tCommandType: " << request.commandType << endl;
-
-        switch (request.commandType) {
-            case ADD_MEASUREMENT:
-                connection->addMeasurement(request.clientId, request.measurementValue, request.measurementTimestamp);
-                break;
-            case CONNECTED_SENSOR:
-                //Do smth
-                connection->connectSensor(request.clientId);
-                break;
-            case DISCONNECT_SENSOR:
-                //Do smth
-                connection->disconnectSensor(request.clientId);
-                break;
+        try
+        {
+            if (auto req = dynamic_cast<SensorMeasurementRequest *>(request))
+            {
+                executeSensorRequest(req, connection);
+            }
+            else if (auto req = dynamic_cast<SensorOnConnectedRequest *>(request))
+            {
+                executeSensorRequest(req, connection);
+            }
+            else if (auto req = dynamic_cast<SensorOnDisconnectedRequest *>(request))
+            {
+                executeSensorRequest(req, connection);
+            }
         }
+        catch (std::exception &e)
+        {
+            cout << "Got an exception while executing sensor request: " << e.what() << endl;
+        }
+
+        delete request;
 
         //std::chrono::milliseconds timespan(1000); // or whatever
         //std::this_thread::sleep_for(timespan);
@@ -283,4 +289,26 @@ void ServerModel::executeSensorRequests() {
     //delete connection;
 }
 
+void ServerModel::executeSensorRequest(SensorMeasurementRequest *req, IDatabaseConnection *connection)
+{
+    req->clientId = clientToSensorId[req->clientId];
+    connection->addMeasurement(req->clientId, req->value, req->timestamp);
+}
 
+void ServerModel::executeSensorRequest(SensorOnConnectedRequest *req, IDatabaseConnection *connection)
+{
+    if (!connection->checkIfTokenIsWhitelisted(req->token)) {
+        sensorConnectionListener->disconnectClient(req->clientId);
+        return;
+    }
+
+    Sensor sensor = connection->addSensor(req->ip, req->port, req->token);
+    clientToSensorId[req->clientId] = sensor.id;
+    sensorToClientId[sensor.id] = req->clientId;
+}
+
+void ServerModel::executeSensorRequest(SensorOnDisconnectedRequest *req, IDatabaseConnection *connection)
+{
+    connection->disconnectSensor(clientToSensorId[req->clientId]);
+    clientToSensorId.erase(req->clientId);
+}

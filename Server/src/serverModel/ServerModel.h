@@ -15,6 +15,7 @@
 #include <src/commandTypes/AdministratorCommandTypes.h>
 #include <src/commandTypes/SensorCommandTypes.h>
 #include <mutex>
+#include <thread>
 #include <src/responses/AdministratorResponse.h>
 #include <src/responses/MonitoringResponse.h>
 #include "IModelForMonitoring.h"
@@ -25,6 +26,7 @@
 #include "IModelForMonitoring.h"
 #include "IModelForAdministrator.h"
 #include "IModelForSensor.h"
+#include <unordered_map>
 
 class ServerModel : public IModelForSensor, public IModelForMonitoring, public IModelForAdministrator {
     IRequestListener *sensorConnectionListener;
@@ -33,12 +35,16 @@ class ServerModel : public IModelForSensor, public IModelForMonitoring, public I
 
     Queue<AdministratorRequest> administratorRequestsQueue;
     Queue<MonitoringRequest> monitoringRequestsQueue;
-    Queue<SensorRequest> sensorRequestsQueue;
+    Queue<SensorRequest*> sensorRequestsQueue;
 
     IDatabaseManager *databaseConnector;
 
     Queue<AdministratorResponse> administratorResponsesQueue;
     Queue<MonitoringResponse> monitoringResponsesQueue;
+
+    std::unordered_map<int, int> clientToSensorId;
+    std::unordered_map<int, int> sensorToClientId;
+    std::string generateToken();
 
 public:
     ServerModel(IRequestListener *sensor, IRequestListener *administrator, IRequestListener *monitoring);
@@ -54,12 +60,7 @@ public:
     void init();
 
     //SENSOR INTERFACE
-    virtual void sensorCommandAddMeasurement(int clientId, int64_t timestamp, double value);
-
-    virtual void
-    sensorCommandConnectedSensor(int clientId, std::string sensorIp, int sensorPort, std::string sensorToken);
-
-    virtual void sensorCommandDisconnectedSensor(int clientId);
+    virtual void addSensorRequestToExecute(SensorRequest *request);
 
     //ADMINISTRATOR INTERFACE
     virtual void addAdministratorRequestToExecute(AdministratorRequest request);
@@ -79,6 +80,9 @@ private:
     void executeMonitoringRequests();
 
     void executeSensorRequests();
+    void executeSensorRequest(SensorMeasurementRequest *request, IDatabaseConnection *connection);
+    void executeSensorRequest(SensorOnConnectedRequest *request, IDatabaseConnection *connection);
+    void executeSensorRequest(SensorOnDisconnectedRequest *request, IDatabaseConnection *connection);
 
     void sendMonitoringResponse();
 };

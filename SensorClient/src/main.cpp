@@ -1,56 +1,32 @@
 #include <iostream>
-#include <NetworkUtils.h>
 #include <vector>
 #include <thread>
-#include "IRequestListener.h"
-//#include "IClientsHandler.h"
-#include "ClientsHandler.h"
+#include "SslClientsHandler.h"
+#include "MeasureReader.h"
+#include "NetworkListener.h"
+#include <UserPrefs.h>
 
 using namespace std;
 
-class MockListener : public IRequestListener
-{
-public:
-    void onGotRequest(int clientId, vector<unsigned char> msg) override
-    {
-        int cursorPos = 0;
-        //long timestamp = getData<long>(msg, cursorPos);
-        char status = getData<char>(msg, cursorPos);
-        int64_t lastTimestamp = getData<int64_t>(msg, cursorPos);
-        cout << "response: " << status << "   " << lastTimestamp << endl;
-    }
-
-    void onClientConnected(int clientId, string ip, int port) override
-    {
-        cout << "Client " << clientId << " connected [" << ip << ":" << "]" << endl;
-    }
-
-    void onClientDisconnected(int clientId) override
-    {
-        cout << "Client " << clientId << " disconnected" << endl;
-    }
-};
+const static string USER_PREFS_IP = "ip";
+const static string USER_PREFS_PORT = "port";
+const static string USER_PREFS_TOKEN = "token";
 
 IClientsHandler *connectionHandler;
 IRequestListener *listener;
 
-void networkThread()
-{
-
-}
-
 void sensorThread()
 {
-    for (int i = 2; ; ++i)
+    while (true)
     {
         int64_t timestamp = getPosixTime();
-        double measure = timestamp % 1000 * (timestamp % 100000 / 1000);
-        //cout << "Measure: " << measure << endl;
-        sleepMillis(50);
+        int measure = MeasureReader::getInstance().getMeasure();
+        sleepMillis(2000);
 
         vector<unsigned char> response;
-        BytesParser::appendBytes<long>(response, timestamp);
-        BytesParser::appendBytes<double>(response, measure);
+        BytesParser::appendBytes<int8_t>(response, 'm');
+        BytesParser::appendBytes<int64_t>(response, timestamp);
+        BytesParser::appendBytes<int32_t>(response, measure);
 
         listener->send(0, response);
     }
@@ -58,24 +34,23 @@ void sensorThread()
 
 int main(int argc, char *argv[])
 {
+    string ip = UserPrefs::getInstance().getString(USER_PREFS_IP);
+    int port  = UserPrefs::getInstance().getInt(USER_PREFS_PORT);
+    string token = UserPrefs::getInstance().getString(USER_PREFS_TOKEN);
+
     try
     {
         initNetwork();
+        listener = new NetworkListener(token);
 
-        cout << "START" << endl;
-
-        listener = new MockListener();
-
-        connectionHandler = new ClientsHandler(1, false);
+        connectionHandler = new SslClientsHandler(1, false);
         connectionHandler->addListener(listener);
 
         thread t(sensorThread);
 
-        connectionHandler->startHandling("127.0.0.1", 33333);
+        connectionHandler->startHandling(ip, port);
 
         t.join();
-
-        cout << "END" << endl;
     }
     catch (ConnectionException &e)
     {
@@ -83,7 +58,8 @@ int main(int argc, char *argv[])
     }
     catch (exception &e)
     {
-        cout << "got exception " << e.what() << endl;
+        cout << "got exception: " << e.what() << endl;
     }
+
     return 0;
 }

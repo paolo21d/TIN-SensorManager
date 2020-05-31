@@ -10,64 +10,84 @@
 
 //namespace sc
 //{
-    class Client
-    {
-    private:
-        const bool IS_SERVER;
-        const static int MAX_MSG;
-
-        int socket;
-        sockaddr_in service;
-        int clientId;
-        std::mutex sendLock;
-        //std::mutex recvLock;
-
-        std::vector<unsigned char> outBuffer;
-        std::vector<unsigned char> inBuffer;
-
-        int remainingIn;
-        int remainingInLen;
-
-        IRequestListener *listener;
-
-        void reset();
-
-    public:
-        Client(bool server);
-
-        void setListener(IRequestListener *listener);
-
-        bool isConnected();
-        void connected(int socket, int clientId, sockaddr_in service);
-        void disconnected();
-
-        bool isSomethingToSend();
-        bool isSomethingToRecv();
-
-        int addOutMsg(std::vector<unsigned char> msg);
-        void gotMsg(std::vector<unsigned char> &msg);
-
-        int sendData();
-        int recvData();
-
-        int getSocket();
-        int getClientId();
-
-        std::string getIp();
-        int getPort();
-    };
 
     class ClientsHandler : public IClientsHandler
     {
     public:
+        class Client
+        {
+        private:
+            const bool IS_SERVER;
+            const static int MAX_MSG;
+
+            int socket;
+            sockaddr_in service;
+            int clientId;
+            std::mutex sendLock;
+            //std::mutex recvLock;
+
+            std::vector<unsigned char> outBuffer;
+            std::vector<unsigned char> inBuffer;
+
+            int remainingIn;
+            int remainingInLen;
+
+            IRequestListener *listener;
+
+            ClientsHandler *handler;
+
+            void reset();
+
+            bool blockSend;
+            bool blockRecv;
+            bool waitForInitMsg;
+
+        public:
+            Client(ClientsHandler *handler, bool serverr, bool blockSend = false, bool blockRecv = false); //TODO: right now blocks params are not required, could be removed
+
+            void setListener(IRequestListener *listener);
+
+            bool isConnected();
+            void connected(int socket, int clientId, sockaddr_in service, IRequestListener *listener);
+            void disconnected();
+
+            bool isSomethingToSend();
+            bool isSomethingToRecv();
+
+            int addOutMsg(std::vector<unsigned char> msg);
+            void gotMsg(std::vector<unsigned char> &msg);
+
+            int sendData();
+            int recvData();
+
+            int getSocket();
+            int getClientId();
+
+            std::string getIp();
+            int getPort();
+
+            void unlockSend();
+            void unlockRecv();
+        };
+
+
         ClientsHandler(int maxClients = 100, bool server = true);
         void startHandling(std::string ipAddress, int port) override ;
         void addListener(IRequestListener *requestListener) override ;
 
         void disconnectClient(int clientId) override;
         int send(int clientId, std::vector<unsigned char> msg) override;
+        std::string getIp(int clientId) override;
+        int getPort(int clientId) override;
+        void blockRecvOnInit() override;
+        void blockSendOnInit() override;
+        void unlockRecv(int clientId) override;
+        void unlockSend(int clientId) override;
 
-    private:
+        bool getBlockSend();
+        bool getBlockRecv();
+
+    protected:
 
         const bool IS_SERVER;
 
@@ -99,6 +119,9 @@
         int acceptingSocket;
 
         bool connected = false;
+
+        bool blockingSendOnInit = false;
+        bool blockingRecvOnInit = false;
     };
 //}
 

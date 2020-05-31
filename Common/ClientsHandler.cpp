@@ -4,16 +4,17 @@ using namespace std;
 
 //namespace sc
 //{
-    const int Client::MAX_MSG = 512;
+    const int ClientsHandler::Client::MAX_MSG = 512;
 
-    Client::Client(bool server) : IS_SERVER(server)
+    ClientsHandler::Client::Client(ClientsHandler *handler, bool server, bool blockSend, bool blockRecv)
+        : handler(handler), IS_SERVER(server), blockSend(blockSend), blockRecv(blockRecv)
     {
         reset();
         remainingIn = 0;
         remainingInLen = 0;
     }
 
-    void Client::reset()
+    void ClientsHandler::Client::reset()
     {
         socket = -1;
 
@@ -30,31 +31,51 @@ using namespace std;
         }
     }
 
-    void Client::setListener(IRequestListener *listener)
+    void ClientsHandler::Client::setListener(IRequestListener *listener)
     {
         this->listener = listener;
     }
 
-    bool Client::isConnected()
+    bool ClientsHandler::Client::isConnected()
     {
         return socket > -1;
     }
 
-    void Client::connected(int socket, int clientId, sockaddr_in service)
+    void ClientsHandler::Client::connected(int socket, int clientId, sockaddr_in service, IRequestListener *listener)
     {
+        blockRecv = handler->getBlockRecv();
+        blockSend = handler->getBlockSend();
+        waitForInitMsg = true;
+
         this->socket = socket;
         this->clientId = clientId;
         this->service = service;
+        this->listener = listener;
+
+        vector<unsigned char> initMsg = listener->beforeFirstSend(clientId);
+        if (initMsg.size() > 0)
+        {
+            sendLock.lock();
+            int msgLen = initMsg.size();
+            BytesParser::appendFrontBytes<int32_t>(initMsg, (int32_t) msgLen);
+            outBuffer.insert(outBuffer.begin(), make_move_iterator(initMsg.begin()), make_move_iterator(initMsg.end()));
+            sendLock.unlock();
+        }
     }
 
-    void Client::disconnected()
+    void ClientsHandler::Client::disconnected()
     {
+        if (blockRecv)
+            handler->flushRecvBuffer(socket);
         reset();
     }
 
-    bool Client::isSomethingToSend()
+    bool ClientsHandler::Client::isSomethingToSend()
     {
         if (socket < 0)
+            return false;
+
+        if (blockSend)
             return false;
 
         bool result;
@@ -65,15 +86,21 @@ using namespace std;
         return result;
     }
 
-    bool Client::isSomethingToRecv()
+    bool ClientsHandler::Client::isSomethingToRecv()
     {
+        if (blockRecv && !waitForInitMsg)
+            return false;
+
         bool result = socket >= 0;
         return result;
     }
 
-    int Client::addOutMsg(std::vector<unsigned char> msg)
+    int ClientsHandler::Client::addOutMsg(std::vector<unsigned char> msg)
     {
-        if (!isConnected() || msg.size() <= 0)
+        if (msg.size() <= 0)
+            return -1;
+
+        if (!isConnected() && IS_SERVER)
             return -1;
 
         int msgLen = msg.size();
@@ -83,30 +110,34 @@ using namespace std;
         outBuffer.insert(outBuffer.end(), make_move_iterator(msg.begin()), make_move_iterator(msg.end()));
         sendLock.unlock();
 
-        sendData();
+        if (isConnected() && !IS_SERVER)
+            sendData();
 
         return 0;
     }
 
-    void Client::gotMsg(std::vector<unsigned char> &msg)
+    void ClientsHandler::Client::gotMsg(std::vector<unsigned char> &msg)
     {
+        waitForInitMsg = false;
+
         if (listener == nullptr)
             return;
 
         listener->onGotRequest(clientId, msg);
     }
 
-    int Client::sendData()
+    int ClientsHandler::Client::sendData()
     {
         sendLock.lock();
-        int sent = send(socket, reinterpret_cast<const char *>(outBuffer.data()), outBuffer.size(), 0);
-        outBuffer.erase(outBuffer.begin(), outBuffer.begin() + sent);
+        int sent = handler->socket_send(socket, reinterpret_cast<const char *>(outBuffer.data()), outBuffer.size(), 0);
+        if (sent > 0)
+            outBuffer.erase(outBuffer.begin(), outBuffer.begin() + sent);
         sendLock.unlock();
 
         return sent;
     }
 
-    int Client::recvData()
+    int ClientsHandler::Client::recvData()
     {
         if (remainingIn == 0 && remainingInLen == 0)
         {
@@ -117,7 +148,7 @@ using namespace std;
         int toReceive = max(remainingIn, remainingInLen);
 
         char *data = new char[toReceive];
-        int received = recv(socket, data, toReceive, 0);
+        int received = handler->socket_recv(socket, data, toReceive, 0);
 
         if (received <= 0)
             return received;
@@ -150,30 +181,35 @@ using namespace std;
         return received;
     }
 
-    int Client::getSocket()
+    int ClientsHandler::Client::getSocket()
     {
         return socket;
     }
 
-    int Client::getClientId()
+    int ClientsHandler::Client::getClientId()
     {
         return clientId;
     }
 
-    std::string Client::getIp()
+    std::string ClientsHandler::Client::getIp()
     {
-/*        struct sockaddr_in* pV4Addr = (struct sockaddr_in*)&service;
-        struct in_addr ipAddr = pV4Addr->sin_addr;
-        char str[INET_ADDRSTRLEN];
-        inet_ntop( AF_INET, &ipAddr, str, INET_ADDRSTRLEN );
-
-        return string(str);*/
-        return "127.0.0.1";
+//        return "127.0.0.1";
+        return inet_ntoa(service.sin_addr);
     }
 
-    int Client::getPort()
+    int ClientsHandler::Client::getPort()
     {
         return (int) ntohs(service.sin_port);
+    }
+
+    void ClientsHandler::Client::unlockSend()
+    {
+        blockSend = false;
+    }
+
+    void ClientsHandler::Client::unlockRecv()
+    {
+        blockRecv = false;
     }
 
     ClientsHandler::ClientsHandler(int maxClients, bool server) :
@@ -182,7 +218,7 @@ using namespace std;
     {
         for (int i = 0; i < CLIENTS; ++i)
         {
-            clientHandlers.push_back(shared_ptr<Client>(new Client(IS_SERVER)));
+            clientHandlers.push_back(shared_ptr<Client>(new Client(this, IS_SERVER, blockingSendOnInit, blockingRecvOnInit)));
         }
     }
 
@@ -207,8 +243,8 @@ using namespace std;
                 Client *handler = clientHandlers[0].get();
                 sockaddr_in s;
                 memset(&s, 0, sizeof(sockaddr_in));
-                handler->connected(mainSocket, freeHandler, s);
-                handler->setListener(listener);
+                handler->connected(mainSocket, freeHandler, s, listener);
+                listener->onClientConnected(handler->getClientId(), handler->getIp(), handler->getPort());
             }
 
             connected = true;
@@ -246,6 +282,22 @@ using namespace std;
             return -1;
 
         return clientHandlers[clientId]->addOutMsg(msg);
+    }
+
+    std::string ClientsHandler::getIp(int clientId)
+    {
+        if (clientId < 0 || clientId >= CLIENTS)
+            return "";
+
+        return clientHandlers[clientId]->getIp();
+    }
+
+    int ClientsHandler::getPort(int clientId)
+    {
+        if (clientId < 0 || clientId >= CLIENTS)
+            return -1;
+
+        return clientHandlers[clientId]->getPort();
     }
 
     int ClientsHandler::getFreeHandler()
@@ -286,7 +338,7 @@ using namespace std;
         struct timeval to;
         to.tv_sec = DELAY_SELECT_SEC;
         to.tv_usec = DELAY_SELECT_MICROS;
-        if ( (nactive = select(nfds, &readyIn, &readyOut, (fd_set *)0, &to) ) == -1)
+        if ( (nactive = socket_select(nfds, &readyIn, &readyOut, (fd_set *)0, &to) ) == -1)
         {
             throw ConnectionException(ConnectionException::SELECT);
         }
@@ -298,17 +350,17 @@ using namespace std;
     {
         if ( FD_ISSET(acceptingSocket, &readyIn))
         {
-            sockaddr_in service;
-            int sLen;
-            memset( & service, 0, sizeof( service ) );
-//            int clientSocket = accept(acceptingSocket, (struct sockaddr *)&service, &sLen );
-            int clientSocket = accept(acceptingSocket, nullptr, nullptr );
+            sockaddr_in clientAddr;
+            int sizeAddrClient = sizeof(sockaddr);
+            int clientSocket = socket_accept(acceptingSocket, (sockaddr*)&clientAddr, &sizeAddrClient);
+//            int clientSocket = accept(acceptingSocket, nullptr, nullptr );
             prepareSocket(clientSocket, IS_SERVER);
 
             if (clientSocket == -1)
                 throw ConnectionException(ConnectionException::ACCEPT);
             nfds = max(clientSocket + 1, nfds);
-            bindHandler(clientSocket, service);
+
+            bindHandler(clientSocket, clientAddr);
         }
     }
 
@@ -348,8 +400,7 @@ using namespace std;
     void ClientsHandler::bindHandler(int socket, sockaddr_in service)
     {
         Client *handler = clientHandlers[freeHandler].get();
-        handler->connected(socket, freeHandler, service);
-        handler->setListener(listener);
+        handler->connected(socket, freeHandler, service, listener);
         listener->onClientConnected(handler->getClientId(), handler->getIp(), handler->getPort());
     }
 
@@ -358,8 +409,45 @@ using namespace std;
         connected = false;
         
         int clientId = client->getClientId();
-        closeSocket(client->getSocket());
+        socket_close(client->getSocket());
+
         client->disconnected();
         listener->onClientDisconnected(clientId);
+    }
+
+    void ClientsHandler::blockRecvOnInit()
+    {
+        blockingRecvOnInit = true;
+    }
+
+    void ClientsHandler::blockSendOnInit()
+    {
+        blockingSendOnInit = true;
+    }
+
+    void ClientsHandler::unlockRecv(int clientId)
+    {
+        if (clientId < 0 || clientId >= CLIENTS)
+            return;
+
+        clientHandlers[clientId]->unlockRecv();
+    }
+
+    void ClientsHandler::unlockSend(int clientId)
+    {
+        if (clientId < 0 || clientId >= CLIENTS)
+            return;
+
+        clientHandlers[clientId]->unlockRecv();
+    }
+
+    bool ClientsHandler::getBlockSend()
+    {
+        return blockingSendOnInit;
+    }
+
+    bool ClientsHandler::getBlockRecv()
+    {
+        return blockingRecvOnInit;
     }
 //}
