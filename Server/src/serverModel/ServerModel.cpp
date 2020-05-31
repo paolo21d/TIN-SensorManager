@@ -256,27 +256,34 @@ void ServerModel::sendMonitoringResponse() {
 void ServerModel::executeSensorRequests() {
     IDatabaseConnection *connection = databaseConnector->getNewConnection();
 
-    try {
-        while (1 == 1) {
+    while (1 == 1) {
 
-            SensorRequest *request = sensorRequestsQueue.pop();
+        SensorRequest *request = sensorRequestsQueue.pop();
 
-            if (auto req = dynamic_cast<SensorMeasurementRequest *>(request)) {
-                executeSensorRequest(req, connection);
-            } else if (auto req = dynamic_cast<SensorOnConnectedRequest *>(request)) {
-                executeSensorRequest(req, connection);
-            } else if (auto req = dynamic_cast<SensorOnDisconnectedRequest *>(request)) {
+        try
+        {
+            if (auto req = dynamic_cast<SensorMeasurementRequest *>(request))
+            {
                 executeSensorRequest(req, connection);
             }
-
-            delete request;
-
-            //std::chrono::milliseconds timespan(1000); // or whatever
-            //std::this_thread::sleep_for(timespan);
+            else if (auto req = dynamic_cast<SensorOnConnectedRequest *>(request))
+            {
+                executeSensorRequest(req, connection);
+            }
+            else if (auto req = dynamic_cast<SensorOnDisconnectedRequest *>(request))
+            {
+                executeSensorRequest(req, connection);
+            }
         }
-    }
-    catch (std::exception &e) {
-        cout<<e.what()<<endl;
+        catch (std::exception &e)
+        {
+            cout << "Got an exception while executing sensor request: " << e.what() << endl;
+        }
+
+        delete request;
+
+        //std::chrono::milliseconds timespan(1000); // or whatever
+        //std::this_thread::sleep_for(timespan);
     }
     //Przy ładnym wyłączaniu przydałoby się kasować connection
     //delete connection;

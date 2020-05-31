@@ -110,7 +110,7 @@ using namespace std;
         outBuffer.insert(outBuffer.end(), make_move_iterator(msg.begin()), make_move_iterator(msg.end()));
         sendLock.unlock();
 
-        if (!isConnected() && !IS_SERVER)
+        if (isConnected() && !IS_SERVER)
             sendData();
 
         return 0;

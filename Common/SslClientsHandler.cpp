@@ -117,9 +117,12 @@ int SslClientsHandler::socket_accept(int socket, sockaddr *address,int *address_
     return client;
 }
 
-int SslClientsHandler::socket_connect(int socket, const sockaddr *address, socklen_t address_len)
+int SslClientsHandler::socket_connect(int socket, const sockaddr *address, int address_len)
 {
     int result = connect(socket, address, address_len);
+    if (result < 0)
+        return result;
+
     SSL *ssl = SSL_new(ctx);
 //    sock = SSL_get_fd(ssl);
     SSL_get_fd(ssl);
