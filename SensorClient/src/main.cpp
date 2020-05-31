@@ -1,10 +1,9 @@
 #include <iostream>
-#include <NetworkUtils.h>
 #include <vector>
 #include <thread>
-#include "IRequestListener.h"
 #include "SslClientsHandler.h"
 #include "MeasureReader.h"
+#include "NetworkListener.h"
 #include <UserPrefs.h>
 
 using namespace std;
@@ -13,40 +12,12 @@ const static string USER_PREFS_IP = "ip";
 const static string USER_PREFS_PORT = "port";
 const static string USER_PREFS_TOKEN = "token";
 
-class MockListener : public IRequestListener
-{
-public:
-    void onGotRequest(int clientId, vector<unsigned char> msg) override
-    {
-        int cursorPos = 0;
-        char status = getData<char>(msg, cursorPos);
-        int64_t lastTimestamp = getData<int64_t>(msg, cursorPos);
-        cout << "response: " << status << "   " << lastTimestamp << endl;
-    }
-
-    void onClientConnected(int clientId, std::string ip, int port) override
-    {
-        cout << "Connected to the server" << endl;
-    }
-
-    vector<unsigned char> beforeFirstSend(int clientId) override
-    {
-        string initMsg = "i" + UserPrefs::getInstance().getString(USER_PREFS_TOKEN);
-        return vector<unsigned char>(initMsg.begin(), initMsg.end());
-    }
-};
-
 IClientsHandler *connectionHandler;
 IRequestListener *listener;
 
-void networkThread()
-{
-
-}
-
 void sensorThread()
 {
-    for (int i = 2; ; ++i)
+    while (true)
     {
         int64_t timestamp = getPosixTime();
         int measure = MeasureReader::getInstance().getMeasure();
@@ -67,27 +38,19 @@ int main(int argc, char *argv[])
     int port  = UserPrefs::getInstance().getInt(USER_PREFS_PORT);
     string token = UserPrefs::getInstance().getString(USER_PREFS_TOKEN);
 
-    cout << "loaded '" << ip << ":" << port << endl;
-    cout << "token: " << token << endl;
-
     try
     {
         initNetwork();
-
-        cout << "START" << endl;
-
-        listener = new MockListener();
+        listener = new NetworkListener(token);
 
         connectionHandler = new SslClientsHandler(1, false);
         connectionHandler->addListener(listener);
 
         thread t(sensorThread);
 
-        connectionHandler->startHandling("127.0.0.1", 33335);
+        connectionHandler->startHandling(ip, port);
 
         t.join();
-
-        cout << "END" << endl;
     }
     catch (ConnectionException &e)
     {
@@ -95,7 +58,8 @@ int main(int argc, char *argv[])
     }
     catch (exception &e)
     {
-        cout << "got exception " << e.what() << endl;
+        cout << "got exception: " << e.what() << endl;
     }
+
     return 0;
 }

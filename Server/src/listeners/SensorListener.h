@@ -5,9 +5,7 @@
 #ifndef SERVER_SENSORLISTENER_H
 #define SERVER_SENSORLISTENER_H
 
-
 #include <IRequestListener.h>
-#include <src/serializers/SerializerSensorMessage.h>
 #include <src/serverModel/IModelForSensor.h>
 
 class SensorListener : public IRequestListener
@@ -20,7 +18,6 @@ public:
     void onClientDisconnected(int clientId);
 
 private:
-    SerializerSensorMessage serializer;
     IModelForSensor *model;
 
     void handleInitMsg(int clientId, std::vector<unsigned char> &msg, int cursorPos = 0);
