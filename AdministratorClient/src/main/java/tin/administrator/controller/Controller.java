@@ -3,16 +3,23 @@ package tin.administrator.controller;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.text.Font;
+import javafx.util.Pair;
 import tin.administrator.communication.CommunicationManager;
 import tin.administrator.model.AdministratorModel;
 import tin.administrator.model.Sensor;
 import tin.administrator.model.SensorTable;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Timer;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -70,6 +77,7 @@ public class Controller implements ResponseExecutor {
             sensorsTable.getItems().add(new SensorTable(sensor));
         }
 
+        setServerAddress();
         communicationManager.run();
 
         ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
@@ -82,7 +90,11 @@ public class Controller implements ResponseExecutor {
             }
             else {
                 Platform.runLater(() -> {
-                    isConnectionEstablished();
+                    try {
+                        isConnectionEstablished();
+                    } catch (InterruptedException e) {
+                        System.out.println(e.getMessage());
+                    }
                 });
             }
 
@@ -91,6 +103,52 @@ public class Controller implements ResponseExecutor {
         //timer.scheduleAtFixedRate(sensorTableRefreshTask, 5000, 3000);
         clearSensorDetails();
 
+    }
+
+    private void setServerAddress() {
+
+        Dialog<Pair<String, String>> dialog = new Dialog<>();
+        dialog.setTitle("Server Address");
+        dialog.setHeaderText("Specify Server Address");
+
+        ButtonType connectButton = new ButtonType("Connect", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(connectButton, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
+
+        TextField serverIp = new TextField("127.0.0.1");
+        TextField serverPort = new TextField("28000");
+
+        grid.add(new Label("Server IP:"), 0, 0);
+        grid.add(serverIp, 1, 0);
+        grid.add(new Label("Server Port:"), 0, 1);
+        grid.add(serverPort, 1, 1);
+
+        dialog.getDialogPane().setContent(grid);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == connectButton) {
+                return new Pair<String,String>(serverIp.getText(), serverPort.getText());
+            }
+            if(dialogButton == ButtonType.CANCEL) {
+                try {
+                    closeApp();
+                } catch (InterruptedException e) {
+                    System.out.println(e.getMessage());
+                }
+            }
+            return null;
+        });
+
+        Optional<Pair<String, String>> result = dialog.showAndWait();
+
+        result.ifPresent(serverAddress -> {
+            communicationManager.setServerIp(serverAddress.getKey());
+            communicationManager.setServerPort(Integer.parseInt(serverAddress.getValue()));
+        });
     }
 
     //UI Events
@@ -111,13 +169,13 @@ public class Controller implements ResponseExecutor {
         }
     }
 
-    public void addNewSensorClicked(ActionEvent actionEvent) {
+    public void addNewSensorClicked() {
         System.out.println("ADD NEW SENSOR!!");
         communicationManager.sendCommandGenerateToken("newToken");
 //        displayToken("nowy token");
     }
 
-    public void disconnectClicked(ActionEvent actionEvent) {
+    public void disconnectClicked() {
         if (model.getCurrentDisplayedSensorId() != null) {
             communicationManager.sendCommandDisconnectSensor(model.getCurrentDisplayedSensorId());
             communicationManager.sendCommandGetAllSensors();
@@ -125,7 +183,7 @@ public class Controller implements ResponseExecutor {
         System.out.println("DISCONNECT");
     }
 
-    public void revokeClicked(ActionEvent actionEvent) {
+    public void revokeClicked() {
         if (model.getCurrentDisplayedSensorId() != null) {
             communicationManager.sendCommandRevokeSensor(model.getCurrentDisplayedSensorId());
             communicationManager.sendCommandGetAllSensors();
@@ -133,7 +191,7 @@ public class Controller implements ResponseExecutor {
         System.out.println("REVOKE");
     }
 
-    public void editNameClicked(ActionEvent actionEvent) {
+    public void editNameClicked() {
         if (isNameEditing) {
             textFieldEditedName.setVisible(false);
             buttonEditName.setText("Edit");
@@ -151,6 +209,12 @@ public class Controller implements ResponseExecutor {
             buttonEditName.setText("Save");
         }
         isNameEditing = !isNameEditing;
+    }
+
+    public void saveSensorName(KeyEvent keyEvent) {
+        if(keyEvent.getCode() == KeyCode.ENTER){
+            editNameClicked();
+        }
     }
 
     //Response Executor
@@ -196,11 +260,27 @@ public class Controller implements ResponseExecutor {
     }
 
     private void displayToken(String token) {
+//        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+//        alert.setTitle("New Token");
+//        alert.setHeaderText("Note this token!");
+//        alert.setContentText(token);
+//
+//        alert.showAndWait();
+
+        TextArea textArea = new TextArea(token);
+        textArea.setEditable(false);
+        textArea.setWrapText(true);
+        textArea.setPrefRowCount(1);
+        textArea.setPrefColumnCount(20);
+        textArea.setFont(Font.font(20));
+        GridPane gridPane = new GridPane();
+        //gridPane.setMaxWidth(Double.MAX_VALUE);
+        gridPane.add(textArea, 0, 0);
+
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("New Token");
         alert.setHeaderText("Note this token!");
-        alert.setContentText(token);
-
+        alert.getDialogPane().setContent(gridPane);
         alert.showAndWait();
     }
 
@@ -253,7 +333,7 @@ public class Controller implements ResponseExecutor {
         buttonEditName.setDisable(false);
     }
 
-    private void isConnectionEstablished() {
+    private void isConnectionEstablished() throws InterruptedException {
         if(!communicationManager.isConnectionReady()) {
             if(!alertOccurred) {
                 alertOccurred = true;
@@ -263,17 +343,18 @@ public class Controller implements ResponseExecutor {
                 alert.setContentText("Connection with server cannot be established");
 
                 alert.showAndWait();
-                closeApp(new ActionEvent());
+                closeApp();
             }
         }
     }
 
-    public void closeApp(ActionEvent actionEvent) {
+    public void closeApp() throws InterruptedException {
+        communicationManager.closeConnection();
         Platform.exit();
         System.exit(0);
     }
 
-    public void showCredits(ActionEvent actionEvent) {
+    public void showCredits() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("About");
         alert.setHeaderText("TIN PROJECT");
@@ -281,4 +362,6 @@ public class Controller implements ResponseExecutor {
 
         alert.showAndWait();
     }
+
+
 }
