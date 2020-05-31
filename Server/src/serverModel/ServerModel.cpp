@@ -4,8 +4,8 @@
 
 #include <src/serializers/SerializerAdministratorMessage.h>
 #include <src/serializers/SerializerMonitoringMessage.h>
-//#include <src/database/DatabaseManager.h>
-#include <src/database/MockDatabaseManager.h>
+#include <src/database/DatabaseManager.h>
+//#include <src/database/MockDatabaseManager.h>
 #include "ServerModel.h"
 
 using namespace std;
@@ -40,7 +40,7 @@ void ServerModel::init() {
     thread monitoringRequestsExecutor(&ServerModel::executeMonitoringRequests, this);
     thread monitoringResponsesSender(&ServerModel::sendMonitoringResponse, this);
 
-    //thread sensorRequestsExecutor(&ServerModel::executeSensorRequests, this);
+    thread sensorRequestsExecutor(&ServerModel::executeSensorRequests, this);
 
     monitoringRequestsExecutor.join();
     monitoringResponsesSender.join();
@@ -48,7 +48,7 @@ void ServerModel::init() {
     administratorRequestsExecutor.join();
     administratorResponsesSender.join();
 
-    //sensorRequestsExecutor.join();
+    sensorRequestsExecutor.join();
 }
 
 ///SENSOR INTERFACE
@@ -174,8 +174,8 @@ void ServerModel::sendAdministratorResponse() {
             }
             administratorConnectionListener->send(response.clientId, toSend);
         }
-        std::chrono::milliseconds timespan(1000); // or whatever
-        std::this_thread::sleep_for(timespan);
+        // std::chrono::milliseconds timespan(1000); // or whatever
+        // std::this_thread::sleep_for(timespan);
     }
 
 }
@@ -247,8 +247,8 @@ void ServerModel::sendMonitoringResponse() {
             }
             monitoringConnectionListener->send(response.clientId, toSend);
         }
-        std::chrono::milliseconds timespan(1000); // or whatever
-        std::this_thread::sleep_for(timespan);
+        // std::chrono::milliseconds timespan(1000); // or whatever
+        // std::this_thread::sleep_for(timespan);
     }
 
 }
