@@ -45,6 +45,7 @@ using namespace std;
     {
         blockRecv = handler->getBlockRecv();
         blockSend = handler->getBlockSend();
+        waitForInitMsg = true;
 
         this->socket = socket;
         this->clientId = clientId;
@@ -64,6 +65,8 @@ using namespace std;
 
     void ClientsHandler::Client::disconnected()
     {
+        if (blockRecv)
+            handler->flushRecvBuffer(socket);
         reset();
     }
 
@@ -85,7 +88,7 @@ using namespace std;
 
     bool ClientsHandler::Client::isSomethingToRecv()
     {
-        if (blockRecv)
+        if (blockRecv && !waitForInitMsg)
             return false;
 
         bool result = socket >= 0;
@@ -115,6 +118,8 @@ using namespace std;
 
     void ClientsHandler::Client::gotMsg(std::vector<unsigned char> &msg)
     {
+        waitForInitMsg = false;
+
         if (listener == nullptr)
             return;
 
@@ -425,13 +430,15 @@ using namespace std;
         if (clientId < 0 || clientId >= CLIENTS)
             return;
 
-
+        clientHandlers[clientId]->unlockRecv();
     }
 
     void ClientsHandler::unlockSend(int clientId)
     {
         if (clientId < 0 || clientId >= CLIENTS)
             return;
+
+        clientHandlers[clientId]->unlockRecv();
     }
 
     bool ClientsHandler::getBlockSend()

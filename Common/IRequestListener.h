@@ -20,6 +20,8 @@ public:
     void disconnectClient(int clientId);
     std::string getIp(int clientId);
     int getPort(int clientId);
+    void unlockSend(int clientId);
+    void unlockRecv(int clientId);
 
     virtual void onClientConnected(int clientId, std::string ip, int port);
     virtual void onClientDisconnected(int clientId);

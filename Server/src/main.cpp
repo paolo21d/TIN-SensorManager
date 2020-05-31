@@ -26,7 +26,6 @@ void sensorThread()
         IRequestListener *listener = new SensorListener(serverModel);
         serverModel->setSensorConnectionListener(listener);
         IClientsHandler *connectionHandler = new SslClientsHandler();
-        //connectionHandler->blockRecvOnInit();
         connectionHandler->addListener(listener);
         connectionHandler->startHandling(ip, port);
 

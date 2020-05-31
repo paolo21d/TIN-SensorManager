@@ -40,3 +40,13 @@ int IRequestListener::getPort(int clientId)
 {
     return clientsHandler->getPort(clientId);
 }
+
+void IRequestListener::unlockSend(int clientId)
+{
+    clientsHandler->unlockSend(clientId);
+}
+
+void IRequestListener::unlockRecv(int clientId)
+{
+    clientsHandler->unlockRecv(clientId);
+}

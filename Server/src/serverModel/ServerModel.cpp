@@ -4,8 +4,8 @@
 
 #include <src/serializers/SerializerAdministratorMessage.h>
 #include <src/serializers/SerializerMonitoringMessage.h>
-#include <src/database/DatabaseManager.h>
-//#include <src/database/MockDatabaseManager.h>
+//#include <src/database/DatabaseManager.h>
+#include <src/database/MockDatabaseManager.h>
 #include "ServerModel.h"
 
 using namespace std;
@@ -40,7 +40,7 @@ void ServerModel::init() {
     thread monitoringRequestsExecutor(&ServerModel::executeMonitoringRequests, this);
     thread monitoringResponsesSender(&ServerModel::sendMonitoringResponse, this);
 
-    thread sensorRequestsExecutor(&ServerModel::executeSensorRequests, this);
+    //thread sensorRequestsExecutor(&ServerModel::executeSensorRequests, this);
 
     monitoringRequestsExecutor.join();
     monitoringResponsesSender.join();
@@ -48,7 +48,7 @@ void ServerModel::init() {
     administratorRequestsExecutor.join();
     administratorResponsesSender.join();
 
-    sensorRequestsExecutor.join();
+    //sensorRequestsExecutor.join();
 }
 
 ///SENSOR INTERFACE
@@ -256,40 +256,52 @@ void ServerModel::sendMonitoringResponse() {
 void ServerModel::executeSensorRequests() {
     IDatabaseConnection *connection = databaseConnector->getNewConnection();
 
-    unordered_map<int, int> clientToSensorId;
-try {
-    while (1 == 1) {
+    try {
+        while (1 == 1) {
 
-        SensorRequest *request = sensorRequestsQueue.pop();
+            SensorRequest *request = sensorRequestsQueue.pop();
 
-        if (auto req = dynamic_cast<SensorMeasurementRequest *>(request)) {
-            request->clientId = clientToSensorId[request->clientId];
-            connection->addMeasurement(req->clientId, req->value, req->timestamp);
-        } else if (auto req = dynamic_cast<SensorOnConnectedRequest *>(request)) {
-            if (!connection->checkIfTokenIsWhitelisted(req->token)) {
-                sensorConnectionListener->disconnectClient(request->clientId);
-                return;
+            if (auto req = dynamic_cast<SensorMeasurementRequest *>(request)) {
+                executeSensorRequest(req, connection);
+            } else if (auto req = dynamic_cast<SensorOnConnectedRequest *>(request)) {
+                executeSensorRequest(req, connection);
+            } else if (auto req = dynamic_cast<SensorOnDisconnectedRequest *>(request)) {
+                executeSensorRequest(req, connection);
             }
 
-            Sensor sensor = connection->addSensor(req->ip, req->port, req->token);
-            clientToSensorId[request->clientId] = sensor.id;
-            sensorToClientId[sensor.id] = request->clientId;
-        } else if (auto req = dynamic_cast<SensorOnDisconnectedRequest *>(request)) {
-            connection->disconnectSensor(clientToSensorId[req->clientId]);
-            clientToSensorId.erase(req->clientId);
+            delete request;
+
+            //std::chrono::milliseconds timespan(1000); // or whatever
+            //std::this_thread::sleep_for(timespan);
         }
-
-        delete request;
-
-        //std::chrono::milliseconds timespan(1000); // or whatever
-        //std::this_thread::sleep_for(timespan);
     }
-}
-catch (oracle::occi::SQLException &e) {
-    cout<<e.getMessage()<<endl;
-}catch (std::exception &e) {
-    cout<<e.what()<<endl;
-}
+    catch (std::exception &e) {
+        cout<<e.what()<<endl;
+    }
     //Przy ładnym wyłączaniu przydałoby się kasować connection
     //delete connection;
+}
+
+void ServerModel::executeSensorRequest(SensorMeasurementRequest *req, IDatabaseConnection *connection)
+{
+    req->clientId = clientToSensorId[req->clientId];
+    connection->addMeasurement(req->clientId, req->value, req->timestamp);
+}
+
+void ServerModel::executeSensorRequest(SensorOnConnectedRequest *req, IDatabaseConnection *connection)
+{
+    if (!connection->checkIfTokenIsWhitelisted(req->token)) {
+        sensorConnectionListener->disconnectClient(req->clientId);
+        return;
+    }
+
+    Sensor sensor = connection->addSensor(req->ip, req->port, req->token);
+    clientToSensorId[req->clientId] = sensor.id;
+    sensorToClientId[sensor.id] = req->clientId;
+}
+
+void ServerModel::executeSensorRequest(SensorOnDisconnectedRequest *req, IDatabaseConnection *connection)
+{
+    connection->disconnectSensor(clientToSensorId[req->clientId]);
+    clientToSensorId.erase(req->clientId);
 }
