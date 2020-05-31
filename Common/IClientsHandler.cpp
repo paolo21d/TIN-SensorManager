@@ -47,7 +47,7 @@
             mainSocket = socket_create();
             result = socket_connect(mainSocket, (sockaddr * ) & service, sizeof(service));
 
-            sleepSecs(1);
+            // sleepSecs(1);
             std::cout << "Trying connect to " << ipAddress << ":" << port << std::endl;
         }
 
