@@ -291,8 +291,10 @@ void ServerModel::executeSensorRequests() {
 
 void ServerModel::executeSensorRequest(SensorMeasurementRequest *req, IDatabaseConnection *connection)
 {
-    req->clientId = clientToSensorId[req->clientId];
-    connection->addMeasurement(req->clientId, req->value, req->timestamp);
+    if(clientToSensorId.contains(req->clientId)) {
+        req->clientId = clientToSensorId[req->clientId];
+        connection->addMeasurement(req->clientId, req->value, req->timestamp);
+    }
 }
 
 void ServerModel::executeSensorRequest(SensorOnConnectedRequest *req, IDatabaseConnection *connection)
@@ -309,6 +311,8 @@ void ServerModel::executeSensorRequest(SensorOnConnectedRequest *req, IDatabaseC
 
 void ServerModel::executeSensorRequest(SensorOnDisconnectedRequest *req, IDatabaseConnection *connection)
 {
-    connection->disconnectSensor(clientToSensorId[req->clientId]);
-    clientToSensorId.erase(req->clientId);
+    if(clientToSensorId.contains(req->clientId)) {
+        connection->disconnectSensor(clientToSensorId[req->clientId]);
+        clientToSensorId.erase(req->clientId);
+    }
 }
