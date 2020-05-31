@@ -33,11 +33,14 @@ public class MonitoringApp extends Application {
         Controller controller = loader.getController();
 
         stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-            @SneakyThrows
             @Override
             public void handle(WindowEvent t) {
 
-                controller.closeApp(new ActionEvent());
+                try {
+                    controller.closeApp();
+                } catch (InterruptedException e) {
+                    System.out.println(e.getMessage());
+                }
 
             }
         });

@@ -135,7 +135,7 @@ public class Controller implements ResponseExecutor {
             }
             if(dialogButton == ButtonType.CANCEL) {
                 try {
-                    closeApp(new ActionEvent());
+                    closeApp();
                 } catch (InterruptedException e) {
                     System.out.println(e.getMessage());
                 }
@@ -169,13 +169,13 @@ public class Controller implements ResponseExecutor {
         }
     }
 
-    public void addNewSensorClicked(ActionEvent actionEvent) {
+    public void addNewSensorClicked() {
         System.out.println("ADD NEW SENSOR!!");
         communicationManager.sendCommandGenerateToken("newToken");
 //        displayToken("nowy token");
     }
 
-    public void disconnectClicked(ActionEvent actionEvent) {
+    public void disconnectClicked() {
         if (model.getCurrentDisplayedSensorId() != null) {
             communicationManager.sendCommandDisconnectSensor(model.getCurrentDisplayedSensorId());
             communicationManager.sendCommandGetAllSensors();
@@ -183,7 +183,7 @@ public class Controller implements ResponseExecutor {
         System.out.println("DISCONNECT");
     }
 
-    public void revokeClicked(ActionEvent actionEvent) {
+    public void revokeClicked() {
         if (model.getCurrentDisplayedSensorId() != null) {
             communicationManager.sendCommandRevokeSensor(model.getCurrentDisplayedSensorId());
             communicationManager.sendCommandGetAllSensors();
@@ -191,7 +191,7 @@ public class Controller implements ResponseExecutor {
         System.out.println("REVOKE");
     }
 
-    public void editNameClicked(ActionEvent actionEvent) {
+    public void editNameClicked() {
         if (isNameEditing) {
             textFieldEditedName.setVisible(false);
             buttonEditName.setText("Edit");
@@ -213,7 +213,7 @@ public class Controller implements ResponseExecutor {
 
     public void saveSensorName(KeyEvent keyEvent) {
         if(keyEvent.getCode() == KeyCode.ENTER){
-            editNameClicked(new ActionEvent());
+            editNameClicked();
         }
     }
 
@@ -343,18 +343,18 @@ public class Controller implements ResponseExecutor {
                 alert.setContentText("Connection with server cannot be established");
 
                 alert.showAndWait();
-                closeApp(new ActionEvent());
+                closeApp();
             }
         }
     }
 
-    public void closeApp(ActionEvent actionEvent) throws InterruptedException {
+    public void closeApp() throws InterruptedException {
         communicationManager.closeConnection();
         Platform.exit();
         System.exit(0);
     }
 
-    public void showCredits(ActionEvent actionEvent) {
+    public void showCredits() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("About");
         alert.setHeaderText("TIN PROJECT");

@@ -118,7 +118,7 @@ public class Controller implements ResponseExecutor {
             }
             if(dialogButton == ButtonType.CANCEL) {
                 try {
-                    closeApp(new ActionEvent());
+                    closeApp();
                 } catch (InterruptedException e) {
                     System.out.println(e.getMessage());
                 }
@@ -148,7 +148,7 @@ public class Controller implements ResponseExecutor {
     }
 
 
-    public void loadData(ActionEvent event) {
+    public void loadData() {
         Sensor current = MonitoringModel.getInstance().getCurrentDisplayedSensor();
         if(current == null) {
             loadDataButton.setDisable(true);
@@ -272,18 +272,18 @@ public class Controller implements ResponseExecutor {
                 alert.setContentText("Connection with server cannot be established");
 
                 alert.showAndWait();
-                closeApp(new ActionEvent());
+                closeApp();
             }
         }
     }
 
-    public void closeApp(ActionEvent actionEvent) throws InterruptedException {
+    public void closeApp() throws InterruptedException {
         communicationManager.closeConnection();
         Platform.exit();
         System.exit(0);
     }
 
-    public void showCredits(ActionEvent actionEvent) {
+    public void showCredits() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("About");
         alert.setHeaderText("TIN PROJECT");
