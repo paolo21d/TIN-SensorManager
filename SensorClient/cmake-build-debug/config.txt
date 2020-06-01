@@ -1,3 +1,3 @@
 ip:127.0.0.1
 port:33335
-token:rQF69AzBlax3CF3
+token:Fos82SLLMR7u3rv

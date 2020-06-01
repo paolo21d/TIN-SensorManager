@@ -83,7 +83,6 @@ int main(int argc, char *argv[])
 
     serverModel = new ServerModel();
 
-
     thread t1(sensorThread);
     thread t2(monitoringThread);
     thread t3(adminThread);
