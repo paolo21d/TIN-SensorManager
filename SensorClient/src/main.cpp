@@ -20,13 +20,13 @@ void sensorThread()
     while (true)
     {
         int64_t timestamp = getPosixTime();
-        int measure = MeasureReader::getInstance().getMeasure();
+        pair<int, int64_t> measure = MeasureReader::getInstance().getMeasure();
         sleepMillis(2000);
 
         vector<unsigned char> response;
         BytesParser::appendBytes<int8_t>(response, 'm');
-        BytesParser::appendBytes<int64_t>(response, timestamp);
-        BytesParser::appendBytes<int32_t>(response, measure);
+        BytesParser::appendBytes<int64_t>(response, measure.second);
+        BytesParser::appendBytes<int32_t>(response, measure.first);
 
         listener->send(0, response);
     }
@@ -48,6 +48,7 @@ int main(int argc, char *argv[])
 
         thread t(sensorThread);
 
+        connectionHandler->blockSendOnInit();
         connectionHandler->startHandling(ip, port);
 
         t.join();

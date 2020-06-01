@@ -1,5 +1,5 @@
 #include "MeasureReader.h"
-#include <math.h>
+#include <SystemUtils.h>
 
 #ifdef WIN32
 #include "windows.h"
@@ -11,30 +11,39 @@ MEMORYSTATUSEX memInfo;
 //struct sysinfo memInfo;
 #endif
 
+using namespace std;
+
 MeasureReader &MeasureReader::getInstance()
 {
     static MeasureReader instance;
     return instance;
 }
 
-int MeasureReader::getMeasure()
+std::pair<int, int64_t> MeasureReader::getMeasure()
 {
 #ifdef WIN32
     memInfo.dwLength = sizeof(MEMORYSTATUSEX);
     GlobalMemoryStatusEx(&memInfo);
     double totalPhysMem = memInfo.ullTotalPhys / 1024 / 1024;
     double physMemUsed = (memInfo.ullTotalPhys - memInfo.ullAvailPhys) / 1024 / 1024;
-    return ceil(physMemUsed * 100 / totalPhysMem);
+    int val = ceil(physMemUsed * 100 / totalPhysMem);
+    return make_pair<int, long> (val, getPosixTime() + timeOffset);
 #else
+    //Commented lines get RAM usage in Linux
 //    sysinfo (&memInfo);
 //    double totalPhysMem  = memInfo.totalram / 1024 / 1024;
 //    double physMemUsed  = memInfo.totalram - memInfo.freeram / 1024 / 1024;
 //    return ceil(physMemUsed * 100 / totalPhysMem);
-    return 0;
+    return make_pair<int, long> (0, getPosixTime() + timeOffset);
 #endif
 }
 
-MeasureReader::MeasureReader()
+void MeasureReader::setCurTime(long serverTime)
+{
+    timeOffset = serverTime - getPosixTime();
+}
+
+MeasureReader::MeasureReader() : timeOffset(0)
 {
 
 }

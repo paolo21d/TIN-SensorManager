@@ -68,6 +68,9 @@
 
             void unlockSend();
             void unlockRecv();
+
+            bool isSendBlocked();
+            bool isRecvBlocked();
         };
 
 

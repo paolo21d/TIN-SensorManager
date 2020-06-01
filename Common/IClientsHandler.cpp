@@ -44,11 +44,11 @@
         int result = -1;
         while (result == -1)
         {
+            std::cout << "Trying to connect to " << ipAddress << ":" << port << std::endl;
+            sleepSecs(1);
+
             mainSocket = socket_create();
             result = socket_connect(mainSocket, (sockaddr * ) & service, sizeof(service));
-
-            sleepSecs(1);
-            std::cout << "Trying connect to " << ipAddress << ":" << port << std::endl;
         }
 
         std::cout << "Connected" << std::endl;

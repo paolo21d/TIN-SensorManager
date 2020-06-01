@@ -4,6 +4,7 @@
 
 #include "SensorListener.h"
 #include <iostream>
+#include <SystemUtils.h>
 
 using namespace std;
 
@@ -49,6 +50,13 @@ void SensorListener::handleInitMsg(int clientId, std::vector<unsigned char> &msg
 {
     string token(msg.begin() + cursorPos, msg.end());
     cout << "received token from sensor: " << token << endl;
+
+    //TODO: could be removed after checking correctness in ServerModel
+//    int64_t serverTime = getPosixTime();
+//    vector<unsigned char> response;
+//    BytesParser::appendBytes<char>(response, 'a');
+//    BytesParser::appendBytes<int64_t>(response, serverTime);
+//    send(clientId, response);
 
     model->addSensorRequestToExecute(new SensorOnConnectedRequest(clientId, getIp(clientId), getPort(clientId), token));
 }

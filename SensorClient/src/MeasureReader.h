@@ -1,15 +1,20 @@
 #ifndef SENSOR_MEASUREREADER_H
 #define SENSOR_MEASUREREADER_H
 
+#include <iostream>
+
 class MeasureReader
 {
 public:
     static MeasureReader &getInstance();
 
-    int getMeasure();
+    std::pair<int, int64_t> getMeasure();
+    void setCurTime(long serverTime);
 
 private:
     MeasureReader();
+
+    long timeOffset;
 };
 
 #endif //SENSOR_MEASUREREADER_H

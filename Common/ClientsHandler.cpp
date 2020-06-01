@@ -66,7 +66,7 @@ using namespace std;
     void ClientsHandler::Client::disconnected()
     {
         if (blockRecv)
-            handler->flushRecvBuffer(socket);
+            handler->flushRecvBuffer(socket); //TODO: this condition probably can be removed
         reset();
     }
 
@@ -110,7 +110,7 @@ using namespace std;
         outBuffer.insert(outBuffer.end(), make_move_iterator(msg.begin()), make_move_iterator(msg.end()));
         sendLock.unlock();
 
-        if (isConnected() && !IS_SERVER)
+        if ((isConnected() && !IS_SERVER) || IS_SERVER)
             sendData();
 
         return 0;
@@ -128,6 +128,10 @@ using namespace std;
 
     int ClientsHandler::Client::sendData()
     {
+
+//        if (blockSend)
+//            return 1; //TODO: allow to send an initMsg even if sending is blocked
+
         sendLock.lock();
         int sent = handler->socket_send(socket, reinterpret_cast<const char *>(outBuffer.data()), outBuffer.size(), 0);
         if (sent > 0)
@@ -204,12 +208,22 @@ using namespace std;
 
     void ClientsHandler::Client::unlockSend()
     {
-        blockSend = false;
+        blockSend = true;
     }
 
     void ClientsHandler::Client::unlockRecv()
     {
-        blockRecv = false;
+        blockRecv = true;
+    }
+
+    bool ClientsHandler::Client::isSendBlocked()
+    {
+        return blockSend;
+    }
+
+    bool ClientsHandler::Client::isRecvBlocked()
+    {
+        return blockRecv;
     }
 
     ClientsHandler::ClientsHandler(int maxClients, bool server) :

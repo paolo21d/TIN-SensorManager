@@ -7,6 +7,7 @@
 //#include <src/database/DatabaseManager.h>
 #include <src/database/MockDatabaseManager.h>
 #include "ServerModel.h"
+#include <SystemUtils.h>
 
 using namespace std;
 
@@ -305,6 +306,12 @@ void ServerModel::executeSensorRequest(SensorOnConnectedRequest *req, IDatabaseC
     Sensor sensor = connection->addSensor(req->ip, req->port, req->token);
     clientToSensorId[req->clientId] = sensor.id;
     sensorToClientId[sensor.id] = req->clientId;
+
+    int64_t serverTime = getPosixTime();
+    vector<unsigned char> response;
+    BytesParser::appendBytes<char>(response, 'a');
+    BytesParser::appendBytes<int64_t>(response, serverTime);
+    sensorConnectionListener->send(req->clientId, response);
 }
 
 void ServerModel::executeSensorRequest(SensorOnDisconnectedRequest *req, IDatabaseConnection *connection)

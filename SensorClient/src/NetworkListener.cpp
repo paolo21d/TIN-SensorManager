@@ -13,7 +13,15 @@ void NetworkListener::onGotRequest(int clientId, vector<unsigned char> msg)
     int cursorPos = 0;
     char status = getData<char>(msg, cursorPos);
     int64_t lastTimestamp = getData<int64_t>(msg, cursorPos);
-    cout << "response: " << status << "   " << lastTimestamp << endl;
+
+    if (status == '1')
+    {
+        cout << "last accepted measurement: " << lastTimestamp << endl;
+    }
+    else if (status == 'a')
+    {
+        cout << "Accepted by server. Server time: " << lastTimestamp << endl;
+    }
 }
 
 void NetworkListener::onClientConnected(int clientId, std::string ip, int port)
