@@ -73,7 +73,8 @@ public class CommunicationManager extends Thread {
         System.out.println("----------------- SENDING FROM BUFFER BEFORE CLOSE");
         sendAllMessagesFromBuffer(); //TODO zrobić jakieś czekanie żeby zdążyło się wszystko wysłac przed zamknięciem połaczenia
         System.out.println("---------------- CLOSING");
-        handler.closeConnection();
+        if(connectionReady)
+            handler.closeConnection();
         System.out.println("---------------- chanel closed");
         group.shutdownGracefully().sync();
         System.out.println("---------------- group shutdown");
@@ -83,7 +84,7 @@ public class CommunicationManager extends Thread {
     public void run() {
         handler = new ClientHandler(this);
         System.out.println("---------------- CONNECTING");
-        connect("127.0.0.1", 28000);
+        connect(serverIp, serverPort);
         if(connectionReady)
             System.out.println("---------------- CONNECTED");
     }
