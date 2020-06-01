@@ -84,7 +84,13 @@ private:
     void executeSensorRequest(SensorOnConnectedRequest *request, IDatabaseConnection *connection);
     void executeSensorRequest(SensorOnDisconnectedRequest *request, IDatabaseConnection *connection);
 
+    void killSensor(int clientId, int reason = 0);
+
     void sendMonitoringResponse();
+
+    const static int KILL_SENSOR_REVOKED;
+    const static int KILL_SENSOR_DISCONNECTED;
+    const static int KILL_SENSOR_INCORRECT_TOKEN;
 };
 
 

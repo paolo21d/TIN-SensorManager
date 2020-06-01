@@ -299,7 +299,9 @@ void ServerModel::executeSensorRequest(SensorMeasurementRequest *req, IDatabaseC
 void ServerModel::executeSensorRequest(SensorOnConnectedRequest *req, IDatabaseConnection *connection)
 {
     if (!connection->checkIfTokenIsWhitelisted(req->token)) {
-        sensorConnectionListener->disconnectClient(req->clientId);
+
+        killSensor(req->clientId, KILL_SENSOR_INCORRECT_TOKEN);
+        //sensorConnectionListener->disconnectClient(req->clientId); //TODO: remove if killSensor() works
         return;
     }
 
@@ -319,3 +321,16 @@ void ServerModel::executeSensorRequest(SensorOnDisconnectedRequest *req, IDataba
     connection->disconnectSensor(clientToSensorId[req->clientId]);
     clientToSensorId.erase(req->clientId);
 }
+
+void ServerModel::killSensor(int clientId, int reason)
+{
+    vector<unsigned char> response;
+    BytesParser::appendBytes<char>(response, 'r');
+    BytesParser::appendBytes<int32_t>(response, reason);
+    sensorConnectionListener->send(clientId, response);
+    sensorConnectionListener->disconnectClient(clientId);
+}
+
+const int ServerModel::KILL_SENSOR_REVOKED = 1;
+const int ServerModel::KILL_SENSOR_DISCONNECTED = 2;
+const int ServerModel::KILL_SENSOR_INCORRECT_TOKEN = 3;

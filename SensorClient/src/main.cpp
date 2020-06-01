@@ -19,7 +19,6 @@ void sensorThread()
 {
     while (true)
     {
-        int64_t timestamp = getPosixTime();
         pair<int, int64_t> measure = MeasureReader::getInstance().getMeasure();
         sleepMillis(2000);
 
