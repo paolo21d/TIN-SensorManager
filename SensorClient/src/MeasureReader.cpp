@@ -27,7 +27,7 @@ std::pair<int, int64_t> MeasureReader::getMeasure()
     double totalPhysMem = memInfo.ullTotalPhys / 1024 / 1024;
     double physMemUsed = (memInfo.ullTotalPhys - memInfo.ullAvailPhys) / 1024 / 1024;
     int val = ceil(physMemUsed * 100 / totalPhysMem);
-    return make_pair<int, long> (val, getPosixTime() + timeOffset);
+    return make_pair<int, int64_t> (reinterpret_cast<int &&>(val), getPosixTime() + timeOffset);
 #else
     //Commented lines get RAM usage in Linux
 //    sysinfo (&memInfo);

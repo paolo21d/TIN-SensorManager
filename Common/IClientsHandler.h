@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <string>
+#include <atomic>
 #include <BytesParser.h>
 #include <ConnectionException.h>
 #include <IRequestListener.h>
