@@ -2,8 +2,6 @@
 
 using namespace std;
 
-//namespace sc
-//{
     const int ClientsHandler::Client::MAX_MSG = 512;
 
     ClientsHandler::Client::Client(ClientsHandler *handler, bool server, bool blockSend, bool blockRecv)
@@ -12,6 +10,11 @@ using namespace std;
         reset();
         remainingIn = 0;
         remainingInLen = 0;
+    }
+
+    ClientsHandler::Client::~Client()
+    {
+        handler->disconnectClient(clientId);
     }
 
     void ClientsHandler::Client::reset()
@@ -128,9 +131,6 @@ using namespace std;
 
     int ClientsHandler::Client::sendData()
     {
-//        if (blockSend)
-//            return 1; //TODO: allow to send an initMsg even if sending is blocked
-
         sendLock.lock();
         int sent = handler->socket_send(socket, reinterpret_cast<const char *>(outBuffer.data()), outBuffer.size(), 0);
         if (sent > 0)
@@ -180,6 +180,8 @@ using namespace std;
                 gotMsg(inBuffer);
             }
         }
+
+        delete[] data;
 
         return received;
     }
@@ -463,4 +465,3 @@ using namespace std;
     {
         return blockingRecvOnInit;
     }
-//}

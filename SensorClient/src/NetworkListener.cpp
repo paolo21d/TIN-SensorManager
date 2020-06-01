@@ -60,4 +60,6 @@ std::string NetworkListener::getKillReason(int reason)
         case KILL_SENSOR_REVOKED:
             return "Revoked by admin";
     }
+
+    return "Undefined reason";
 }

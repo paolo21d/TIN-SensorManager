@@ -60,3 +60,8 @@ bool IRequestListener::isKilled()
 {
     return clientsHandler->isKilled();
 }
+
+IRequestListener::~IRequestListener()
+{
+
+}

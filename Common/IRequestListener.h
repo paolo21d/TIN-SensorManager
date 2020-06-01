@@ -32,6 +32,8 @@ public:
     void killHandler();
     bool isKilled();
 
+    virtual ~IRequestListener();
+
 private:
     IClientsHandler *clientsHandler;
 };

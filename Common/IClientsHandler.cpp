@@ -1,62 +1,57 @@
 #include "IClientsHandler.h"
 
-//using namespace std;
 
-//namespace sc
-//{
-    int IClientsHandler::getAcceptingSocket(std::string ipAddress, int port, int listeningQueue)
+int IClientsHandler::getAcceptingSocket(std::string ipAddress, int port, int listeningQueue)
+{
+    int acceptingSocket = socket_create();
+
+    if (acceptingSocket == -1)
     {
-
-
-        int acceptingSocket = socket_create();
-
-        if (acceptingSocket == -1)
-        {
-            throw ConnectionException(ConnectionException::CREATE_SOCKET, "Cannot create socket");
-        }
-
-        if( socket_bind( acceptingSocket,ipAddress, port ) == -1 )
-        {
-            socket_close( acceptingSocket );
-            throw ConnectionException(ConnectionException::BIND, "Cannot bind socket");
-        }
-
-        if( socket_listen( acceptingSocket, listeningQueue) == -1)
-        {
-            socket_close(acceptingSocket);
-            throw ConnectionException(ConnectionException::LISTEN, "Cannot listen socket");
-        }
-
-        return acceptingSocket;
+        throw ConnectionException(ConnectionException::CREATE_SOCKET, "Cannot create socket");
     }
 
-    int IClientsHandler::tryConnect(std::string ipAddress, int port)
+    if( socket_bind( acceptingSocket,ipAddress, port ) == -1 )
     {
-        sockaddr_in service;
-
-        memset( & service, 0, sizeof( service ) );
-        service.sin_family = AF_INET;
-        service.sin_addr.s_addr = inet_addr( ipAddress.c_str() );
-        service.sin_port = htons( port );
-
-        int mainSocket = socket_create();
-
-        int result = -1;
-        while (result == -1)
-        {
-            std::cout << "Trying to connect to " << ipAddress << ":" << port << std::endl;
-            sleepSecs(1);
-
-            mainSocket = socket_create();
-            result = socket_connect(mainSocket, (sockaddr * ) & service, sizeof(service));
-        }
-
-        std::cout << "Connected" << std::endl;
-
-        nfds = mainSocket + 1;
-
-        return mainSocket;
+        socket_close( acceptingSocket );
+        throw ConnectionException(ConnectionException::BIND, "Cannot bind socket");
     }
+
+    if( socket_listen( acceptingSocket, listeningQueue) == -1)
+    {
+        socket_close(acceptingSocket);
+        throw ConnectionException(ConnectionException::LISTEN, "Cannot listen socket");
+    }
+
+    return acceptingSocket;
+}
+
+int IClientsHandler::tryConnect(std::string ipAddress, int port)
+{
+    sockaddr_in service;
+
+    memset( & service, 0, sizeof( service ) );
+    service.sin_family = AF_INET;
+    service.sin_addr.s_addr = inet_addr( ipAddress.c_str() );
+    service.sin_port = htons( port );
+
+    int mainSocket = socket_create();
+
+    int result = -1;
+    while (result == -1)
+    {
+        std::cout << "Trying to connect to " << ipAddress << ":" << port << std::endl;
+        sleepSecs(1);
+
+        mainSocket = socket_create();
+        result = socket_connect(mainSocket, (sockaddr * ) & service, sizeof(service));
+    }
+
+    std::cout << "Connected" << std::endl;
+
+    nfds = mainSocket + 1;
+
+    return mainSocket;
+}
 
 int IClientsHandler::socket_create()
 {
@@ -124,4 +119,8 @@ bool IClientsHandler::isKilled()
 {
     return killed;
 }
-//}
+
+IClientsHandler::~IClientsHandler()
+{
+
+}

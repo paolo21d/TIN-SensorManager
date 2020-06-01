@@ -1,7 +1,7 @@
 #ifndef SslClientsHandler_h
 #define SslClientsHandler_h
 
-#define DISABLE_SSL
+//#define DISABLE_SSL
 
 #ifndef DISABLE_SSL
 #include <openssl/bio.h>

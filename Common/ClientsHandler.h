@@ -8,9 +8,6 @@
 #include <unordered_map>
 #include "IClientsHandler.h"
 
-//namespace sc
-//{
-
     class ClientsHandler : public IClientsHandler
     {
     public:
@@ -24,7 +21,6 @@
             sockaddr_in service;
             int clientId;
             std::mutex sendLock;
-            //std::mutex recvLock;
 
             std::vector<unsigned char> outBuffer;
             std::vector<unsigned char> inBuffer;
@@ -44,6 +40,7 @@
 
         public:
             Client(ClientsHandler *handler, bool serverr, bool blockSend = false, bool blockRecv = false);
+            ~Client();
 
             void setListener(IRequestListener *listener);
 
@@ -126,6 +123,5 @@
         bool blockingSendOnInit = false;
         bool blockingRecvOnInit = false;
     };
-//}
 
 #endif /* ISensorConnectionHandler_h */

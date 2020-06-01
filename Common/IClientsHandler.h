@@ -11,10 +11,6 @@
 #include <ConnectionException.h>
 #include <IRequestListener.h>
 
-//class IRequestListener;
-
-//namespace sc
-//{
     class IClientsHandler
     {
     public:
@@ -32,6 +28,8 @@
 
         virtual void killHandler();
         virtual bool isKilled();
+
+        virtual ~IClientsHandler();
 
     protected:
         int nfds;
@@ -54,6 +52,6 @@
     private:
         std::atomic<bool> killed = false;
     };
-//}
+
 
 #endif /* ISensorConnectionHandler_h */
