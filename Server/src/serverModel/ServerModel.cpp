@@ -136,7 +136,6 @@ void ServerModel::executeAdministratorRequests() {
 }
 
 
-
 string ServerModel::generateToken() {
     static const int len = 15;
     static const char alphanum[] =
@@ -175,8 +174,8 @@ void ServerModel::sendAdministratorResponse() {
             }
             administratorConnectionListener->send(response.clientId, toSend);
         }
-        std::chrono::milliseconds timespan(1000); // or whatever
-        std::this_thread::sleep_for(timespan);
+//        std::chrono::milliseconds timespan(1000); // or whatever
+//        std::this_thread::sleep_for(timespan);
     }
 
 }
@@ -261,23 +260,16 @@ void ServerModel::executeSensorRequests() {
 
         SensorRequest *request = sensorRequestsQueue.pop();
 
-        try
-        {
-            if (auto req = dynamic_cast<SensorMeasurementRequest *>(request))
-            {
+        try {
+            if (auto req = dynamic_cast<SensorMeasurementRequest *>(request)) {
                 executeSensorRequest(req, connection);
-            }
-            else if (auto req = dynamic_cast<SensorOnConnectedRequest *>(request))
-            {
+            } else if (auto req = dynamic_cast<SensorOnConnectedRequest *>(request)) {
                 executeSensorRequest(req, connection);
-            }
-            else if (auto req = dynamic_cast<SensorOnDisconnectedRequest *>(request))
-            {
+            } else if (auto req = dynamic_cast<SensorOnDisconnectedRequest *>(request)) {
                 executeSensorRequest(req, connection);
             }
         }
-        catch (std::exception &e)
-        {
+        catch (std::exception &e) {
             cout << "Got an exception while executing sensor request: " << e.what() << endl;
         }
 
@@ -290,14 +282,14 @@ void ServerModel::executeSensorRequests() {
     //delete connection;
 }
 
-void ServerModel::executeSensorRequest(SensorMeasurementRequest *req, IDatabaseConnection *connection)
-{
-    req->clientId = clientToSensorId[req->clientId];
-    connection->addMeasurement(req->clientId, req->value, req->timestamp);
+void ServerModel::executeSensorRequest(SensorMeasurementRequest *req, IDatabaseConnection *connection) {
+    if (clientToSensorId.contains(req->clientId)) {
+        req->clientId = clientToSensorId[req->clientId];
+        connection->addMeasurement(req->clientId, req->value, req->timestamp);
+    }
 }
 
-void ServerModel::executeSensorRequest(SensorOnConnectedRequest *req, IDatabaseConnection *connection)
-{
+void ServerModel::executeSensorRequest(SensorOnConnectedRequest *req, IDatabaseConnection *connection) {
     if (!connection->checkIfTokenIsWhitelisted(req->token)) {
 
         killSensor(req->clientId, KILL_SENSOR_INCORRECT_TOKEN);
@@ -315,14 +307,14 @@ void ServerModel::executeSensorRequest(SensorOnConnectedRequest *req, IDatabaseC
     sensorConnectionListener->send(req->clientId, response);
 }
 
-void ServerModel::executeSensorRequest(SensorOnDisconnectedRequest *req, IDatabaseConnection *connection)
-{
-    connection->disconnectSensor(clientToSensorId[req->clientId]);
-    clientToSensorId.erase(req->clientId);
+void ServerModel::executeSensorRequest(SensorOnDisconnectedRequest *req, IDatabaseConnection *connection) {
+    if (clientToSensorId.contains(req->clientId)) {
+        connection->disconnectSensor(clientToSensorId[req->clientId]);
+        clientToSensorId.erase(req->clientId);
+    }
 }
 
-void ServerModel::killSensor(int clientId, int reason)
-{
+void ServerModel::killSensor(int clientId, int reason) {
     vector<unsigned char> response;
     BytesParser::appendBytes<char>(response, 'r');
     BytesParser::appendBytes<int32_t>(response, reason);
@@ -330,9 +322,9 @@ void ServerModel::killSensor(int clientId, int reason)
     sensorConnectionListener->disconnectClient(clientId);
 }
 
-int64_t ServerModel::getServerTime()
-{
-    return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+int64_t ServerModel::getServerTime() {
+    return std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
 const int ServerModel::KILL_SENSOR_REVOKED = 1;
