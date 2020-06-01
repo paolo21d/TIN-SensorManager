@@ -29,6 +29,9 @@ public:
 
     void setupListener(IClientsHandler *clientsHandler);
 
+    void killHandler();
+    bool isKilled();
+
 private:
     IClientsHandler *clientsHandler;
 };

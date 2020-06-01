@@ -41,6 +41,7 @@ std::pair<int, int64_t> MeasureReader::getMeasure()
 void MeasureReader::setCurTime(long serverTime)
 {
     timeOffset = serverTime - getPosixTime();
+    cout << "Sync clock: " << timeOffset << "ms offset" << endl;
 }
 
 MeasureReader::MeasureReader() : timeOffset(0)

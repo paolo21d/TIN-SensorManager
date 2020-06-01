@@ -43,7 +43,7 @@
             bool waitForInitMsg;
 
         public:
-            Client(ClientsHandler *handler, bool serverr, bool blockSend = false, bool blockRecv = false); //TODO: right now blocks params are not required, could be removed
+            Client(ClientsHandler *handler, bool serverr, bool blockSend = false, bool blockRecv = false);
 
             void setListener(IRequestListener *listener);
 

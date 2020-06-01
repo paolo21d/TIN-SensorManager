@@ -114,4 +114,14 @@ void IClientsHandler::flushRecvBuffer(int socket)
     char data[4096];
     while (socket_recv(socket, data, 4096, 0) == 4096);
 }
+
+void IClientsHandler::killHandler()
+{
+    killed = true;
+}
+
+bool IClientsHandler::isKilled()
+{
+    return killed;
+}
 //}

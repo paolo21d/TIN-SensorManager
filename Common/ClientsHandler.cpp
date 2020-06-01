@@ -128,7 +128,6 @@ using namespace std;
 
     int ClientsHandler::Client::sendData()
     {
-
 //        if (blockSend)
 //            return 1; //TODO: allow to send an initMsg even if sending is blocked
 
@@ -273,7 +272,7 @@ using namespace std;
             tryRecv();
             trySend();
         }
-        while(true);
+        while(!isKilled());
     }
 
     void ClientsHandler::disconnectClient(int clientId)

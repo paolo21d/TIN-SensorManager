@@ -4,10 +4,10 @@
 
 #include <src/serializers/SerializerAdministratorMessage.h>
 #include <src/serializers/SerializerMonitoringMessage.h>
-//#include <src/database/DatabaseManager.h>
-#include <src/database/MockDatabaseManager.h>
+#include <src/database/DatabaseManager.h>
+//#include <src/database/MockDatabaseManager.h>
 #include "ServerModel.h"
-#include <SystemUtils.h>
+#include <chrono>
 
 using namespace std;
 
@@ -109,13 +109,13 @@ void ServerModel::executeAdministratorRequests() {
             case REVOKE_SENSOR:
                 response->sensorId =
                         connection->revokeSensor(request.sensorId).id;
-                sensorConnectionListener->disconnectClient(sensorToClientId[request.sensorId]);
+                killSensor(request.clientId, KILL_SENSOR_REVOKED);
                 sensorToClientId.erase(request.sensorId);
                 break;
             case DISCONNECT_SENSOR:
                 response->sensorId =
                         connection->disconnectSensor(request.sensorId).id;
-                sensorConnectionListener->disconnectClient(sensorToClientId[request.sensorId]);
+                killSensor(request.clientId, KILL_SENSOR_DISCONNECTED);
                 sensorToClientId.erase(request.sensorId);
                 break;
             case GENERATE_TOKEN:
@@ -301,7 +301,6 @@ void ServerModel::executeSensorRequest(SensorOnConnectedRequest *req, IDatabaseC
     if (!connection->checkIfTokenIsWhitelisted(req->token)) {
 
         killSensor(req->clientId, KILL_SENSOR_INCORRECT_TOKEN);
-        //sensorConnectionListener->disconnectClient(req->clientId); //TODO: remove if killSensor() works
         return;
     }
 
@@ -309,7 +308,7 @@ void ServerModel::executeSensorRequest(SensorOnConnectedRequest *req, IDatabaseC
     clientToSensorId[req->clientId] = sensor.id;
     sensorToClientId[sensor.id] = req->clientId;
 
-    int64_t serverTime = getPosixTime();
+    int64_t serverTime = getServerTime();
     vector<unsigned char> response;
     BytesParser::appendBytes<char>(response, 'a');
     BytesParser::appendBytes<int64_t>(response, serverTime);
@@ -329,6 +328,11 @@ void ServerModel::killSensor(int clientId, int reason)
     BytesParser::appendBytes<int32_t>(response, reason);
     sensorConnectionListener->send(clientId, response);
     sensorConnectionListener->disconnectClient(clientId);
+}
+
+int64_t ServerModel::getServerTime()
+{
+    return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
 const int ServerModel::KILL_SENSOR_REVOKED = 1;

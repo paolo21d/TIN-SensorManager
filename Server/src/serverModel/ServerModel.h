@@ -88,6 +88,8 @@ private:
 
     void sendMonitoringResponse();
 
+    int64_t getServerTime();
+
     const static int KILL_SENSOR_REVOKED;
     const static int KILL_SENSOR_DISCONNECTED;
     const static int KILL_SENSOR_INCORRECT_TOKEN;

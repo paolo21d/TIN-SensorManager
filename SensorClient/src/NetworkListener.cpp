@@ -22,6 +22,7 @@ void NetworkListener::onGotRequest(int clientId, vector<unsigned char> msg)
     {
         int64_t lastTimestamp = getData<int64_t>(msg, cursorPos);
         cout << "last accepted measurement: " << lastTimestamp << endl;
+        //unlockSend(clientId);
     }
     else if (status == 'a')
     {
@@ -33,7 +34,7 @@ void NetworkListener::onGotRequest(int clientId, vector<unsigned char> msg)
     {
         int reason = getData<int32_t>(msg, cursorPos);
         cout << "Rejected from server (REASON " << reason << ": " << getKillReason(reason) << ")" << endl;
-        //TODO: turn off the sensor
+        killHandler();
     }
 }
 

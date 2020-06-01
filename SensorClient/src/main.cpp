@@ -17,7 +17,7 @@ IRequestListener *listener;
 
 void sensorThread()
 {
-    while (true)
+    while (!listener->isKilled())
     {
         pair<int, int64_t> measure = MeasureReader::getInstance().getMeasure();
         sleepMillis(2000);
@@ -51,6 +51,9 @@ int main(int argc, char *argv[])
         connectionHandler->startHandling(ip, port);
 
         t.join();
+
+        delete listener;
+        delete connectionHandler;
     }
     catch (ConnectionException &e)
     {

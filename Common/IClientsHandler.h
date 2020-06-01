@@ -29,6 +29,9 @@
         virtual void unlockRecv(int clientId) = 0;
         virtual void unlockSend(int clientId) = 0;
 
+        virtual void killHandler();
+        virtual bool isKilled();
+
     protected:
         int nfds;
 
@@ -46,6 +49,9 @@
         virtual int socket_close(int socket);
 
         void flushRecvBuffer(int socket);
+
+    private:
+        std::atomic<bool> killed = false;
     };
 //}
 
