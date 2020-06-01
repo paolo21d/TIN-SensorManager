@@ -8,8 +8,6 @@ using namespace std;
         : handler(handler), IS_SERVER(server), blockSend(blockSend), blockRecv(blockRecv)
     {
         reset();
-        remainingIn = 0;
-        remainingInLen = 0;
     }
 
     ClientsHandler::Client::~Client()
@@ -23,14 +21,16 @@ using namespace std;
 
         memset( & service, 0, sizeof( service ) );
 
+        remainingIn = 0;
+        remainingInLen = 0;
+        inBuffer.clear();
+        sendLock.lock();
+        outBuffer.clear();
+        sendLock.unlock();
+
         if (IS_SERVER)
         {
-            remainingIn = 0;
-            remainingInLen = 0;
             listener = nullptr;
-            
-            inBuffer.clear();
-            outBuffer.clear();
         }
     }
 
