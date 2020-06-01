@@ -27,6 +27,8 @@
 #include "IModelForAdministrator.h"
 #include "IModelForSensor.h"
 #include <unordered_map>
+#include <atomic>
+#include <csignal>
 
 class ServerModel : public IModelForSensor, public IModelForMonitoring, public IModelForAdministrator {
     IRequestListener *sensorConnectionListener;
@@ -45,6 +47,9 @@ class ServerModel : public IModelForSensor, public IModelForMonitoring, public I
     std::unordered_map<int, int> clientToSensorId;
     std::unordered_map<int, int> sensorToClientId;
     std::string generateToken();
+
+    static inline std::atomic<bool> quit = false;
+    static void gotSignal(int signum);
 
 public:
     ServerModel(IRequestListener *sensor, IRequestListener *administrator, IRequestListener *monitoring);

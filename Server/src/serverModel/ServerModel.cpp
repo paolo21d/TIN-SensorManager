@@ -15,10 +15,12 @@ ServerModel::ServerModel(IRequestListener *sensor, IRequestListener *administrat
     administratorConnectionListener = administrator;
     monitoringConnectionListener = monitoring;
     databaseConnector = new DatabaseManager("ADMIN", "Seikonnoqwaser1!", "tin_high");
+    signal(SIGINT, ServerModel::gotSignal);
 }
 
 ServerModel::ServerModel() {
     databaseConnector = new DatabaseManager("ADMIN", "Seikonnoqwaser1!", "tin_high");
+    signal(SIGINT, ServerModel::gotSignal);
 }
 
 void ServerModel::setSensorConnectionListener(IRequestListener *listener) {
@@ -88,7 +90,7 @@ void ServerModel::executeAdministratorRequests() {
     SerializerAdministratorMessage serializer;
     srand(time(NULL));
     IDatabaseConnection *connection = databaseConnector->getNewConnection();
-    while (1 == 1) {
+    while (!quit) {
 
         AdministratorRequest request = administratorRequestsQueue.pop();
         cout << "AdministratorRequest\tCommandType: " << request.commandType << endl;
@@ -157,7 +159,7 @@ void ServerModel::sendAdministratorResponse() {
     vector<char> byteMessage;
     AdministratorResponse response(-1, -1);
 
-    while (true) {
+    while (!quit) {
         byteMessage.clear();
         response = AdministratorResponse(-1, -1);
 
@@ -184,7 +186,7 @@ void ServerModel::executeMonitoringRequests() {
 
     IDatabaseConnection *connection = databaseConnector->getNewConnection();
 
-    while (1 == 1) {
+    while (!quit) {
 
         MonitoringRequest request = monitoringRequestsQueue.pop();
 
@@ -231,7 +233,7 @@ void ServerModel::sendMonitoringResponse() {
     vector<char> byteMessage;
     MonitoringResponse response(-1, -1);
 
-    while (true) {
+    while (!quit) {
         byteMessage.clear();
         response = MonitoringResponse(-1, -1);
 
@@ -256,8 +258,8 @@ void ServerModel::sendMonitoringResponse() {
 void ServerModel::executeSensorRequests() {
     IDatabaseConnection *connection = databaseConnector->getNewConnection();
 
-    while (1 == 1) {
-
+    while (!quit) {
+        std::cout<<quit<<"w watku"<<endl;
         SensorRequest *request = sensorRequestsQueue.pop();
 
         try
@@ -285,6 +287,8 @@ void ServerModel::executeSensorRequests() {
         //std::chrono::milliseconds timespan(1000); // or whatever
         //std::this_thread::sleep_for(timespan);
     }
+
+    std::cout<<"SIEMANKO ZIOMECZKI";
     //Przy ładnym wyłączaniu przydałoby się kasować connection
     //delete connection;
 }
@@ -315,4 +319,8 @@ void ServerModel::executeSensorRequest(SensorOnDisconnectedRequest *req, IDataba
         connection->disconnectSensor(clientToSensorId[req->clientId]);
         clientToSensorId.erase(req->clientId);
     }
+}
+
+void ServerModel::gotSignal(int signum) {
+    quit = true;
 }
