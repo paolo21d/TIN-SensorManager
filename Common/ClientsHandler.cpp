@@ -2,16 +2,17 @@
 
 using namespace std;
 
-//namespace sc
-//{
     const int ClientsHandler::Client::MAX_MSG = 512;
 
     ClientsHandler::Client::Client(ClientsHandler *handler, bool server, bool blockSend, bool blockRecv)
         : handler(handler), IS_SERVER(server), blockSend(blockSend), blockRecv(blockRecv)
     {
         reset();
-        remainingIn = 0;
-        remainingInLen = 0;
+    }
+
+    ClientsHandler::Client::~Client()
+    {
+        handler->disconnectClient(clientId);
     }
 
     void ClientsHandler::Client::reset()
@@ -20,14 +21,16 @@ using namespace std;
 
         memset( & service, 0, sizeof( service ) );
 
+        remainingIn = 0;
+        remainingInLen = 0;
+        inBuffer.clear();
+        sendLock.lock();
+        outBuffer.clear();
+        sendLock.unlock();
+
         if (IS_SERVER)
         {
-            remainingIn = 0;
-            remainingInLen = 0;
             listener = nullptr;
-            
-            inBuffer.clear();
-            outBuffer.clear();
         }
     }
 
@@ -66,7 +69,7 @@ using namespace std;
     void ClientsHandler::Client::disconnected()
     {
         if (blockRecv)
-            handler->flushRecvBuffer(socket);
+            handler->flushRecvBuffer(socket); //TODO: this condition probably can be removed
         reset();
     }
 
@@ -110,8 +113,6 @@ using namespace std;
         outBuffer.insert(outBuffer.end(), make_move_iterator(msg.begin()), make_move_iterator(msg.end()));
         sendLock.unlock();
 
-        // if (isConnected() && !IS_SERVER)
-        //     sendData();
         if ((isConnected() && !IS_SERVER) || IS_SERVER)
             sendData();
 
@@ -180,6 +181,8 @@ using namespace std;
             }
         }
 
+        delete[] data;
+
         return received;
     }
 
@@ -206,12 +209,22 @@ using namespace std;
 
     void ClientsHandler::Client::unlockSend()
     {
-        blockSend = false;
+        blockSend = true;
     }
 
     void ClientsHandler::Client::unlockRecv()
     {
-        blockRecv = false;
+        blockRecv = true;
+    }
+
+    bool ClientsHandler::Client::isSendBlocked()
+    {
+        return blockSend;
+    }
+
+    bool ClientsHandler::Client::isRecvBlocked()
+    {
+        return blockRecv;
     }
 
     ClientsHandler::ClientsHandler(int maxClients, bool server) :
@@ -261,7 +274,7 @@ using namespace std;
             tryRecv();
             trySend();
         }
-        while(true);
+        while(!isKilled());
     }
 
     void ClientsHandler::disconnectClient(int clientId)
@@ -452,4 +465,3 @@ using namespace std;
     {
         return blockingRecvOnInit;
     }
-//}

@@ -2,9 +2,6 @@
 
 using namespace std;
 
-//namespace sc
-//{
-
 SslClientsHandler::SslClientsHandler(int maxClients, bool server) : ClientsHandler(maxClients, server)
 {
 #ifndef DISABLE_SSL
@@ -164,37 +161,35 @@ int SslClientsHandler::socket_close(int socket)
 void SslClientsHandler::log_ssl()
 {
     int err;
-    while (err = ERR_get_error())
+    while ((err = ERR_get_error()))
     {
         char *str = ERR_error_string(err, 0);
         if (!str)
             return;
-        printf(str);
-        printf("\n");
-        fflush(stdout);
+        cout << str << endl;
     }
 }
 
 void SslClientsHandler::ShowCerts( SSL * ssl )
-{ X509 * cert;
+{
+    X509 * cert;
     char * line;
 
     cert = SSL_get_peer_certificate( ssl ); /* Get certificates (if available) */
     if( cert != NULL )
     {
-        printf( "Server certificates:\n" );
+        cout << "Server certificates:" << endl;
         line = X509_NAME_oneline( X509_get_subject_name( cert ), 0, 0 );
-        printf( "Subject: %s\n", line );
+        cout << "Subject: " << line << endl;
         free( line );
         line = X509_NAME_oneline( X509_get_issuer_name( cert ), 0, 0 );
-        printf( "Issuer: %s\n", line );
+        cout << "Issuer: " << line << endl;
         free( line );
         X509_free( cert );
     }
     else
-         printf( "No certificates.\n" );
+         cout << "No certificates." << endl;
 
 }
 
 #endif
-//}

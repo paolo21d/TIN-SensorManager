@@ -6,14 +6,11 @@
 
 #include <iostream>
 #include <string>
+#include <atomic>
 #include <BytesParser.h>
 #include <ConnectionException.h>
 #include <IRequestListener.h>
 
-//class IRequestListener;
-
-//namespace sc
-//{
     class IClientsHandler
     {
     public:
@@ -28,6 +25,11 @@
         virtual void blockSendOnInit() = 0;
         virtual void unlockRecv(int clientId) = 0;
         virtual void unlockSend(int clientId) = 0;
+
+        virtual void killHandler();
+        virtual bool isKilled();
+
+        virtual ~IClientsHandler();
 
     protected:
         int nfds;
@@ -46,7 +48,10 @@
         virtual int socket_close(int socket);
 
         void flushRecvBuffer(int socket);
+
+    private:
+        std::atomic<bool> killed = false;
     };
-//}
+
 
 #endif /* ISensorConnectionHandler_h */

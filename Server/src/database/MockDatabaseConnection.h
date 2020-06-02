@@ -14,7 +14,7 @@ public:
 
     ~MockDatabaseConnection();
 
-    std::vector<Sensor> getAllSensors();
+    std::vector<Sensor> getAllSensors() override;
 
     std::vector<Sensor> getAllSensorsWithMeasurements() override;
 

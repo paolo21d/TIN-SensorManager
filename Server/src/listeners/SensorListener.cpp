@@ -4,6 +4,7 @@
 
 #include "SensorListener.h"
 #include <iostream>
+#include <SystemUtils.h>
 
 using namespace std;
 
@@ -30,7 +31,6 @@ void SensorListener::onGotRequest(int clientId, vector<unsigned char> msg)
             cout << "Could not recognize msg type -> disconnecting " << clientId << endl;
             disconnectClient(clientId);
     }
-
 }
 
 void SensorListener::onClientConnected(int clientId, string ip, int port)
