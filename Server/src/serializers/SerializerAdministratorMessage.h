@@ -18,7 +18,7 @@
 
 class SerializerAdministratorMessage : public SerializerMessage {
 public:
-    AdministratorRequest* analyzeMessage(int clientId, std::vector<char> message);
+    AdministratorRequest *analyzeMessage(int clientId, std::vector<char> message);
 
     std::vector<char> serializeResponseMessage(AdministratorResponse response);
 
@@ -33,6 +33,16 @@ public:
     std::vector<char> constructGenerateTokenMessage(std::string token);
 
 private:
+    AdministratorRequest *analyzeGetAllSensors(int clientId, std::vector<char> message);
+
+    AdministratorRequest *analyzeUpdateSensorName(int clientId, std::vector<char> message);
+
+    AdministratorRequest *analyzeRevokeSensor(int clientId, std::vector<char> message);
+
+    AdministratorRequest *analyzeDisconnectSensor(int clientId, std::vector<char> message);
+
+    AdministratorRequest *analyzeGenerateToken(int clientId, std::vector<char> message);
+
     std::vector<char> constructSensorMessage(Sensor sensor);
 
     std::vector<char> constructSensorListMessage(std::vector<Sensor> sensors);
