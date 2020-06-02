@@ -51,30 +51,51 @@ void sensorThread()
 }
 
 void monitoringThread() {
-    cout << "START MONITORING CONNECTION" << endl;
+    try {
+        cout << "START MONITORING CONNECTION" << endl;
 
-    string ip = UserPrefs::getInstance().getString(USER_PREFS_MONITORING_IP);
-    int port  = UserPrefs::getInstance().getInt(USER_PREFS_MONITORING_PORT);
+        string ip = UserPrefs::getInstance().getString(USER_PREFS_MONITORING_IP);
+        int port  = UserPrefs::getInstance().getInt(USER_PREFS_MONITORING_PORT);
 
-    IRequestListener *listener = new MonitoringListener(serverModel);
-    serverModel->setMonitoringConnectionListener(listener);
-    IClientsHandler *connectionHandler = new ClientsHandler();
-    connectionHandler->addListener(listener);
-    connectionHandler->startHandling(ip, port);
+        IRequestListener *listener = new MonitoringListener(serverModel);
+        serverModel->setMonitoringConnectionListener(listener);
+        IClientsHandler *connectionHandler = new ClientsHandler();
+        connectionHandler->addListener(listener);
+        connectionHandler->startHandling(ip, port);
+    }
+    catch (ConnectionException &e)
+    {
+        cout << "Connection exception: " << e.what() << endl;
+    }
+    catch (exception &e)
+    {
+        cout << "Got exception: " << e.what() << endl;
+    }
+
 
 }
 
 void adminThread() {
-    cout << "START ADMIN CONNECTION" << endl;
+    try {
+        cout << "START ADMIN CONNECTION" << endl;
 
-    string ip = UserPrefs::getInstance().getString(USER_PREFS_ADMIN_IP);
-    int port  = UserPrefs::getInstance().getInt(USER_PREFS_ADMIN_PORT);
+        string ip = UserPrefs::getInstance().getString(USER_PREFS_ADMIN_IP);
+        int port  = UserPrefs::getInstance().getInt(USER_PREFS_ADMIN_PORT);
 
-    IRequestListener *listener = new AdministratorListener(serverModel);
-    serverModel->setAdministratorConnectionListener(listener);
-    IClientsHandler *connectionHandler = new ClientsHandler();
-    connectionHandler->addListener(listener);
-    connectionHandler->startHandling(ip, port);
+        IRequestListener *listener = new AdministratorListener(serverModel);
+        serverModel->setAdministratorConnectionListener(listener);
+        IClientsHandler *connectionHandler = new ClientsHandler();
+        connectionHandler->addListener(listener);
+        connectionHandler->startHandling(ip, port);
+    }
+    catch (ConnectionException &e)
+    {
+        cout << "Connection exception: " << e.what() << endl;
+    }
+    catch (exception &e)
+    {
+        cout << "Got exception: " << e.what() << endl;
+    }
 }
 
 int main(int argc, char *argv[])
@@ -89,9 +110,12 @@ int main(int argc, char *argv[])
 
     serverModel->init();
 
+
+
     t1.join();
     t2.join();
     t3.join();
 
+    cout<<"SERVER SHUT DOWN"<<endl;
     return 0;
 }

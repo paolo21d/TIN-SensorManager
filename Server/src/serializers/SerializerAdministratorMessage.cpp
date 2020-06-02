@@ -11,9 +11,6 @@ AdministratorRequest *SerializerAdministratorMessage::analyzeMessage(int clientI
         return nullptr;
     }
     int readingBegin = 0;
-//    int paramQuantity = ByteToInt(message, readingBegin);
-//    readingBegin += 4;
-//    printf("Param quantity: %d\n", paramQuantity);
 
     int sizeOfCommandType = ByteToInt(message, readingBegin);
     readingBegin += 4;
@@ -24,86 +21,107 @@ AdministratorRequest *SerializerAdministratorMessage::analyzeMessage(int clientI
 
     if (commandType == GET_ALL_SENSORS) { //GET_ALL_SENSORS
         printf("Command: GetAllSensors\n");
-        return new AdministratorRequest(clientId, GET_ALL_SENSORS);
+        return analyzeGetAllSensors(clientId, message);
     } else if (commandType == UPDATE_SENSOR_NAME) { //UPDATE_SENSOR_NAME
         printf("Command: UpdateSensorName\n");
-        int sizeOfId = ByteToInt(message, readingBegin);
-        readingBegin += 4;
-
-        int id = ByteToInt(message, readingBegin);
-        readingBegin += 4;
-
-        int sizeOfName = ByteToInt(message, readingBegin);
-        readingBegin += 4;
-
-        string name;
-        for (int i = 0; i < sizeOfName; i++) {
-            name += message[readingBegin + i];
-        }
-
-        printf("SizeOfId: %d; Id: %d; SizeOfName: %d; Name: %s\n", sizeOfId, id, sizeOfName, name.c_str());
-        AdministratorRequest *request = new AdministratorRequest(clientId, UPDATE_SENSOR_NAME);
-        request->sensorId = id;
-        request->sensorName = name;
-        return request;
+        return analyzeUpdateSensorName(clientId, vector<char>(message.begin() + readingBegin, message.end()));
     } else if (commandType == REVOKE_SENSOR) { //REVOKE_SENSOR
         printf("Command: RevokeSensor\n");
-
-        int sizeOfId = ByteToInt(message, readingBegin);
-        readingBegin += 4;
-
-        int id = ByteToInt(message, readingBegin);
-        readingBegin += 4;
-
-        printf("SizeOfId: %d; Id: %d\n", sizeOfId, id);
-        AdministratorRequest *request = new AdministratorRequest(clientId, REVOKE_SENSOR);
-        request->sensorId = id;
-        return request;
+        return analyzeRevokeSensor(clientId, vector<char>(message.begin() + readingBegin, message.end()));
     } else if (commandType == DISCONNECT_SENSOR) { //DISCONNECT_SENSOR
         printf("Command: DisconnectSensor\n");
-
-        int sizeOfId = ByteToInt(message, readingBegin);
-        readingBegin += 4;
-
-        int id = ByteToInt(message, readingBegin);
-        readingBegin += 4;
-
-        printf("SizeOfId: %d; Id: %d\n", sizeOfId, id);
-        AdministratorRequest *request = new AdministratorRequest(clientId, DISCONNECT_SENSOR);
-        request->sensorId = id;
-        return request;
+        return analyzeDisconnectSensor(clientId, vector<char>(message.begin() + readingBegin, message.end()));
     } else if (commandType == GENERATE_TOKEN) { //GENERATE_TOKEN
         printf("Command: GenerateToken\n");
-
-        int sizeOfName = ByteToInt(message, readingBegin);
-        readingBegin += 4;
-
-        string name; //TODO fix name - check how works sending string;;; W javie String jeden znak jest zapisany na 2 Byte trzeba zrobić konwersje (moze z javy wysyałac jako tablica char?)
-        for (int i = 0; i < sizeOfName; i++) {
-            //printf("%c|", message[readingBegin+i]);
-            name += message[readingBegin + i];
-        }
-
-        printf("SizeOfName: %d; Name: %s\n", sizeOfName, name.c_str());
-        AdministratorRequest *request = new AdministratorRequest(clientId, GENERATE_TOKEN);
-        request->tokenName = name;
-        return request;
+        return analyzeGenerateToken(clientId, vector<char>(message.begin() + readingBegin, message.end()));
     } else {
-        printf("Error command type unrecogized");
+        printf("Error command type unrecognized");
     }
     return nullptr;
 }
 
+AdministratorRequest *SerializerAdministratorMessage::analyzeGetAllSensors(int clientId, std::vector<char> message) {
+    return new AdministratorRequest(clientId, GET_ALL_SENSORS);
+}
+
+AdministratorRequest *SerializerAdministratorMessage::analyzeUpdateSensorName(int clientId, std::vector<char> message) {
+    int readingBegin = 0;
+    int sizeOfId = ByteToInt(message, readingBegin);
+    readingBegin += 4;
+
+    int id = ByteToInt(message, readingBegin);
+    readingBegin += 4;
+
+    int sizeOfName = ByteToInt(message, readingBegin);
+    readingBegin += 4;
+
+    string name;
+    for (int i = 0; i < sizeOfName; i++) {
+        name += message[readingBegin + i];
+    }
+
+    printf("SizeOfId: %d; Id: %d; SizeOfName: %d; Name: %s\n", sizeOfId, id, sizeOfName, name.c_str());
+    AdministratorRequest *request = new AdministratorRequest(clientId, UPDATE_SENSOR_NAME);
+    request->sensorId = id;
+    request->sensorName = name;
+    return request;
+}
+
+AdministratorRequest *SerializerAdministratorMessage::analyzeRevokeSensor(int clientId, std::vector<char> message) {
+    int readingBegin = 0;
+    int sizeOfId = ByteToInt(message, readingBegin);
+    readingBegin += 4;
+
+    int id = ByteToInt(message, readingBegin);
+    readingBegin += 4;
+
+    printf("SizeOfId: %d; Id: %d\n", sizeOfId, id);
+    AdministratorRequest *request = new AdministratorRequest(clientId, REVOKE_SENSOR);
+    request->sensorId = id;
+    return request;
+}
+
+AdministratorRequest *SerializerAdministratorMessage::analyzeDisconnectSensor(int clientId, std::vector<char> message) {
+    int readingBegin = 0;
+    int sizeOfId = ByteToInt(message, readingBegin);
+    readingBegin += 4;
+
+    int id = ByteToInt(message, readingBegin);
+    readingBegin += 4;
+
+    printf("SizeOfId: %d; Id: %d\n", sizeOfId, id);
+    AdministratorRequest *request = new AdministratorRequest(clientId, DISCONNECT_SENSOR);
+    request->sensorId = id;
+    return request;
+}
+
+AdministratorRequest *SerializerAdministratorMessage::analyzeGenerateToken(int clientId, std::vector<char> message) {
+    int readingBegin = 0;
+    int sizeOfName = ByteToInt(message, readingBegin);
+    readingBegin += 4;
+
+    string name;
+    for (int i = 0; i < sizeOfName; i++) {
+        //printf("%c|", message[readingBegin+i]);
+        name += message[readingBegin + i];
+    }
+
+    printf("SizeOfName: %d; Name: %s\n", sizeOfName, name.c_str());
+    AdministratorRequest *request = new AdministratorRequest(clientId, GENERATE_TOKEN);
+    request->tokenName = name;
+    return request;
+}
+
 vector<char> SerializerAdministratorMessage::serializeResponseMessage(AdministratorResponse response) {
-    if(response.commandType == GET_ALL_SENSORS) {
+    if (response.commandType == GET_ALL_SENSORS) {
         return constructGetAllSensorsMessage(response.sensors);
-    } else if(response.commandType == UPDATE_SENSOR_NAME) {
+    } else if (response.commandType == UPDATE_SENSOR_NAME) {
         return constructUpdateSensorNameMessage(response.sensorId);
-    } else if(response.commandType == REVOKE_SENSOR) {
+    } else if (response.commandType == REVOKE_SENSOR) {
         return constructRevokeSensorMessage(response.sensorId);
-    } else if(response.commandType == DISCONNECT_SENSOR) {
+    } else if (response.commandType == DISCONNECT_SENSOR) {
         return constructDisconnectSensorMessage(response.sensorId);
-    }else if(response.commandType == GENERATE_TOKEN) {
+    } else if (response.commandType == GENERATE_TOKEN) {
         return constructGenerateTokenMessage(response.token);
     }
 }
