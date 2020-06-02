@@ -85,6 +85,6 @@ int main(int argc, char *argv[])
     t1.join();
     t2.join();
     t3.join();
-
+    cout<<"SERVER SHUT DOWN"<<endl;
     return 0;
 }

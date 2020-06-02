@@ -46,11 +46,12 @@ void ServerModel::init() {
 
     monitoringRequestsExecutor.join();
     monitoringResponsesSender.join();
-
+    cout<<"MONITORING THREADS ENDED"<<endl;
     administratorRequestsExecutor.join();
     administratorResponsesSender.join();
-
+    cout<<"ADMINISTRATOR THREADS ENDED"<<endl;
     sensorRequestsExecutor.join();
+    cout<<"SENSOR THREADS ENDED"<<endl;
 }
 
 ///SENSOR INTERFACE
@@ -132,8 +133,7 @@ void ServerModel::executeAdministratorRequests() {
         //std::chrono::milliseconds timespan(1000); // or whatever
         //std::this_thread::sleep_for(timespan);
     }
-    //Kasowanie connection
-    //delete connection;
+    delete connection;
 }
 
 
@@ -224,8 +224,7 @@ void ServerModel::executeMonitoringRequests() {
         //std::chrono::milliseconds timespan(1000); // or whatever
         //std::this_thread::sleep_for(timespan);
     }
-    //Przy ładnym wyłączaniu przydałoby się kasować connection
-    //delete connection;
+    delete connection;
 }
 
 void ServerModel::sendMonitoringResponse() {
@@ -259,7 +258,6 @@ void ServerModel::executeSensorRequests() {
     IDatabaseConnection *connection = databaseConnector->getNewConnection();
 
     while (!quit) {
-        std::cout<<quit<<"w watku"<<endl;
         SensorRequest *request = sensorRequestsQueue.pop();
 
         try
@@ -288,9 +286,7 @@ void ServerModel::executeSensorRequests() {
         //std::this_thread::sleep_for(timespan);
     }
 
-    std::cout<<"SIEMANKO ZIOMECZKI";
-    //Przy ładnym wyłączaniu przydałoby się kasować connection
-    //delete connection;
+    delete connection;
 }
 
 void ServerModel::executeSensorRequest(SensorMeasurementRequest *req, IDatabaseConnection *connection)
