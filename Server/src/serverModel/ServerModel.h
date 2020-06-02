@@ -93,6 +93,7 @@ private:
     const static int KILL_SENSOR_REVOKED;
     const static int KILL_SENSOR_DISCONNECTED;
     const static int KILL_SENSOR_INCORRECT_TOKEN;
+    const static int KILL_SENSOR_TOKEN_ACTIVE;
 };
 
 

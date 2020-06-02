@@ -20,8 +20,11 @@ private:
     const static int KILL_SENSOR_REVOKED;
     const static int KILL_SENSOR_DISCONNECTED;
     const static int KILL_SENSOR_INCORRECT_TOKEN;
+    static const int KILL_SENSOR_TOKEN_ACTIVE;
 
     std::string getKillReason(int reason);
+
+
 };
 
 #endif //SENSORCLIENT_NETWORKLISTENER_H

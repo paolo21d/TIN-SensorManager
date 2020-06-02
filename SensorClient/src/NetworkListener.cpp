@@ -7,6 +7,7 @@ using namespace std;
 const int NetworkListener::KILL_SENSOR_REVOKED = 1;
 const int NetworkListener::KILL_SENSOR_DISCONNECTED = 2;
 const int NetworkListener::KILL_SENSOR_INCORRECT_TOKEN = 3;
+const int NetworkListener::KILL_SENSOR_TOKEN_ACTIVE = 4;
 
 NetworkListener::NetworkListener(std::string token) : token(token)
 {
@@ -59,6 +60,8 @@ std::string NetworkListener::getKillReason(int reason)
             return "Disconnected by admin";
         case KILL_SENSOR_REVOKED:
             return "Revoked by admin";
+        case KILL_SENSOR_TOKEN_ACTIVE:
+            return "Sensor with this token is already active";
     }
 
     return "Undefined reason";

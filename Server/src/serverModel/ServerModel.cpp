@@ -109,13 +109,13 @@ void ServerModel::executeAdministratorRequests() {
             case REVOKE_SENSOR:
                 response->sensorId =
                         connection->revokeSensor(request.sensorId).id;
-                killSensor(request.clientId, KILL_SENSOR_REVOKED);
+                killSensor(sensorToClientId[request.sensorId], KILL_SENSOR_REVOKED);
                 sensorToClientId.erase(request.sensorId);
                 break;
             case DISCONNECT_SENSOR:
                 response->sensorId =
                         connection->disconnectSensor(request.sensorId).id;
-                killSensor(request.clientId, KILL_SENSOR_DISCONNECTED);
+                killSensor(sensorToClientId[request.sensorId], KILL_SENSOR_DISCONNECTED);
                 sensorToClientId.erase(request.sensorId);
                 break;
             case GENERATE_TOKEN:
@@ -290,9 +290,12 @@ void ServerModel::executeSensorRequest(SensorMeasurementRequest *req, IDatabaseC
 }
 
 void ServerModel::executeSensorRequest(SensorOnConnectedRequest *req, IDatabaseConnection *connection) {
-    if (!connection->checkIfTokenIsWhitelisted(req->token)) {
-
+    if (!connection->checkIfTokenIsWhitelisted(req->token) ) {
         killSensor(req->clientId, KILL_SENSOR_INCORRECT_TOKEN);
+        return;
+    }
+    if(sensorToClientId.contains(connection->getSensorId(req->token))) {
+        killSensor(req->clientId, KILL_SENSOR_TOKEN_ACTIVE);
         return;
     }
 
@@ -330,3 +333,4 @@ int64_t ServerModel::getServerTime() {
 const int ServerModel::KILL_SENSOR_REVOKED = 1;
 const int ServerModel::KILL_SENSOR_DISCONNECTED = 2;
 const int ServerModel::KILL_SENSOR_INCORRECT_TOKEN = 3;
+const int ServerModel::KILL_SENSOR_TOKEN_ACTIVE = 4;
