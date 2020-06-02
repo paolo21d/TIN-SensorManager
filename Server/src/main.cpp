@@ -12,6 +12,15 @@
 
 using namespace std;
 
+const static string USER_PREFS_SENSOR_IP = "sensor_ip";
+const static string USER_PREFS_SENSOR_PORT = "sensor_port";
+
+const static string USER_PREFS_ADMIN_IP = "admin_ip";
+const static string USER_PREFS_ADMIN_PORT = "admin_port";
+
+const static string USER_PREFS_MONITORING_IP = "monitoring_ip";
+const static string USER_PREFS_MONITORING_PORT = "monitoring_port";
+
 ServerModel *serverModel;
 
 void sensorThread()
@@ -20,8 +29,8 @@ void sensorThread()
     {
         cout << "START SENSOR CONNECTION" << endl;
 
-        string ip = UserPrefs::getInstance().getString("sensor_ip");
-        int port  = UserPrefs::getInstance().getInt("sensor_port");
+        string ip = UserPrefs::getInstance().getString(USER_PREFS_SENSOR_IP);
+        int port  = UserPrefs::getInstance().getInt(USER_PREFS_SENSOR_PORT);
 
         IRequestListener *listener = new SensorListener(serverModel);
         serverModel->setSensorConnectionListener(listener);
@@ -44,8 +53,8 @@ void sensorThread()
 void monitoringThread() {
     cout << "START MONITORING CONNECTION" << endl;
 
-    string ip = UserPrefs::getInstance().getString("monitoring_ip");
-    int port  = UserPrefs::getInstance().getInt("monitoring_port");
+    string ip = UserPrefs::getInstance().getString(USER_PREFS_MONITORING_IP);
+    int port  = UserPrefs::getInstance().getInt(USER_PREFS_MONITORING_PORT);
 
     IRequestListener *listener = new MonitoringListener(serverModel);
     serverModel->setMonitoringConnectionListener(listener);
@@ -58,8 +67,8 @@ void monitoringThread() {
 void adminThread() {
     cout << "START ADMIN CONNECTION" << endl;
 
-    string ip = UserPrefs::getInstance().getString("admin_ip");
-    int port  = UserPrefs::getInstance().getInt("admin_port");
+    string ip = UserPrefs::getInstance().getString(USER_PREFS_ADMIN_IP);
+    int port  = UserPrefs::getInstance().getInt(USER_PREFS_ADMIN_PORT);
 
     IRequestListener *listener = new AdministratorListener(serverModel);
     serverModel->setAdministratorConnectionListener(listener);
@@ -73,7 +82,6 @@ int main(int argc, char *argv[])
     initNetwork();
 
     serverModel = new ServerModel();
-
 
     thread t1(sensorThread);
     thread t2(monitoringThread);

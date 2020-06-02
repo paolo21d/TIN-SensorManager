@@ -50,3 +50,18 @@ void IRequestListener::unlockRecv(int clientId)
 {
     clientsHandler->unlockRecv(clientId);
 }
+
+void IRequestListener::killHandler()
+{
+    clientsHandler->killHandler();
+}
+
+bool IRequestListener::isKilled()
+{
+    return clientsHandler->isKilled();
+}
+
+IRequestListener::~IRequestListener()
+{
+
+}

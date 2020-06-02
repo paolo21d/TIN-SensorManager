@@ -29,6 +29,11 @@ public:
 
     void setupListener(IClientsHandler *clientsHandler);
 
+    void killHandler();
+    bool isKilled();
+
+    virtual ~IRequestListener();
+
 private:
     IClientsHandler *clientsHandler;
 };
