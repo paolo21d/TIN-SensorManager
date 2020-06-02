@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
     thread t3(adminThread);
 
     serverModel->init();
-
+    IClientsHandler::shutDown();
     t1.join();
     t2.join();
     t3.join();

@@ -261,7 +261,7 @@ using namespace std;
             tryRecv();
             trySend();
         }
-        while(true);
+        while(!quit);
     }
 
     void ClientsHandler::disconnectClient(int clientId)

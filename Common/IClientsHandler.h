@@ -10,6 +10,8 @@
 #include <ConnectionException.h>
 #include <IRequestListener.h>
 
+#include <atomic>
+
 //class IRequestListener;
 
 //namespace sc
@@ -29,8 +31,11 @@
         virtual void unlockRecv(int clientId) = 0;
         virtual void unlockSend(int clientId) = 0;
 
+        static void shutDown();
+
     protected:
         int nfds;
+        static inline std::atomic<bool> quit = false;
 
         virtual int getAcceptingSocket(std::string ipAddress, int port, int listeningQueue = 10);
         virtual int tryConnect(std::string ipAddress, int port);
