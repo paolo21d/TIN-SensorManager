@@ -1,10 +1,10 @@
-sensor_ip:127.0.0.1
+sensor_ip:192.168.0.220
 sensor_port:33335
 
-admin_ip:127.0.0.1
+admin_ip:192.168.0.220
 admin_port:28000
 
-monitoring_ip:127.0.0.1
+monitoring_ip:192.168.0.220
 monitoring_port:28001
 
 cert_file:../../../openssl/cert2.pem
