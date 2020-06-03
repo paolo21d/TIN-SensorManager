@@ -26,7 +26,7 @@ ServerModel::ServerModel() {
 }
 
 ServerModel::~ServerModel() {
-    //delete databaseConnector;
+    delete databaseConnector;
 }
 
 void ServerModel::setSensorConnectionListener(IRequestListener *listener) {
@@ -139,6 +139,11 @@ void ServerModel::executeAdministratorRequests() {
                     break;
             }
             addAdministratorResponseToSend(*response);
+        } catch (oracle::occi::SQLException e) {
+            if (e.getErrorCode() == 3114) {
+                delete connection;
+                connection = databaseConnector->getNewConnection();
+            }
         } catch (std::exception &e) {
             cout << "Got an exception while executing administrator request: " << e.what() << endl;
         }
@@ -221,6 +226,11 @@ void ServerModel::executeMonitoringRequests() {
 
                 addMonitoringResponseToSend(*response);
             }
+        } catch (oracle::occi::SQLException e) {
+            if (e.getErrorCode() == 3114) {
+                delete connection;
+                connection = databaseConnector->getNewConnection();
+            }
         }
         catch (std::exception &e) {
             cout << "Got an exception while executing monitor request: " << e.what() << endl;
@@ -274,6 +284,11 @@ void ServerModel::executeSensorRequests() {
             } else if (auto req = dynamic_cast<SensorOnDisconnectedRequest *>(request)) {
                 executeSensorRequest(req, connection);
             }
+        } catch (oracle::occi::SQLException e) {
+            if (e.getErrorCode() == 3114) {
+                delete connection;
+                connection = databaseConnector->getNewConnection();
+            }
         }
         catch (std::exception &e) {
             cout << "Got an exception while executing sensor request: " << e.what() << endl;
@@ -316,6 +331,7 @@ void ServerModel::executeSensorRequest(SensorOnConnectedRequest *req, IDatabaseC
 void ServerModel::executeSensorRequest(SensorOnDisconnectedRequest *req, IDatabaseConnection *connection) {
     if (clientToSensorId.contains(req->clientId)) {
         connection->disconnectSensor(clientToSensorId[req->clientId]);
+        sensorToClientId.erase(clientToSensorId[req->clientId]);
         clientToSensorId.erase(req->clientId);
     }
 }
