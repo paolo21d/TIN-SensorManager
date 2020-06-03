@@ -100,6 +100,7 @@ void adminThread() {
 
 int main(int argc, char *argv[])
 {
+
     initNetwork();
 
     serverModel = new ServerModel();

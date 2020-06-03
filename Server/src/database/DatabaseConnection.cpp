@@ -202,7 +202,7 @@ std::vector<Sensor> DatabaseConnection::getAllSensorsWithMeasurements() {
             "SELECT s.id, s.name, s.ip, s.port, m.measure, to_char(m.timestamp, 'DD/MM/YYYY HH24:MI:SS')\n"
             "FROM SENSORS s\n"
             "JOIN MEASUREMENTS m on s.id = m.sensor_id\n"
-            "WHERE m.ROWID IN (SELECT MAX(ms.ROWID) FROM MEASUREMENTS ms group by ms.sensor_id)"
+            "WHERE m.timestamp IN (SELECT MAX(ms.timestamp) FROM MEASUREMENTS ms WHERE ms.sensor_id = s.id group by ms.sensor_id)"
             "AND s.status LIKE 'ACTIVE'"
             "ORDER BY s.id ASC");
     ResultSet *resultSet = statement->executeQuery();
